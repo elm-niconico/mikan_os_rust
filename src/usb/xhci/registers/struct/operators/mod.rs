@@ -1,2 +1,3 @@
 pub mod operator;
-pub mod usbcmd;
+pub mod usb_cmd;
+pub mod usb_sts;
