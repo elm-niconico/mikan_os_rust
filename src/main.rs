@@ -6,15 +6,11 @@
 #![reexport_test_harness_main = "test_main"]
 #![feature(lang_items, alloc_error_handler)]
 #![feature(once_cell)]
-
+#![feature(strict_provenance)]
 extern crate alloc;
 extern crate bitfield_struct;
 
-use core::fmt::{Debug, Formatter};
-use core::mem;
-use core::num::NonZeroUsize;
-use core::panic::PanicInfo;
-
+use bit_field::BitField;
 use bitfield_struct::bitfield;
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use bootloader::{entry_point, BootInfo};
@@ -22,14 +18,26 @@ use x86_64::structures::paging::{
     FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PhysFrame, Size4KiB,
 };
 use x86_64::{PhysAddr, VirtAddr};
+use xhci::ring::trb::event::CompletionCode::Success;
+use xhci::ring::trb::event::TransferEvent;
 use xhci::Registers;
 
-use crate::pci::{read_data, write_address, ConfigRegisterFinder, Device};
+use core::fmt::{Debug, Formatter};
+use core::num::NonZeroUsize;
+use core::panic::PanicInfo;
+use core::{ptr, slice};
+use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
+
 use crate::qemu::{exit_qemu, QemuExitCode};
+use crate::usb::pci::configuration::{read_data, write_address, Device};
+use crate::usb::xhci::trb::transfer_request_block::TrbBase;
+use crate::usb::xhci::trb::NormalTrb::NormalTrb;
+use crate::QemuExitCode::Failed;
 
 mod allocator;
 mod asm_func;
-mod pci;
+
+mod macros;
 mod qemu;
 mod serial_port;
 mod testable;
@@ -42,29 +50,151 @@ entry_point!(kernel_main);
 
 #[no_mangle]
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    println!("Hello World!");
+    serial_println!("Hello World! {}", boot_info.physical_memory_offset);
+    #[cfg(test)]
+    test_main();
 
-    // let xhc_dev = find_xhc_device().unwrap();
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
 
-    // let base_bus = read_bar(&xhc_dev, 0).unwrap();
+    serial_println!("offset {}", boot_info.physical_memory_offset);
+    let mapper = unsafe { init(phys_mem_offset, boot_info) };
 
-    // let xhc_mmio_base = to_base_bar(base_bus);
+    let xhc_mmio_base = tmp_find_usb_mouse_base().unwrap();
+    let range = 0..7;
+    let cap = xhc_mmio_base.get_bits(range) as u8;
+    serial_println!("cap_length {:?}", cap);
 
-    // let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let mut registers = unsafe { Registers::new(xhc_mmio_base as usize, mapper) };
+    registers.interrupt_register_set.update_volatile_at(0, |r| {
+        r.imod.set_interrupt_moderation_interval(4000);
+    });
+    registers.interrupt_register_set.update_volatile_at(0, |r| {
+        r.iman.set_interrupt_enable();
+        r.iman.clear_interrupt_pending();
+    });
+    registers.operational.usbcmd.update_volatile(|r| {
+        r.set_interrupter_enable();
+        r.set_run_stop();
+    });
 
-    // unsafe {
-    //     LEVEL_4_PAGE_TABLE = active_level_4_table(phys_mem_offset);
-    //     ALLOC = Some(BootInfoFrameAllocator::init(&boot_info.memory_map));
+    while registers.operational.usbsts.read_volatile().hc_halted() {}
+
+    println!(
+        "imod {:?}",
+        registers.interrupt_register_set.read_volatile_at(0).iman
+    );
+
+    // let trb_ptr = (dequeue_ptr + boot_info.physical_memory_offset) as *const _;
+    //
+    // let trb_data = unsafe { slice::from_raw_parts::<u32>(trb_ptr, 4) };
+    // let trb_data = unsafe { <[u32; 4]>::try_from(trb_data).unwrap() };
+    //
+
+    //let trb = TrbBase::from(dequeue_ptr);
+
+    //println!("trb array {:?}", trb_pointer);
+
+    let mut event_count = 0;
+    let mut is_cycle = true;
+    let mut cahche = 0;
+    serial_println!(
+        "event {:?}",
+        registers.port_register_set.read_volatile_at(0).portsc
+    );
+    loop {
+        unsafe {
+            let mut primary_interrupt = registers.interrupt_register_set.read_volatile_at(0);
+
+            let mut dequeue_ptr = primary_interrupt.erdp.event_ring_dequeue_pointer();
+            let mut dequeue_ptr = dequeue_ptr + boot_info.physical_memory_offset;
+            if cahche != dequeue_ptr {
+                cahche = dequeue_ptr;
+                serial_println!("cache {}", dequeue_ptr);
+            }
+            let mut trb_base = &mut *(dequeue_ptr as *mut TrbBase);
+
+            //
+            // if (trb_base.trb_type() != 0) {
+            //     serial_println!("deque {:?}", trb_base);
+            // }
+            if is_cycle != trb_base.cycle_bit() {
+                continue;
+            }
+
+            //println!("status {}", base.status());
+            let data = slice::from_raw_parts::<u32>(dequeue_ptr as *const _, 4);
+            let data = unsafe { <[u32; 4]>::try_from(data).unwrap() };
+            let trb = TransferEvent::try_from(data);
+
+            if let Ok(trb) = trb {
+                let slot_id = trb.slot_id();
+
+                if trb.completion_code().map(|c| c == Success).is_err() {
+                    continue;
+                }
+                let base =
+                    &*((trb.trb_pointer() + boot_info.physical_memory_offset) as *const TrbBase);
+
+                if base.trb_type() == 1 {
+                    let normal_ptr =
+                        (trb.trb_pointer() + boot_info.physical_memory_offset) as *const NormalTrb;
+                    let normal = unsafe { ptr::read_volatile(normal_ptr) };
+
+                    if trb.endpoint_id() & 1 == 1 {
+                        let buf = normal.data_buffer_pointer() + boot_info.physical_memory_offset;
+
+                        let buf = slice::from_raw_parts::<u8>(
+                            buf as *const _,
+                            normal.trb_transfer_length() as usize,
+                        );
+
+                        println!("Buffer from Normal x {} y{}", buf[1], buf[2]);
+                    }
+                }
+            }
+
+            let deqeue_ptr = primary_interrupt.erdp.event_ring_dequeue_pointer()
+                + boot_info.physical_memory_offset;
+            let ptr = deqeue_ptr as *const TrbBase;
+            let ptr = ptr.add(1);
+            let next_ptr = ptr.addr() as u64;
+
+            println!(
+                "imo {:?}",
+                registers.interrupt_register_set.read_volatile_at(0).imod
+            );
+            println!("usb cmd {:?}", registers.operational.usbcmd.read_volatile());
+            registers.interrupt_register_set.update_volatile_at(0, |r| {
+                let event_base_addr =
+                    primary_interrupt.erstba.get() + boot_info.physical_memory_offset;
+                let event_end_addr = event_base_addr + primary_interrupt.erstsz.get() as u64;
+                let next_ptr =
+                    r.erdp.event_ring_dequeue_pointer() + boot_info.physical_memory_offset + 16;
+                if next_ptr >= event_end_addr {
+                    r.erdp.set_event_ring_dequeue_pointer(
+                        event_base_addr - boot_info.physical_memory_offset,
+                    );
+                    is_cycle = !is_cycle;
+                } else {
+                    r.erdp.set_event_ring_dequeue_pointer(
+                        next_ptr - boot_info.physical_memory_offset,
+                    );
+                }
+            });
+        }
+    }
+    // println!("trb {:?}", event.expect("faield result trb"));
+    // loop {
+    //
+    //     serial_println!("base {:?}", registers.port_register_set.read_volatile_at(0).portsc);
     // }
-
-    // let mapper = unsafe { init(phys_mem_offset, boot_info) };
-    // let mut registers = unsafe { Registers::new(xhc_mmio_base as usize, mapper) };
-
-    // while registers.operational.usbsts.read_volatile().hc_halted() {}
-    // println!(
-    //     "usb command is reset! {:?}",
-    //     registers.operational.usbsts.read_volatile()
-    // );
+    //
+    // let base = registers.operational.dcbaap.read_volatile().get();
+    // println!("usb command register {:?}", registers.operational.operators.read_volatile());
+    //
+    //
+    // println!("len {:?}", primary_interrupt.erdp.event_ring_dequeue_pointer());
+    //
 
     // loop {
     //     let dep = registers
@@ -75,22 +205,16 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //     let normal = unsafe { mem::transmute::<u64, TrbInfo>(dep) };
     //     println!("usb event {}", normal.trb_type());
     // }
-    // // let mut usb_cmd = registers.operational.usbcmd;
-    // // usb_cmd.update_volatile(|v| {
-    // //     let mut a: u32= unsafe { mem::transmute::<UsbCommandRegister, u32>(*v) };
-    // //
-    // //     a.set_bit(1, true);
-    // // });
-    // //
-    // // while !usb_cmd.read().host_controller_reset() {
-    // //     let bit = unsafe { mem::transmute::<UsbCommandRegister, u32>(usb_cmd.read()) };
-    // //
-    // // }
+    // let mut usb_cmd = registers.operational.operators;
+    // usb_cmd.update_volatile(|v| {
+    //     let mut a: u32= unsafe { mem::transmute::<UsbCommandRegister, u32>(*v) };
+    //
+    //     a.set_bit(1, true);
+    // });
+    //
 
     println!("usb command run_stop");
     println!("end kernel");
-    #[cfg(test)]
-    test_main();
 
     loop {}
 }
@@ -152,7 +276,8 @@ struct PageTableEntry {
 fn panic(info: &PanicInfo) -> ! {
     println!("panic!!");
     println!("{}", info);
-
+    serial_println!("{}", info);
+    exit_qemu(Failed);
     loop {}
 }
 
@@ -163,22 +288,6 @@ fn panic(info: &PanicInfo) -> ! {
 
     test_panic_handler(info);
     loop {}
-}
-
-fn find_xhc_device() -> Option<Device> {
-    let mut config_register = ConfigRegisterFinder::new();
-    config_register.scan_all_device().expect("failed scan");
-
-    for i in 0..config_register.device_count {
-        let dev = config_register.devices[i];
-        if let Some(device) = dev {
-            let is_xhci = device.class_code.is_match(0x0C, 0x03, 0x30);
-            if is_xhci {
-                return Some(device);
-            }
-        }
-    }
-    None
 }
 
 pub fn read_bar(device: &Device, index: u32) -> Result<u64, ()> {
@@ -200,12 +309,6 @@ pub fn read_cong(device: &Device, addr: u32) -> u32 {
     read_data()
 }
 
-fn to_base_bar(bar: u64) -> u64 {
-    let mask: u64 = 0xf;
-
-    bar & !mask
-}
-
 fn make_address(bus: u32, device: u32, func: u32, reg_addr: u32) -> u32 {
     let shl = |x: u32, bits: usize| -> u32 { (x << bits) as u32 };
 
@@ -220,10 +323,10 @@ fn make_address(bus: u32, device: u32, func: u32, reg_addr: u32) -> u32 {
 /// complete physical memory is mapped to virtual memory at the passed
 /// `physical_memory_offset`. Also, this function must be only called once
 /// to avoid aliasing `&mut` references (which is undefined behavior).
-// unsafe fn init(physical_memory_offset: VirtAddr, boot_info: &'static BootInfo) -> MemoryMapper {
-//     let offset_page_table = OffsetPageTable::new(&mut LEVEL_4_PAGE_TABLE, physical_memory_offset);
-//     MemoryMapper::new(offset_page_table, boot_info)
-// }
+unsafe fn init(physical_memory_offset: VirtAddr, boot_info: &'static BootInfo) -> MemoryMapper {
+    let offset_page_table = OffsetPageTable::new(&mut LEVEL_4_PAGE_TABLE, physical_memory_offset);
+    MemoryMapper::new(offset_page_table, boot_info)
+}
 
 struct MemoryMapper {
     offset_page_table: OffsetPageTable<'static>,

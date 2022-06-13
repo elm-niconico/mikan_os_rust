@@ -14,13 +14,13 @@ use crate::testable::Testable;
 
 
 mod asm_func;
-mod pci;
+
 pub mod qemu;
 pub mod serial_port;
 pub mod testable;
-pub mod vga_buffer;
 pub mod usb;
-
+pub mod vga_buffer;
+mod macros;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
@@ -30,6 +30,8 @@ pub fn test_runner_handler(tests: &[&dyn Testable]) {
     for test in tests {
         test.run();
     }
+    
+    
     exit_qemu(QemuExitCode::Success);
 }
 

@@ -2,6 +2,7 @@ use x86_64::instructions::port::Port;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[repr(u32)]
+#[allow(dead_code)]
 pub enum QemuExitCode {
     Success = 0x10,
     Failed = 0x11,

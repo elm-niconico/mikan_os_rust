@@ -1,9 +1,8 @@
+use crate::QemuExitCode::Failed;
+use crate::{exit_qemu, println};
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::UnsafeCell;
 use core::ptr;
-use crate::{exit_qemu, println};
-use crate::QemuExitCode::Failed;
-
 
 // グローバルメモリアロケータの宣言
 // ユーザはメモリ領域の`[0x2000_0100, 0x2000_0200]`がプログラムの他の部分で使用されないことを
@@ -14,30 +13,24 @@ pub static HEAP: BumpPointerAlloc = BumpPointerAlloc {
     end: 0x2000_0200,
 };
 
-
 #[alloc_error_handler]
 pub fn on_oom(_layout: Layout) -> ! {
-    
     println!("alloc error!");
     exit_qemu(Failed);
     loop {}
 }
-
 
 pub struct BumpPointerAlloc {
     pub head: UnsafeCell<usize>,
     pub end: usize,
 }
 
-
 unsafe impl Sync for BumpPointerAlloc {}
-
 
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-
         let head = self.head.get();
-        
+
         let align = layout.align();
         let res = *head % align;
         let start = if res == 0 { *head } else { *head + align - res };
@@ -49,7 +42,7 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
             start as *mut u8
         }
     }
-    
+
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
         // このアロケータはメモリを解放しません
     }

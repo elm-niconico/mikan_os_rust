@@ -66,6 +66,7 @@ dependencies = [
 name = "mikan_os_rust"
 version = "0.1.0"
 dependencies = [
+ "bit_field",
  "bitfield-struct",
  "bootloader",
  "lazy_static",
