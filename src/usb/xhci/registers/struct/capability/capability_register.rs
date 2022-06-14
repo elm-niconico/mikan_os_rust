@@ -8,6 +8,7 @@ use crate::{impl_debug, impl_debug_only_fields, impl_deref_from_type};
 // Doorbell Register addr -> CAP BASE + DB OFF
 
 #[repr(C)]
+#[allow(dead_code)]
 pub struct CapabilityRegister {
     /// Capability Registers Length
     pub cap_length: CapLength,
@@ -74,7 +75,7 @@ impl_debug! {
 #[bitfield(u32)]
 pub struct XhcParameters2 {
     #[bits(4)]
-    pub isochronous_scheduling_threshold: u8,
+    pub iso_chronous_scheduling_threshold: u8,
     
     // このフィールドは、イベントリングセグメントテーブルのベースサイズレジスタでサポートされる最大値を決定します。
     #[bits(4)]
@@ -96,7 +97,7 @@ pub struct XhcParameters2 {
 }
 impl_debug! {
     XhcParameters2{
-        isochronous_scheduling_threshold,
+        iso_chronous_scheduling_threshold,
         event_ring_segment_max,
         max_scratchpad_buffers_high,
         scratch_pad_is_restore,

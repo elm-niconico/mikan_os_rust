@@ -1,1 +1,1 @@
-pub mod capability;
+pub mod capability_register;

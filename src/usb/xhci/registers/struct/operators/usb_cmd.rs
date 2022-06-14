@@ -1,5 +1,6 @@
 use bitfield_struct::bitfield;
 
+#[allow(dead_code)]
 #[bitfield(u32)]
 pub struct UsbCmd {
     // 1にすることで動作の開始をスケジュールします。

@@ -1,8 +1,8 @@
 use core::ptr;
 
-use crate::usb::xhci::registers::r#struct::capability::CapabilityRegister;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::r#struct::capability::capability_register::CapabilityRegister;
 use crate::usb::xhci::registers::r#struct::register_info::RegisterInfo;
+use crate::usb::xhci::registers::read_write::volatile::Volatile;
 
 
 pub trait ICapabilityRegisterCreate {

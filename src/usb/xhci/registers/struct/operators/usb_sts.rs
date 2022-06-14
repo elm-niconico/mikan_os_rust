@@ -1,7 +1,9 @@
 use bitfield_struct::bitfield;
 
+
+#[allow(dead_code)]
 #[bitfield(u32)]
-pub struct UsbStsRegister{
+pub struct UsbStsRegister {
     pub is_hc_halted: bool,
     _reserve: bool,
     pub host_system_error: bool,
@@ -22,5 +24,5 @@ pub struct UsbStsRegister{
     pub host_controller_error: bool,
     
     #[bits(19)]
-    _reserve3: u32
+    _reserve3: u32,
 }

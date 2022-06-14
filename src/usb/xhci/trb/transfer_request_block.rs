@@ -2,8 +2,10 @@ use core::ptr;
 
 use bitfield_struct::bitfield;
 
-use crate::{impl_debug, impl_debug_from_methods, impl_deref_from_type};
+use crate::impl_debug;
 
+
+#[allow(dead_code)]
 #[bitfield(u128)]
 pub struct TrbBase {
     pub parameter: u64,
@@ -34,7 +36,7 @@ impl TrbBase {
             ptr::read_volatile(ptr)
         }
     }
-
+    
     pub fn test_new() -> Self {
         Self::new()
     }
