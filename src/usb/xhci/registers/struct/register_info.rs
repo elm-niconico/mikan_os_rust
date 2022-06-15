@@ -3,13 +3,14 @@ use core::fmt::Debug;
 use crate::impl_debug_with_generic;
 
 
-pub struct RegisterInfo<T> {
+#[derive(Clone, Copy)]
+pub struct RegisterInfo<T: Debug> {
     register: T,
     register_start_addr: u64,
 }
 
 
-impl<T> RegisterInfo<T> {
+impl<T: core::fmt::Debug> RegisterInfo<T> {
     pub fn new(register_start_addr: u64, register: T) -> Self {
         Self {
             register,

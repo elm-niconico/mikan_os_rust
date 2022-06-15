@@ -1,3 +1,4 @@
+use core::fmt::Debug;
 use crate::usb::xhci::registers::r#struct::register_info::RegisterInfo;
 
 
@@ -8,12 +9,15 @@ pub trait IVolatile<T> {
 }
 
 
-pub enum Volatile<T> {
+#[derive(Debug, Clone)]
+pub enum Volatile<T: Debug> {
     Core(RegisterInfo<T>)
+
+
 }
 
 
-impl<T> IVolatile<T> for Volatile<T> {
+impl<T: Debug> IVolatile<T> for Volatile<T> {
     fn read_volatile(&self) -> T {
         match self {
             Volatile::Core(r) => {

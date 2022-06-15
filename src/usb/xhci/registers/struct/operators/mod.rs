@@ -7,3 +7,4 @@ pub mod command_ring_control;
 pub mod device_context_base_address_array_pointer;
 pub mod configure;
 pub mod port_status_and_control;
+pub mod operational_registers;

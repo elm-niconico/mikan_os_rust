@@ -50,6 +50,12 @@ impl_debug_only_fields! {
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapLength(u8);
+impl Into<u8> for CapLength{
+    fn into(self) -> u8 {
+        self.0
+    }
+}
+
 impl_deref_from_type!(CapLength, u8);
 #[repr(transparent)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
