@@ -1,7 +1,7 @@
+use core::{mem, ptr};
 use core::fmt::Debug;
 
-use core::{mem, ptr};
-
+use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operators::structs::command_ring_control::CommandRingControlRegister;
 use crate::usb::xhci::registers::operators::structs::configure::ConfigureRegister;
 use crate::usb::xhci::registers::operators::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
@@ -12,25 +12,22 @@ use crate::usb::xhci::registers::operators::structs::usb_cmd::UsbCmdRegister;
 use crate::usb::xhci::registers::operators::structs::usb_sts::UsbStsRegister;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 
+
 pub trait ICreateOperationalRegisters {
-    fn create(&self, mmio_base_addr: u64, cap_length: u8) -> Result<OperationalRegisters, ()>;
+    fn operational_registers(&self, mmio_base_addr: u64, cap_length: u8) -> Result<OperationalRegisters, ()>;
 }
 
-#[allow(dead_code)]
-pub enum CreateOperationalRegisters {
-    // 生ポインタから強制的にキャスト
-    UncheckTransmute,
-}
 
-impl ICreateOperationalRegisters for CreateOperationalRegisters {
-    fn create(&self, mmio_base_addr: u64, cap_len: u8) -> Result<OperationalRegisters, ()> {
+impl ICreateOperationalRegisters for CreateType {
+    fn operational_registers(&self, mmio_base_addr: u64, cap_len: u8) -> Result<OperationalRegisters, ()> {
         match self {
-            CreateOperationalRegisters::UncheckTransmute => {
+            CreateType::UncheckTransmute => {
                 Ok(uncheck_transmute(mmio_base_addr, cap_len))
             }
         }
     }
 }
+
 
 fn uncheck_transmute(mmio_base_addr: u64, cap_len: u8) -> OperationalRegisters {
     let mut addr = mmio_base_addr + cap_len as u64;
@@ -53,10 +50,11 @@ fn uncheck_transmute(mmio_base_addr: u64, cap_len: u8) -> OperationalRegisters {
     )
 }
 
+
 fn transmute<T: Debug>(addr: &mut u64) -> RegisterInfo<T> {
     let ptr = *addr as *const T;
     let size = mem::size_of::<T>();
-
+    
     let register = unsafe { ptr::read_volatile(ptr) };
     let info = RegisterInfo::new(addr.clone(), register);
     *addr += size as u64;
