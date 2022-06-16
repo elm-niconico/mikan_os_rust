@@ -11,6 +11,7 @@ use crate::usb::xhci::registers::operators::structs::usb_sts::UsbStsRegister;
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 
+
 #[allow(dead_code)]
 pub struct OperationalRegisters {
     usb_cmd: Volatile<UsbCmdRegister>,
@@ -21,6 +22,7 @@ pub struct OperationalRegisters {
     device_context_bae_addr_array_ptr: Volatile<DeviceContextBaseAddressArrayPointerRegister>,
     configure: Volatile<ConfigureRegister>,
 }
+
 
 impl OperationalRegisters {
     pub fn new(
@@ -46,6 +48,7 @@ impl OperationalRegisters {
     }
 }
 
+
 fn new_volatile<T: Debug>(register: RegisterInfo<T>) -> Volatile<T> {
     Volatile::Core(register)
 }
@@ -56,10 +59,6 @@ impl_debug_only_fields! {
         usb_sts,
         page_size,
         device_notify
-
     }
 }
 
-// command_ring_control,
-// device_context_bae_addr_array_ptr,
-// configure

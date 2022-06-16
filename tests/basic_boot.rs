@@ -14,10 +14,9 @@ use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
 use mikan_os_rust::usb::xhci::registers::capability::capability_register::CapabilityRegister;
 use mikan_os_rust::usb::xhci::registers::capability::create::register_creator::ICapabilityRegisterCreate;
 use mikan_os_rust::usb::xhci::registers::create_type::CreateType;
-use mikan_os_rust::usb::xhci::registers::operators::create::operationals::ICreateOperationalRegisters;
+use mikan_os_rust::usb::xhci::registers::operators::create::usb_cmd::CreateUsbCommand;
 use mikan_os_rust::usb::xhci::registers::read_write::volatile::IVolatile;
 use mikan_os_rust::usb::xhci::registers::register_info::RegisterInfo;
-use mikan_os_rust::usb::xhci::trb::transfer_request_block::TrbBase;
 
 
 static OFFSET: u64 = 1649267441664;
@@ -46,14 +45,6 @@ fn should_find_base_bar() {
 
 
 #[test_case]
-pub fn should_debug_trb_base() {
-    let trb_base = TrbBase::test_new();
-    
-    assert_eq!(1, 1);
-}
-
-
-#[test_case]
 pub fn should_impl_deref() {
     #[derive(PartialEq, PartialOrd, Eq, Ord, Debug)]
     struct A(u32);
@@ -66,15 +57,21 @@ pub fn should_impl_deref() {
 
 
 #[test_case]
-pub fn should_cast_to_operational_registers() {
-    let mmio_base = extract_virtual_mmio_base_addr();
-    
-    let cap_len: u8 = extract_cap_register(mmio_base).cap_length.into();
-    
-    let registers = CreateType::UncheckTransmute.operational_registers(mmio_base, cap_len);
-    
-    assert!(registers.is_ok());
-    serial_println!("Operational Registers {:?}", registers.unwrap());
+pub fn should_create_usb_cmd_with_check() {
+    let addr = extract_usb_base();
+    let usb_cmd = CreateType::TransmuteWithCheck.new_usb_command(addr);
+    if let Err(message) = usb_cmd {
+        serial_println!("{}",message);
+    }
+    assert!(usb_cmd.is_ok())
+}
+
+
+fn extract_usb_base() -> u64 {
+    let mmio = extract_virtual_mmio_base_addr();
+    let cap = extract_cap_register(mmio);
+    let cap_len: u8 = cap.cap_length.into();
+    mmio + cap_len as u64
 }
 
 
@@ -87,7 +84,7 @@ fn extract_virtual_mmio_base_addr() -> u64 {
 fn extract_cap_register(mmio_base: u64) -> CapabilityRegister {
     let create = CreateType::UncheckTransmute;
     let volatile = create
-        .capability_register(mmio_base)
+        .new_capability(mmio_base)
         .expect("Failed Mapping to Cap Register");
     
     volatile.read_volatile()
