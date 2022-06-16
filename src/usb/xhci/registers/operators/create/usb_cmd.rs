@@ -5,33 +5,33 @@ use crate::utils::raw_ptr::{transmute_from_u64, transmute_register};
 
 
 pub trait CreateUsbCommand {
-    fn new_usb_command(&self, mmio_base: u64) -> Result<RegisterInfo<UsbCmdRegister>, &'static str>;
+    fn new_usb_command(&self, usb_cmd_addr: u64) -> Result<RegisterInfo<UsbCmdRegister>, &'static str>;
 }
 
 
 impl CreateUsbCommand for CreateType {
-    fn new_usb_command(&self, mmio_base: u64) -> Result<RegisterInfo<UsbCmdRegister>, &'static str> {
+    fn new_usb_command(&self, usb_cmd_addr: u64) -> Result<RegisterInfo<UsbCmdRegister>, &'static str> {
         match self {
-            CreateType::UncheckTransmute => { Ok(transmute_register::<UsbCmdRegister>(mmio_base)) }
-            CreateType::TransmuteWithCheck => { transmute_with_check(mmio_base) }
+            CreateType::UncheckTransmute => { Ok(transmute_register::<UsbCmdRegister>(usb_cmd_addr)) }
+            CreateType::TransmuteWithCheck => { transmute_with_check(usb_cmd_addr) }
         }
     }
 }
 
 
-fn transmute_with_check(mmio_base: u64) -> Result<RegisterInfo<UsbCmdRegister>, &'static str> {
-    let usb_cmd = transmute_from_u64::<UsbCmdRegister>(mmio_base);
+fn transmute_with_check(usb_cmd_addr: u64) -> Result<RegisterInfo<UsbCmdRegister>, &'static str> {
+    let usb_cmd = transmute_from_u64::<UsbCmdRegister>(usb_cmd_addr);
     
     if usb_cmd.host_controller_reset() {
-        return Err("Value Of Host Controller Reset Expected False But It True");
+        return Err("Value Of Host Controller Reset Expected False But True");
     }
     if usb_cmd.interrupt_enable() {
-        return Err("Value Of Interrupt Enable Expected False But It True");
+        return Err("Value Of Interrupt Enable Expected False But True");
     }
     
     if usb_cmd.light_host_controller_reset() {
-        return Err("Value Of Light Host Controller Reset Expected False But It True");
+        return Err("Value Of Light Host Controller Reset Expected False But True");
     }
     
-    return Ok(RegisterInfo::new(mmio_base.clone(), usb_cmd));
+    return Ok(RegisterInfo::new(usb_cmd_addr.clone(), usb_cmd));
 }
