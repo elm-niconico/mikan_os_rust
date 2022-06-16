@@ -2,15 +2,15 @@ use core::fmt::Debug;
 
 use core::{mem, ptr};
 
-use crate::usb::xhci::registers::r#struct::operators::command_ring_control::CommandRingControlRegister;
-use crate::usb::xhci::registers::r#struct::operators::configure::ConfigureRegister;
-use crate::usb::xhci::registers::r#struct::operators::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
-use crate::usb::xhci::registers::r#struct::operators::device_notification_control::DeviceNotificationControlRegister;
-use crate::usb::xhci::registers::r#struct::operators::operational_registers::OperationalRegisters;
-use crate::usb::xhci::registers::r#struct::operators::page_size::PageSizeRegister;
-use crate::usb::xhci::registers::r#struct::operators::usb_cmd::UsbCmdRegister;
-use crate::usb::xhci::registers::r#struct::operators::usb_sts::UsbStsRegister;
-use crate::usb::xhci::registers::r#struct::register_info::RegisterInfo;
+use crate::usb::xhci::registers::operators::structs::command_ring_control::CommandRingControlRegister;
+use crate::usb::xhci::registers::operators::structs::configure::ConfigureRegister;
+use crate::usb::xhci::registers::operators::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
+use crate::usb::xhci::registers::operators::structs::device_notification_control::DeviceNotificationControlRegister;
+use crate::usb::xhci::registers::operators::structs::operational_registers::OperationalRegisters;
+use crate::usb::xhci::registers::operators::structs::page_size::PageSizeRegister;
+use crate::usb::xhci::registers::operators::structs::usb_cmd::UsbCmdRegister;
+use crate::usb::xhci::registers::operators::structs::usb_sts::UsbStsRegister;
+use crate::usb::xhci::registers::register_info::RegisterInfo;
 
 pub trait ICreateOperationalRegisters {
     fn create(&self, mmio_base_addr: u64, cap_length: u8) -> Result<OperationalRegisters, ()>;

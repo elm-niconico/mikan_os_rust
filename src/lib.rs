@@ -4,23 +4,19 @@
 #![test_runner(crate::test_runner_handler)]
 #![reexport_test_harness_main = "test_main"]
 
-
-use core::panic::PanicInfo;
-
-use bootloader::{BootInfo, entry_point};
-
 use crate::qemu::{exit_qemu, QemuExitCode};
 use crate::testable::Testable;
-
+use bootloader::{entry_point, BootInfo};
+use core::panic::PanicInfo;
 
 mod asm_func;
 
+mod macros;
 pub mod qemu;
 pub mod serial_port;
 pub mod testable;
 pub mod usb;
 pub mod vga_buffer;
-mod macros;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
@@ -30,11 +26,9 @@ pub fn test_runner_handler(tests: &[&dyn Testable]) {
     for test in tests {
         test.run();
     }
-    
-    
+
     exit_qemu(QemuExitCode::Success);
 }
-
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
@@ -43,7 +37,6 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     loop {}
 }
 
-
 /// Entry point for `cargo xtest`
 #[cfg(test)]
 #[no_mangle]
@@ -51,7 +44,6 @@ fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
     test_main();
     loop {}
 }
-
 
 #[cfg(test)]
 #[panic_handler]

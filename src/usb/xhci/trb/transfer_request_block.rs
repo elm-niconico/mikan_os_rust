@@ -4,7 +4,6 @@ use bitfield_struct::bitfield;
 
 use crate::impl_debug;
 
-
 #[allow(dead_code)]
 #[bitfield(u128)]
 pub struct TrbBase {
@@ -32,11 +31,11 @@ impl_debug! {
 impl TrbBase {
     pub fn from(addr: u64) -> Self {
         unsafe {
-            let ptr = (addr as *mut Self);
+            let ptr = addr as *mut Self;
             ptr::read_volatile(ptr)
         }
     }
-    
+
     pub fn test_new() -> Self {
         Self::new()
     }

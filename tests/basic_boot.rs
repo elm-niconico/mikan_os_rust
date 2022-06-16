@@ -8,19 +8,20 @@ use core::panic::PanicInfo;
 use core::{mem, ptr};
 
 use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
+
+use mikan_os_rust::usb::xhci::registers::capability::capability_register::CapabilityRegister;
 use mikan_os_rust::usb::xhci::registers::creator::operational_register_create::{
     CreateOperationalRegisters, ICreateOperationalRegisters,
 };
-use mikan_os_rust::usb::xhci::registers::creator::register_creator::{
+use mikan_os_rust::usb::xhci::registers::operators::create::register_creator::{
     CapabilityRegisterCreate, ICapabilityRegisterCreate,
 };
-use mikan_os_rust::usb::xhci::registers::r#struct::capability::capability_register::CapabilityRegister;
-use mikan_os_rust::usb::xhci::registers::r#struct::operators::usb_cmd::UsbCmdRegister;
-use mikan_os_rust::usb::xhci::registers::r#struct::register_info::RegisterInfo;
+
+use mikan_os_rust::test_runner_handler;
 use mikan_os_rust::usb::xhci::registers::read_write::volatile::IVolatile;
+use mikan_os_rust::usb::xhci::registers::register_info::RegisterInfo;
 use mikan_os_rust::usb::xhci::trb::transfer_request_block::TrbBase;
-use mikan_os_rust::{self, impl_deref_from_type, serial_println};
-use mikan_os_rust::{println, test_runner_handler};
+use mikan_os_rust::{impl_deref_from_type, serial_println};
 
 static OFFSET: u64 = 1649267441664;
 
@@ -45,7 +46,6 @@ fn should_find_base_bar() {
 
 #[test_case]
 pub fn should_debug_trb_base() {
-    use bitfield_struct::bitfield;
     let trb_base = TrbBase::test_new();
 
     assert_eq!(1, 1);

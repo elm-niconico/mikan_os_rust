@@ -10,21 +10,15 @@
 extern crate alloc;
 extern crate bitfield_struct;
 
-
 use core::fmt::{Debug, Formatter};
 use core::panic::PanicInfo;
 
-use bit_field::BitField;
 use bitfield_struct::bitfield;
-use bootloader::{BootInfo, entry_point};
-use x86_64::structures::paging::{
-    FrameAllocator, Mapper, PageTable,
-};
+use bootloader::{entry_point, BootInfo};
 
 use crate::qemu::{exit_qemu, QemuExitCode};
+use crate::usb::pci::configuration::{read_data, write_address, Device};
 use crate::QemuExitCode::Failed;
-use crate::usb::pci::configuration::{Device, read_data, write_address};
-
 
 mod allocator;
 mod asm_func;
@@ -36,9 +30,6 @@ mod testable;
 mod usb;
 mod vga_buffer;
 
-
-static mut LEVEL_4_PAGE_TABLE: PageTable = PageTable::new();
-
 entry_point!(kernel_main);
 
 #[no_mangle]
@@ -46,7 +37,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     serial_println!("Hello World! {}", boot_info.physical_memory_offset);
     #[cfg(test)]
     test_main();
-    
+
     // let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     //
     // serial_println!("offset {}", boot_info.physical_memory_offset);
@@ -82,9 +73,9 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     // let trb_data = unsafe { slice::from_raw_parts::<u32>(trb_ptr, 4) };
     // let trb_data = unsafe { <[u32; 4]>::try_from(trb_data).unwrap() };
     //
-    
+
     //let trb = TrbBase::from(dequeue_ptr);
-    
+
     //println!("trb array {:?}", trb_pointer);
     //
     // let mut event_count = 0;
@@ -188,7 +179,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //
     // println!("len {:?}", primary_interrupt.erdp.event_ring_dequeue_pointer());
     //
-    
+
     // loop {
     //     let dep = registers
     //         .interrupt_register_set
@@ -205,13 +196,12 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //     a.set_bit(1, true);
     // });
     //
-    
+
     println!("usb command run_stop");
     println!("end kernel");
-    
+
     loop {}
 }
-
 
 #[bitfield(u64)]
 struct TrbInfo {
@@ -229,7 +219,6 @@ struct TrbInfo {
     pub control: usize,
 }
 
-
 impl Debug for TrbInfo {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         f.write_fmt(format_args!(
@@ -245,28 +234,26 @@ impl Debug for TrbInfo {
     }
 }
 
-
 #[bitfield(u64)]
 struct PageTableEntry {
     /// defaults to 32 bits for u32
     addr: u32,
-    
+
     /// public field -> public accessor functions
     #[bits(12)]
     pub size: usize,
-    
+
     /// padding: No accessor functions are generated for fields beginning with `_`.
     #[bits(6)]
     _p: u8,
-    
+
     /// interpreted as 1 bit flag
     present: bool,
-    
+
     /// sign extend for signed integers
     #[bits(13)]
     negative: i16,
 }
-
 
 #[cfg(not(test))]
 #[panic_handler]
@@ -278,41 +265,37 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
-
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     use mikan_os_rust::test_panic_handler;
-    
+
     test_panic_handler(info);
     loop {}
 }
 
-
 pub fn read_bar(device: &Device, index: u32) -> Result<u64, ()> {
     let addr = 0x10 + 4 * index;
     let bar = read_cong(device, addr);
-    
+
     // 32bit
     if (bar & 0x4) == 0 {
         return Ok(bar as u64);
     }
-    
+
     let upper_bar: u64 = read_cong(device, addr + 4) as u64;
     let result: u64 = (upper_bar) << 32 | bar as u64;
     Ok(result)
 }
-
 
 pub fn read_cong(device: &Device, addr: u32) -> u32 {
     write_address(make_address(device.bus, device.device, device.func, addr));
     read_data()
 }
 
-
 fn make_address(bus: u32, device: u32, func: u32, reg_addr: u32) -> u32 {
     let shl = |x: u32, bits: usize| -> u32 { (x << bits) as u32 };
-    
+
     let addr: u32 =
         shl(1, 31) | shl(bus, 16) | shl(device, 11) | shl(func, 8) | (reg_addr & 0xFC) as u32;
     addr as u32
@@ -398,7 +381,6 @@ fn make_address(bus: u32, device: u32, func: u32, reg_addr: u32) -> u32 {
 //         }
 //     }
 // }
-
 
 // unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> PageTable {
 //     use x86_64::registers::control::Cr3;
