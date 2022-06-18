@@ -13,6 +13,8 @@
       - [HostSystemError(2)](#hostsystemerror2)
     - [EnableWrapEvent(EWE)](#enablewrapeventewe)
   - [Microframe Index Register (MFINDEX)](#microframe-index-register-mfindex)
+  - [Device Context](#device-context)
+  - [Slot Context](#slot-context)
 
 
 ## USBリンク
@@ -78,3 +80,18 @@ Size | 32bits
 周期フレームを決めるためにソフトウェアによって使用されるレジスタ
 
 このレジスタはUsbCmdのRun/Stop(R/s)が1の間インクリメントされます。
+
+
+## Device Context
+
+* [slot context](#slot-context)
+
+## Slot Context
+
+スロットコンテキストデータストラクタは、デバイス全体に適用される情報を定義します。
+
+Bits  | 名前　| 説明
+------|------|----
+19:0  | RouteString |このフィールドは、ハブがパケットを正しいダウンストリームポートにルーティングするために使用されます<br>入力として、このフィールドは、速度に関係なく、すべてのUSBデバイスに対して設定され、USBトポロジ内の位置を示します
+23:20 | Speed | 非推奨
+24    | 予約領域 | 
