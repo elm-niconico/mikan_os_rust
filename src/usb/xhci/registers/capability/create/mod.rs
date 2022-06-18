@@ -1,6 +1,6 @@
-pub mod register_creator;
+pub mod all_registers;
 pub mod capability_registers_length;
-pub mod vci_version;
+pub mod hci_version;
 pub mod xhc_params1;
 pub mod xhc_params2;
 pub mod xhc_params3;

@@ -1,5 +1,5 @@
 pub mod capability_registers_length;
-pub mod vci_version;
+pub mod hci_version;
 pub mod capability_register;
 pub mod xhc_parameters1;
 pub mod xhc_parameters2;

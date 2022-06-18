@@ -1,16 +1,16 @@
 use crate::test_cap_register;
-use crate::usb::xhci::registers::capability::structs::xhc_parameters1::XhcParameters1;
+use crate::usb::xhci::registers::capability::structs::xhc_parameters2::XhcParameters2;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::utils::raw_ptr::transmute_register;
 
 
 pub trait ICreateXhcParams2 {
-    fn new_xhc_params2(&self, mmio_base_addr: u64) -> CreateRegisterResult<XhcParameters1>;
+    fn new_xhc_params2(&self, mmio_base_addr: u64) -> CreateRegisterResult<XhcParameters2>;
 }
 
 
 impl ICreateXhcParams2 for CreateType {
-    fn new_xhc_params2(&self, mmio_base_addr: u64) -> CreateRegisterResult<XhcParameters1> {
+    fn new_xhc_params2(&self, mmio_base_addr: u64) -> CreateRegisterResult<XhcParameters2> {
         match self {
             CreateType::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }
         }
@@ -18,7 +18,7 @@ impl ICreateXhcParams2 for CreateType {
 }
 
 
-fn uncheck_transmute(mmio_base_addr: u64) -> CreateRegisterResult<XhcParameters1> {
+fn uncheck_transmute(mmio_base_addr: u64) -> CreateRegisterResult<XhcParameters2> {
     Ok(transmute_register(mmio_base_addr + 0x08))
 }
 

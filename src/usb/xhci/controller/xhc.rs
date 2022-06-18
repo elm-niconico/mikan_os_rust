@@ -1,15 +1,15 @@
-use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegister;
-use crate::usb::xhci::registers::capability::create::register_creator::ICapabilityRegisterCreate;
+use crate::usb::xhci::registers::capability::create::all_registers::ICreateAllCapabilityRegisters;
+use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operators::create::operationals::ICreateOperationalRegisters;
 use crate::usb::xhci::registers::operators::structs::operational_registers::OperationalRegisters;
-use crate::usb::xhci::registers::read_write::volatile::{IVolatile, Volatile};
+use crate::usb::xhci::registers::read_write::volatile::IVolatile;
 
 
 #[allow(dead_code)]
 #[derive(Debug)]
 pub struct XhcController {
-    capability_register: Volatile<CapabilityRegister>,
+    capability_register: CapabilityRegisters,
     operational_registers: OperationalRegisters,
 }
 
@@ -17,10 +17,10 @@ pub struct XhcController {
 impl XhcController {
     pub fn new(mmio_base: u64) -> Result<Self, ()> {
         let create = CreateType::UncheckTransmute;
-        let capability_register = create.new_capability(mmio_base)?;
+        let capability_register = create.new_all_capabilities(mmio_base)?;
         let operational_registers = create.new_operational(
             mmio_base,
-            capability_register.read_volatile().cap_length)?;
+            capability_register.cap_length.read_volatile())?;
         
         Ok(Self {
             capability_register,
