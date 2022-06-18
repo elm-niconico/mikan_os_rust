@@ -93,6 +93,32 @@ impl IXhcResetOperations for XhcController {
 }
 
 
+trait IXhcInitializeOperations {
+    fn set_max_slots(&mut self, max_slots: u8) -> Result<(), ()>;
+}
+
+
+impl IXhcInitializeOperations for XhcController {
+    fn set_max_slots(&mut self, max_slots: u8) -> Result<(), ()> {
+        let limit_slots = self.capability_register.xhc_params1.read_volatile().number_of_device_slots();
+        if max_slots > limit_slots {
+            return Err(());
+        }
+        
+        // max_slotsをキャプチャできないため、updateでは出来ない
+        let mut configure = self.operational_registers.configure.read_volatile();
+        configure.set_max_device_slots_enabled(max_slots);
+        self.operational_registers.configure.write_volatile(configure);
+        
+        if self.operational_registers.configure.read_volatile().max_device_slots_enabled() == max_slots {
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+}
+
+
 #[test_case]
 pub fn should_new_xhc() {
     let xhc = XhcController::new(extract_virtual_mmio_base_addr());
@@ -127,3 +153,10 @@ pub fn should_xhc_reset() {
 }
 
 
+#[test_case]
+pub fn should_xhc_set_max_slots() {
+    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    
+    let res = xhc.set_max_slots(8);
+    assert!(res.is_ok())
+}

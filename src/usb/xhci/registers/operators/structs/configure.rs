@@ -5,7 +5,7 @@ use crate::impl_debug_from_methods;
 
 #[bitfield(u32)]
 pub struct ConfigureRegister {
-    _reserve1: u8,
+    pub max_device_slots_enabled: u8,
     pub u3_entry_enable: bool,
     pub configuration_info_enable: bool,
     #[bits(22)]
@@ -14,6 +14,7 @@ pub struct ConfigureRegister {
 
 impl_debug_from_methods! {
     ConfigureRegister{
+        max_device_slots_enabled,
         u3_entry_enable,
         configuration_info_enable
     }
