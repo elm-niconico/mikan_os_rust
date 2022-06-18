@@ -1,3 +1,4 @@
+use crate::usb::xhci::device_manager::device_manager::DeviceManager;
 use crate::usb::xhci::registers::capability::create::all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::CreateType;
@@ -7,10 +8,10 @@ use crate::usb::xhci::registers::read_write::volatile::IVolatile;
 use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
 
-#[derive(Debug)]
 pub struct XhcController {
     capability_register: CapabilityRegisters,
     operational_registers: OperationalRegisters,
+    device_manager: DeviceManager,
 }
 
 
@@ -25,6 +26,7 @@ impl XhcController {
         Ok(Self {
             capability_register,
             operational_registers,
+            device_manager: DeviceManager::new(8),
         })
     }
     
@@ -95,7 +97,6 @@ impl IXhcResetOperations for XhcController {
 
 trait IXhcInitializeOperations {
     fn set_max_slots(&mut self, max_slots: u8) -> Result<(), ()>;
-    
 }
 
 

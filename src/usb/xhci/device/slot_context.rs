@@ -1,25 +1,14 @@
-use core::fmt::Debug;
-
 use bitfield_struct::bitfield;
 
-use crate::{impl_debug_from_methods, impl_debug_only_fields};
+use crate::impl_debug_from_methods;
 
 
-#[repr(C)]
+#[repr(packed)]
 pub struct SlotContext {
     pub offset_0: SlotContextOffset0,
     pub offset_1: SlotContextOffset1,
     pub offset_2: SlotContextOffset2,
     pub offset_3: SlotContextOffset3,
-}
-
-impl_debug_only_fields! {
-    SlotContext{
-        offset_0,
-        offset_1,
-        offset_2,
-        offset_3
-    }
 }
 
 

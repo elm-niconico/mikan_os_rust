@@ -31,7 +31,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     test_main();
     let xhc_mmio_base = tmp_find_usb_mouse_base().unwrap() + boot_info.physical_memory_offset;
     let xhc_controller = XhcController::new(xhc_mmio_base).expect("Failed Create Contorller");
-    println!("{:?}", xhc_controller);
+    
     
     // let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     //
