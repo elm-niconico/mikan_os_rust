@@ -27,6 +27,20 @@ impl XhcController {
             operational_registers,
         })
     }
+    
+    pub fn run(&mut self) -> Result<(), ()>{
+        self.operational_registers.usb_cmd.update_volatile(|cmd|{
+            cmd.set_run_stop(true);
+        });
+        
+        while self.operational_registers.usb_sts.read_volatile().hc_halted() {}
+        
+        if self.operational_registers.usb_cmd.read_volatile().run_stop() {
+            Ok(())
+        }else{
+            Err(())
+        }
+    }
 }
 
 
@@ -86,13 +100,19 @@ pub fn should_new_xhc() {
     assert!(xhc.is_ok());
 }
 
+#[test_case]
+pub fn should_run_xhc(){
+    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    let run_res = xhc.run();
+    assert!(run_res.is_ok())
+}
 
 #[test_case]
 pub fn should_wait_hc_halted() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
     
-    let is_halted = xhc.wait_usb_halted();
-    assert!(is_halted.is_ok())
+    let halted_res = xhc.wait_usb_halted();
+    assert!(halted_res.is_ok())
 }
 
 
@@ -100,8 +120,8 @@ pub fn should_wait_hc_halted() {
 pub fn should_xhc_reset() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
     
-    let reset_result = xhc.reset_controller();
-    assert!(reset_result.is_ok())
+    let reset_res = xhc.reset_controller();
+    assert!(reset_res.is_ok())
 }
 
 
