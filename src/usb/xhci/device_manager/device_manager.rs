@@ -20,4 +20,8 @@ impl DeviceManager {
             device_contexts
         }
     }
+    
+    pub fn get_device_context_arr_raw_ptr(&self)->u64{
+        self.device_contexts.as_ptr().addr() as u64
+    }
 }

@@ -4,9 +4,9 @@ use crate::usb::xhci::registers::capability::structs::hcc_params1::HccParams1;
 use crate::usb::xhci::registers::capability::structs::hcc_params2::HccParams2;
 use crate::usb::xhci::registers::capability::structs::hci_version::HciVersion;
 use crate::usb::xhci::registers::capability::structs::runtime_register_space_offset::RuntimeRegisterSpaceOffset;
-use crate::usb::xhci::registers::capability::structs::xhc_parameters1::XhcParameters1;
-use crate::usb::xhci::registers::capability::structs::xhc_parameters2::XhcParameters2;
-use crate::usb::xhci::registers::capability::structs::xhc_parameters3::XhcParameters3;
+use crate::usb::xhci::registers::capability::structs::hcs_parameters1::HcsParameters1;
+use crate::usb::xhci::registers::capability::structs::hcs_parameters2::HcsParameters2;
+use crate::usb::xhci::registers::capability::structs::hcs_parameters3::HcsParameters3;
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
 
 // BAR 1 BAR 0
@@ -21,11 +21,11 @@ pub struct CapabilityRegisters {
     
     pub hci_version: Volatile<HciVersion>,
     
-    pub xhc_params1: Volatile<XhcParameters1>,
+    pub hcs_params1: Volatile<HcsParameters1>,
     
-    pub xhc_params2: Volatile<XhcParameters2>,
+    pub hcs_params2: Volatile<HcsParameters2>,
     
-    pub xhc_params3: Volatile<XhcParameters3>,
+    pub hcs_params3: Volatile<HcsParameters3>,
     
     pub hcc_params1: Volatile<HccParams1>,
     

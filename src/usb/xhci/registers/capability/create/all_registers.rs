@@ -5,9 +5,9 @@ use crate::usb::xhci::registers::capability::create::hcc_params1::ICreateHccPara
 use crate::usb::xhci::registers::capability::create::hcc_params2::ICreateHccParams2;
 use crate::usb::xhci::registers::capability::create::hci_version::ICreateVciVersion;
 use crate::usb::xhci::registers::capability::create::runtime_register_space_offset::ICreateRuntimeRegisterSpaceOffset;
-use crate::usb::xhci::registers::capability::create::xhc_params1::ICreateXhcParams1;
-use crate::usb::xhci::registers::capability::create::xhc_params2::ICreateXhcParams2;
-use crate::usb::xhci::registers::capability::create::xhc_params3::ICreateXhcParams3;
+use crate::usb::xhci::registers::capability::create::hcs_params1::ICreateHcsParams1;
+use crate::usb::xhci::registers::capability::create::hcs_params2::ICreateHcsParams2;
+use crate::usb::xhci::registers::capability::create::hcs_params3::ICreateHcsParams3;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::create_type::CreateType::UncheckTransmute;
@@ -33,9 +33,9 @@ impl ICreateAllCapabilityRegisters for CreateType {
         Ok(CapabilityRegisters {
             cap_length,
             hci_version,
-            xhc_params1,
-            xhc_params2,
-            xhc_params3,
+            hcs_params1: xhc_params1,
+            hcs_params2: xhc_params2,
+            hcs_params3: xhc_params3,
             hcc_params1,
             db_off,
             rts_off,

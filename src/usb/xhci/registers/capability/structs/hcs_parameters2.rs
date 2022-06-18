@@ -2,7 +2,7 @@ use crate::impl_debug_from_methods;
 use bitfield_struct::bitfield;
 
 #[bitfield(u32)]
-pub struct XhcParameters2 {
+pub struct HcsParameters2 {
     #[bits(4)]
     pub isochronous_scheduling_threshold: u8,
     
@@ -25,7 +25,7 @@ pub struct XhcParameters2 {
     pub max_scratch_pad_buffer_low: u8,
 }
 impl_debug_from_methods! {
-    XhcParameters2{
+    HcsParameters2{
         isochronous_scheduling_threshold,
         event_ring_segment_max,
         max_scratchpad_buffers_high,

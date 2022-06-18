@@ -1,7 +1,5 @@
 # 目次
 
-
-
 - [目次](#目次)
   - [USBリンク](#usbリンク)
   - [Wake Up Events](#wake-up-events)
@@ -15,7 +13,6 @@
   - [Microframe Index Register (MFINDEX)](#microframe-index-register-mfindex)
   - [Device Context](#device-context)
   - [Slot Context](#slot-context)
-
 
 ## USBリンク
 
@@ -58,13 +55,12 @@ R/Oビットが0になったら1になりますが、若干時価感がかかる
 
 ホストシステムのアクセスに失敗したとき1がセットされます。
 
-
 ### EnableWrapEvent(EWE)
 
 Bits 1  
-デフォルト 0 
+デフォルト 0
 
----- 
+----
 
 1に設定すると MFINDEXレジスタが03FFFhから0に遷移する度に、ラップイベントを生成します。
 
@@ -81,10 +77,9 @@ Size | 32bits
 
 このレジスタはUsbCmdのRun/Stop(R/s)が1の間インクリメントされます。
 
-
 ## Device Context
 
-* [slot context](#slot-context)
+- [slot context](#slot-context)
 
 ## Slot Context
 
@@ -94,4 +89,4 @@ Bits  | 名前　| 説明
 ------|------|----
 19:0  | RouteString |このフィールドは、ハブがパケットを正しいダウンストリームポートにルーティングするために使用されます<br>入力として、このフィールドは、速度に関係なく、すべてのUSBデバイスに対して設定され、USBトポロジ内の位置を示します
 23:20 | Speed | 非推奨
-24    | 予約領域 | 
+24    | 予約領域 |
