@@ -7,7 +7,6 @@ use crate::usb::xhci::registers::read_write::volatile::IVolatile;
 use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
 
-#[allow(dead_code)]
 #[derive(Debug)]
 pub struct XhcController {
     capability_register: CapabilityRegisters,
@@ -28,9 +27,17 @@ impl XhcController {
             operational_registers,
         })
     }
-    
-    
-    pub fn wait_usb_halted(&mut self) -> Result<(), ()> {
+}
+
+
+trait IXhcResetOperations {
+    fn wait_usb_halted(&mut self) -> Result<(), ()>;
+    fn reset_controller(&mut self) -> Result<(), ()>;
+}
+
+
+impl IXhcResetOperations for XhcController {
+    fn wait_usb_halted(&mut self) -> Result<(), ()> {
         self.operational_registers.usb_cmd.update_volatile(|cmd| {
             cmd.set_interrupt_enable(false);
             cmd.set_host_system_error_enable(false);
@@ -46,6 +53,24 @@ impl XhcController {
         while !self.operational_registers.usb_sts.read_volatile().hc_halted() {}
         
         if self.operational_registers.usb_sts.read_volatile().hc_halted() {
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+    
+    fn reset_controller(&mut self) -> Result<(), ()> {
+        let read_cmd = |me: &XhcController| { me.operational_registers.usb_cmd.read_volatile() };
+        let read_sts = |me: &XhcController| { me.operational_registers.usb_sts.read_volatile() };
+        self.operational_registers.usb_cmd.update_volatile(|cmd| {
+            cmd.set_host_controller_reset(true);
+        });
+        
+        while read_cmd(self).host_controller_reset() {}
+        
+        while read_sts(self).controller_not_ready() {}
+        
+        if (!read_cmd(self).host_controller_reset()) && (!read_sts(self).controller_not_ready()) {
             Ok(())
         } else {
             Err(())
@@ -71,5 +96,12 @@ pub fn should_wait_hc_halted() {
 }
 
 
+#[test_case]
+pub fn should_xhc_reset() {
+    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    
+    let reset_result = xhc.reset_controller();
+    assert!(reset_result.is_ok())
+}
 
 
