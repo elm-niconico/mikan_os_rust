@@ -4,6 +4,7 @@
 #![feature(strict_provenance)]
 #![test_runner(crate::test_runner_handler)]
 #![reexport_test_harness_main = "test_main"]
+#![feature(alloc_error_handler)]
 
 
 use core::panic::PanicInfo;
@@ -23,6 +24,7 @@ pub mod testable;
 pub mod usb;
 pub mod vga_buffer;
 mod utils;
+pub mod allocators;
 
 #[cfg(test)]
 entry_point!(test_kernel_main);

@@ -16,16 +16,15 @@ use core::panic::PanicInfo;
 
 use bitfield_struct::bitfield;
 use bootloader::{BootInfo, entry_point};
+
 use mikan_os_rust::usb::xhci::controller::xhc::XhcController;
 
-use crate::qemu::{exit_qemu, QemuExitCode};
+use crate::qemu::exit_qemu;
 use crate::QemuExitCode::Failed;
 use crate::usb::pci::configuration::{Device, read_data, tmp_find_usb_mouse_base, write_address};
 
 
-mod allocator;
 mod asm_func;
-
 mod macros;
 mod qemu;
 mod serial_port;
@@ -33,6 +32,7 @@ mod testable;
 mod usb;
 mod vga_buffer;
 mod utils;
+mod allocators;
 
 entry_point!(kernel_main);
 
@@ -363,8 +363,8 @@ fn make_address(bus: u32, device: u32, func: u32, reg_addr: u32) -> u32 {
 //         // let flags = Flags::PRESENT | Flags::WRITABLE;
 //         // self.page = Some(page);
 //         //
-//         // let allocator= &mut ALLOC.unwrap();
-//         // let result = self.offset_page_table.map_to(page, frame, flags, allocator).expect("failed to map");
+//         // let allocators= &mut ALLOC.unwrap();
+//         // let result = self.offset_page_table.map_to(page, frame, flags, allocators).expect("failed to map");
 //         // println!("result {:?}", result);
 //         //
 //         // result.flush();
