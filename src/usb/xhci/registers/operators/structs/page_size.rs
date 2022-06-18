@@ -1,7 +1,8 @@
-use crate::impl_debug_from_methods;
 use bitfield_struct::bitfield;
 
-#[allow(dead_code)]
+use crate::impl_debug_from_methods;
+
+
 #[bitfield(u32)]
 pub struct PageSizeRegister {
     pub page_size_ro: u16,

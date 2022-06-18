@@ -28,8 +28,8 @@ impl XhcController {
         })
     }
     
-    pub fn run(&mut self) -> Result<(), ()>{
-        self.operational_registers.usb_cmd.update_volatile(|cmd|{
+    pub fn run(&mut self) -> Result<(), ()> {
+        self.operational_registers.usb_cmd.update_volatile(|cmd| {
             cmd.set_run_stop(true);
         });
         
@@ -37,14 +37,14 @@ impl XhcController {
         
         if self.operational_registers.usb_cmd.read_volatile().run_stop() {
             Ok(())
-        }else{
+        } else {
             Err(())
         }
     }
 }
 
 
-trait IXhcResetOperations {
+pub trait IXhcResetOperations {
     fn wait_usb_halted(&mut self) -> Result<(), ()>;
     fn reset_controller(&mut self) -> Result<(), ()>;
 }
@@ -100,12 +100,14 @@ pub fn should_new_xhc() {
     assert!(xhc.is_ok());
 }
 
+
 #[test_case]
-pub fn should_run_xhc(){
+pub fn should_run_xhc() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
     let run_res = xhc.run();
     assert!(run_res.is_ok())
 }
+
 
 #[test_case]
 pub fn should_wait_hc_halted() {

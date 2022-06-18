@@ -1,5 +1,6 @@
 use core::fmt;
 use core::ops::{Deref, DerefMut};
+
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
@@ -16,7 +17,6 @@ lazy_static! {
 }
 
 /// The standard color palette in VGA text mode.
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Color {
@@ -38,10 +38,12 @@ pub enum Color {
     White = 15,
 }
 
+
 /// A combination of a foreground and a background color.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 struct ColorCode(u8);
+
 
 impl ColorCode {
     /// Create a new `ColorCode` with the given foreground and background colors.
@@ -50,6 +52,7 @@ impl ColorCode {
     }
 }
 
+
 /// A screen character in the VGA text buffer, consisting of an ASCII character and a `ColorCode`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
@@ -57,7 +60,9 @@ struct ScreenChar {
     ascii_character: u8,
     color_code: ColorCode,
 }
-impl Deref for ScreenChar{
+
+
+impl Deref for ScreenChar {
     type Target = ScreenChar;
     
     fn deref(&self) -> &Self::Target {
@@ -65,26 +70,32 @@ impl Deref for ScreenChar{
     }
 }
 
-impl DerefMut for ScreenChar{
+
+impl DerefMut for ScreenChar {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self
     }
 }
+
+
 /// The height of the text buffer (normally 25 lines).
 const BUFFER_HEIGHT: usize = 25;
 /// The width of the text buffer (normally 80 columns).
 const BUFFER_WIDTH: usize = 80;
+
 
 #[repr(transparent)]
 struct Buffer {
     chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
+
 pub struct Writer {
     column_position: usize,
     color_code: ColorCode,
     buffer: &'static mut Buffer,
 }
+
 
 impl Writer {
     /// Writes an ASCII byte to the buffer.
@@ -97,10 +108,10 @@ impl Writer {
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line();
                 }
-
+                
                 let row = BUFFER_HEIGHT - 1;
                 let col = self.column_position;
-
+                
                 let color_code = self.color_code;
                 self.buffer.chars[row][col].write(ScreenChar {
                     ascii_character: byte,
@@ -110,7 +121,7 @@ impl Writer {
             }
         }
     }
-
+    
     /// Writes the given ASCII string to the buffer.
     ///
     /// Wraps lines at `BUFFER_WIDTH`. Supports the `\n` newline character. Does **not**
@@ -126,7 +137,7 @@ impl Writer {
             }
         }
     }
-
+    
     /// Shifts all lines one line up and clears the last row.
     fn new_line(&mut self) {
         for row in 1..BUFFER_HEIGHT {
@@ -138,7 +149,7 @@ impl Writer {
         self.clear_row(BUFFER_HEIGHT - 1);
         self.column_position = 0;
     }
-
+    
     /// Clears a row by overwriting it with blank characters.
     fn clear_row(&mut self, row: usize) {
         let blank = ScreenChar {
@@ -150,6 +161,7 @@ impl Writer {
         }
     }
 }
+
 
 impl fmt::Write for Writer {
     fn write_str(&mut self, s: &str) -> fmt::Result {

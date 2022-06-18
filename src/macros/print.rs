@@ -18,7 +18,7 @@ macro_rules! serial_print {
     };
 }
 
-#[allow(dead_code)]
+
 #[macro_export]
 macro_rules! serial_println {
     () => {$crate::serial_print!("\n")};

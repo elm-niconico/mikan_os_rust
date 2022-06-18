@@ -1,4 +1,3 @@
-use crate::impl_debug_only_fields;
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
 use crate::usb::xhci::registers::capability::structs::db_off::DbOff;
 use crate::usb::xhci::registers::capability::structs::hcc_params1::HccParams1;
@@ -16,6 +15,7 @@ use crate::usb::xhci::registers::read_write::volatile::Volatile;
 // Doorbell Register addr -> CAP BASE + DB OFF
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct CapabilityRegisters {
     pub cap_length: Volatile<CapLength>,
     
@@ -35,44 +35,6 @@ pub struct CapabilityRegisters {
     
     pub hcc_params2: Volatile<HccParams2>,
 }
-
-
-// impl CapabilityRegisters {
-//     pub fn new(
-//         cap_length: Volatile<CapLength>,
-//         hci_version: Volatile<HciVersion>,
-//         xhc_params1: Volatile<XhcParameters1>,
-//         xhc_params2: Volatile<XhcParameters2>,
-//         xhc_params3: Volatile<XhcParameters3>,
-//         hcc_params1: Volatile<HccParams1>,
-//         db_off: Volatile<DbOff>,
-//         rts_off: Volatile<RuntimeRegisterSpaceOffset>,
-//         hcc_params2: Volatile<HccParams2>,
-//     ) -> Self {
-//         Self {
-//             cap_length,
-//             _reserve1: false,
-//
-//         }
-//     }
-// }
-impl_debug_only_fields! {
-    CapabilityRegisters{
-        cap_length,
-        hci_version,
-        xhc_params1,
-        xhc_params2,
-        xhc_params3,
-        hcc_params1,
-        db_off,
-        rts_off,
-        hcc_params2
-    }
-}
-
-
-
-
 
 
 

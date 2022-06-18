@@ -3,7 +3,6 @@ use bitfield_struct::bitfield;
 use crate::impl_debug_from_methods;
 
 
-#[allow(dead_code)]
 #[bitfield(u32)]
 pub struct UsbCmdRegister {
     // 1にすることで動作の開始をスケジュールします。

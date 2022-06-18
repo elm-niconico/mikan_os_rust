@@ -3,7 +3,6 @@ use bitfield_struct::bitfield;
 use crate::impl_debug_from_methods;
 
 
-#[allow(dead_code)]
 #[bitfield(u32)]
 pub struct UsbStsRegister {
     pub hc_halted: bool,
