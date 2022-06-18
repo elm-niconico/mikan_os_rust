@@ -1,6 +1,7 @@
 use crate::serial_println;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::usb::xhci::registers::operators::structs::configure::ConfigureRegister;
+use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 use crate::utils::test_fn::extract_operational_base_addr;
@@ -14,8 +15,7 @@ pub trait ICreateConfigure {
 impl ICreateConfigure for CreateType {
     fn new_configure(&self, operational_base: u64) -> CreateRegisterResult<ConfigureRegister> {
         match self {
-            CreateType::UncheckTransmute => {uncheck_transmute(operational_base)},
-            _ => {todo!()}
+            CreateType::UncheckTransmute => { uncheck_transmute(operational_base) }
         }
     }
 }
@@ -25,7 +25,7 @@ fn uncheck_transmute(operational_base: u64) -> CreateRegisterResult<ConfigureReg
     let start_addr = operational_base + 0x38;
     let configure = transmute_from_u64::<ConfigureRegister>(start_addr);
     
-    Ok(RegisterInfo::new(start_addr, configure))
+    Ok(Volatile::Core(RegisterInfo::new(start_addr, configure)))
 }
 
 

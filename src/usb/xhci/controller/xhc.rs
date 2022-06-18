@@ -1,4 +1,4 @@
-use crate::usb::xhci::registers::capability::capability_register::CapabilityRegister;
+use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegister;
 use crate::usb::xhci::registers::capability::create::register_creator::ICapabilityRegisterCreate;
 use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operators::create::operationals::ICreateOperationalRegisters;

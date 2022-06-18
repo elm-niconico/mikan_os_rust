@@ -1,6 +1,7 @@
 use crate::serial_println;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::usb::xhci::registers::operators::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
+use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 use crate::utils::test_fn::extract_operational_base_addr;
@@ -26,7 +27,7 @@ fn uncheck_transmute(operational_base_addr: u64) -> CreateRegisterResult<DeviceC
     
     let device_context_base_address_array_pointer = transmute_from_u64::<>(addr);
     
-    Ok(RegisterInfo::new(addr, device_context_base_address_array_pointer))
+    Ok(Volatile::Core(RegisterInfo::new(addr, device_context_base_address_array_pointer)))
 }
 
 

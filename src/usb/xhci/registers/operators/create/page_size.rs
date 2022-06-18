@@ -1,6 +1,7 @@
 use crate::serial_println;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::usb::xhci::registers::operators::structs::page_size::PageSizeRegister;
+use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 use crate::utils::test_fn::extract_operational_base_addr;
@@ -15,8 +16,6 @@ impl ICreatePageSize for CreateType {
     fn new_page_size(&self, operational_base_addr: u64) -> CreateRegisterResult<PageSizeRegister> {
         match self {
             CreateType::UncheckTransmute => { transmute_with_status_check(operational_base_addr) }
-            // TODO StatusRegisterのチェック処理 アドレスを確認?
-            CreateType::TransmuteWithCheck => { transmute_with_status_check(operational_base_addr) }
         }
     }
 }
@@ -27,7 +26,7 @@ fn transmute_with_status_check(operational_base_addr: u64) -> CreateRegisterResu
     let addr = operational_base_addr + 0x08;
     let page_size = transmute_from_u64::<PageSizeRegister>(addr);
     
-    Ok(RegisterInfo::new(addr, page_size))
+    Ok(Volatile::Core(RegisterInfo::new(addr, page_size)))
 }
 
 

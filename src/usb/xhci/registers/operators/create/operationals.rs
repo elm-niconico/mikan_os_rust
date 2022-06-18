@@ -1,17 +1,13 @@
-use core::fmt::Debug;
-use core::mem;
-
-use crate::usb::xhci::registers::capability::capability_register::CapLength;
+use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
 use crate::usb::xhci::registers::create_type::CreateType;
-use crate::usb::xhci::registers::operators::structs::command_ring_control::CommandRingControlRegister;
-use crate::usb::xhci::registers::operators::structs::configure::ConfigureRegister;
-use crate::usb::xhci::registers::operators::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
-use crate::usb::xhci::registers::operators::structs::device_notification_control::DeviceNotificationControlRegister;
+use crate::usb::xhci::registers::operators::create::command_ring_control::ICreateCommandRingControl;
+use crate::usb::xhci::registers::operators::create::configure::ICreateConfigure;
+use crate::usb::xhci::registers::operators::create::device_context_base_array_pointer::ICreateDeviceBaseAddressArrayPointer;
+use crate::usb::xhci::registers::operators::create::device_notify_control::ICreateDeviceNotifyControl;
+use crate::usb::xhci::registers::operators::create::page_size::ICreatePageSize;
+use crate::usb::xhci::registers::operators::create::usb_cmd::CreateUsbCommand;
+use crate::usb::xhci::registers::operators::create::usb_sts::ICreateUsbStatusRegister;
 use crate::usb::xhci::registers::operators::structs::operational_registers::OperationalRegisters;
-use crate::usb::xhci::registers::operators::structs::page_size::PageSizeRegister;
-use crate::usb::xhci::registers::operators::structs::usb_cmd::UsbCmdRegister;
-use crate::usb::xhci::registers::operators::structs::usb_sts::UsbStsRegister;
-use crate::usb::xhci::registers::register_info::RegisterInfo;
 
 
 pub trait ICreateOperationalRegisters {
@@ -22,48 +18,38 @@ pub trait ICreateOperationalRegisters {
 impl ICreateOperationalRegisters for CreateType {
     fn new_operational(&self, mmio_base_addr: u64, cap_len: CapLength) -> Result<OperationalRegisters, ()> {
         let cap_len: u8 = cap_len.into();
-        match self {
-            CreateType::UncheckTransmute => { Ok(uncheck_transmute(mmio_base_addr, cap_len)) }
-            _ => { todo!("Not Impl!") }
-        }
+        let operational_base_addr = mmio_base_addr + cap_len as u64;
+        let usb_cmd = self.new_usb_command(operational_base_addr)?;
+        let usb_sts = self.new_usb_sts(operational_base_addr)?;
+        let page_size = self.new_page_size(operational_base_addr)?;
+        let device_notify = self.new_device_notify_control(operational_base_addr)?;
+        let command_ring_control = self.new_command_ring_control(operational_base_addr)?;
+        let device_context_bae_addr_array_ptr = self.new_device_context_base_address_array_pointer(operational_base_addr)?;
+        let configure = self.new_configure(operational_base_addr)?;
+        
+        Ok(OperationalRegisters::new(
+            usb_cmd,
+            usb_sts,
+            page_size,
+            device_notify,
+            command_ring_control,
+            device_context_bae_addr_array_ptr,
+            configure,
+        ))
     }
-}
-
-
-fn uncheck_transmute(mmio_base_addr: u64, cap_len: u8) -> OperationalRegisters {
-    let mut addr = mmio_base_addr + cap_len as u64;
-    let usb_cmd = transmute_register::<UsbCmdRegister>(&mut addr);
-    let usb_sts = transmute_register::<UsbStsRegister>(&mut addr);
-    let page_size = transmute_register::<PageSizeRegister>(&mut addr);
-    let device_notify = transmute_register::<DeviceNotificationControlRegister>(&mut addr);
-    let command_ring_control = transmute_register::<CommandRingControlRegister>(&mut addr);
-    let device_context_bae_addr_array_ptr =
-        transmute_register::<DeviceContextBaseAddressArrayPointerRegister>(&mut addr);
-    let configure = transmute_register::<ConfigureRegister>(&mut addr);
-    OperationalRegisters::new(
-        usb_cmd,
-        usb_sts,
-        page_size,
-        device_notify,
-        command_ring_control,
-        device_context_bae_addr_array_ptr,
-        configure,
-    )
-}
-
-
-fn transmute_register<T: Debug>(addr: &mut u64) -> RegisterInfo<T> {
-    let register = crate::utils::raw_ptr::transmute_register::<T>((*addr).clone());
-    *addr += mem::size_of::<T>() as u64;
-    register
 }
 
 
 // #[test_case]
 // #[doc(hidden)]
-// pub fn should_uncheck_transmute_operational_registers(){
-//     let mmio_base = tmp_find_usb_mouse_base().unwrap();
-//     let cap_len: u8 = CreateType::UncheckTransmute.new_capability(mmio_base).unwrap().read_volatile().cap_length.into();
-//
-//     let registers = uncheck_transmute(mmio_base, cap_len);
+// pub fn should_uncheck_transmute_operational_registers() {
+//     let mmio_base_addr = tmp_find_usb_mouse_base().unwrap();
+//     let uncheck = UncheckTransmute;
+//     let cap_len = uncheck.new_capability(mmio_base_addr).unwrap().read_volatile().cap_length;
+//     // let operational_registers = uncheck.new_operational(mmio_base_addr, cap_len);
+//     //
+//     // assert!(operational_registers.is_ok());
+//     serial_println!("{:?}", cap_len);
 // }
+
+

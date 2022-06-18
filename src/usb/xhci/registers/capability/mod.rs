@@ -1,2 +1,2 @@
-pub mod capability_register;
 pub mod create;
+pub mod structs;

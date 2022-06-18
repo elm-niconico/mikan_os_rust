@@ -1,6 +1,6 @@
 use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
-use crate::usb::xhci::registers::capability::capability_register::CapabilityRegister;
 use crate::usb::xhci::registers::capability::create::register_creator::ICapabilityRegisterCreate;
+use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegister;
 use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;
 
@@ -18,7 +18,7 @@ pub fn extract_operational_base_addr() -> u64 {
 
 
 #[allow(dead_code)]
-fn extract_virtual_mmio_base_addr() -> u64 {
+pub fn extract_virtual_mmio_base_addr() -> u64 {
     let mmio_base = tmp_find_usb_mouse_base().unwrap();
     mmio_base + OFFSET
 }

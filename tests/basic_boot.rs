@@ -5,18 +5,15 @@
 #![reexport_test_harness_main = "test_main"]
 
 
-use core::{mem, ptr};
 use core::panic::PanicInfo;
 
 use mikan_os_rust::{impl_deref_from_type, serial_println};
 use mikan_os_rust::test_runner_handler;
 use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
-use mikan_os_rust::usb::xhci::registers::capability::capability_register::CapabilityRegister;
+use mikan_os_rust::usb::xhci::registers::capability::structs::capability_register::CapabilityRegister;
 use mikan_os_rust::usb::xhci::registers::capability::create::register_creator::ICapabilityRegisterCreate;
 use mikan_os_rust::usb::xhci::registers::create_type::CreateType;
-use mikan_os_rust::usb::xhci::registers::operators::create::usb_cmd::CreateUsbCommand;
 use mikan_os_rust::usb::xhci::registers::read_write::volatile::IVolatile;
-use mikan_os_rust::usb::xhci::registers::register_info::RegisterInfo;
 
 
 static OFFSET: u64 = 1649267441664;
@@ -56,17 +53,6 @@ pub fn should_impl_deref() {
 }
 
 
-#[test_case]
-pub fn should_create_usb_cmd_with_check() {
-    let addr = extract_usb_cmd_base_addr();
-    let usb_cmd = CreateType::TransmuteWithCheck.new_usb_command(addr);
-    if let Err(message) = usb_cmd {
-        serial_println!("{}",message);
-    }
-    assert!(usb_cmd.is_ok())
-}
-
-
 pub fn extract_usb_cmd_base_addr() -> u64 {
     let mmio = extract_virtual_mmio_base_addr();
     let cap = extract_cap_register(mmio);
@@ -91,12 +77,3 @@ fn extract_cap_register(mmio_base: u64) -> CapabilityRegister {
 }
 
 
-fn transmute<T: core::fmt::Debug>(addr: &mut u64) -> RegisterInfo<T> {
-    let ptr = *addr as *const T;
-    let size = mem::size_of::<T>();
-    
-    let register = unsafe { ptr::read_volatile(ptr) };
-    let info = RegisterInfo::new(addr.clone(), register);
-    *addr += size as u64;
-    info
-}

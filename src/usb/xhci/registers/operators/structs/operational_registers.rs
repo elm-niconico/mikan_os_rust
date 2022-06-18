@@ -12,7 +12,6 @@ use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 
 
-#[allow(dead_code)]
 pub struct OperationalRegisters {
     pub usb_cmd: Volatile<UsbCmdRegister>,
     pub usb_sts: Volatile<UsbStsRegister>,
@@ -26,24 +25,22 @@ pub struct OperationalRegisters {
 
 impl OperationalRegisters {
     pub fn new(
-        usb_cmd: RegisterInfo<UsbCmdRegister>,
-        usb_sts: RegisterInfo<UsbStsRegister>,
-        page_size: RegisterInfo<PageSizeRegister>,
-        device_notify: RegisterInfo<DeviceNotificationControlRegister>,
-        command_ring_control: RegisterInfo<CommandRingControlRegister>,
-        device_context_bae_addr_array_ptr: RegisterInfo<
-            DeviceContextBaseAddressArrayPointerRegister,
-        >,
-        configure: RegisterInfo<ConfigureRegister>,
+        usb_cmd: Volatile<UsbCmdRegister>,
+        usb_sts: Volatile<UsbStsRegister>,
+        page_size: Volatile<PageSizeRegister>,
+        device_notify: Volatile<DeviceNotificationControlRegister>,
+        command_ring_control: Volatile<CommandRingControlRegister>,
+        device_context_bae_addr_array_ptr: Volatile<DeviceContextBaseAddressArrayPointerRegister>,
+        configure: Volatile<ConfigureRegister>,
     ) -> Self {
         Self {
-            usb_cmd: new_volatile(usb_cmd),
-            usb_sts: new_volatile(usb_sts),
-            page_size: new_volatile(page_size),
-            device_notify: new_volatile(device_notify),
-            command_ring_control: new_volatile(command_ring_control),
-            device_context_bae_addr_array_ptr: new_volatile(device_context_bae_addr_array_ptr),
-            configure: new_volatile(configure),
+            usb_cmd,
+            usb_sts,
+            page_size,
+            device_notify,
+            command_ring_control,
+            device_context_bae_addr_array_ptr,
+            configure,
         }
     }
 }
