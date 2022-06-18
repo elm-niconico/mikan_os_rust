@@ -1,11 +1,12 @@
 use bitfield_struct::bitfield;
+
 use crate::impl_debug_from_methods;
 
 
 #[allow(dead_code)]
 #[bitfield(u32)]
 pub struct UsbStsRegister {
-    pub is_hc_halted: bool,
+    pub hc_halted: bool,
     _reserve: bool,
     pub host_system_error: bool,
     pub event_interrupt: bool,
@@ -27,9 +28,9 @@ pub struct UsbStsRegister {
     #[bits(19)]
     _reserve3: u32,
 }
-impl_debug_from_methods!{
+impl_debug_from_methods! {
     UsbStsRegister{
-        is_hc_halted,
+        hc_halted,
         host_system_error,
         port_change_detect,
         save_state_status,

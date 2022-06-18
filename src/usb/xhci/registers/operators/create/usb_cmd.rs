@@ -2,6 +2,7 @@ use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operators::structs::usb_cmd::UsbCmdRegister;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::{transmute_from_u64, transmute_register};
+use crate::utils::test_fn::extract_operational_base_addr;
 
 
 pub trait CreateUsbCommand {
@@ -34,4 +35,11 @@ fn transmute_with_check(usb_cmd_addr: u64) -> Result<RegisterInfo<UsbCmdRegister
     }
     
     return Ok(RegisterInfo::new(usb_cmd_addr.clone(), usb_cmd));
+}
+
+
+#[test_case]
+pub fn should_new_usb_command() {
+    let usb_cmd = transmute_with_check(extract_operational_base_addr());
+    assert!(usb_cmd.is_ok())
 }

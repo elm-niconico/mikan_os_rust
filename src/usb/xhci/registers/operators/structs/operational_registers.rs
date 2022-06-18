@@ -14,13 +14,13 @@ use crate::usb::xhci::registers::register_info::RegisterInfo;
 
 #[allow(dead_code)]
 pub struct OperationalRegisters {
-    usb_cmd: Volatile<UsbCmdRegister>,
-    usb_sts: Volatile<UsbStsRegister>,
-    page_size: Volatile<PageSizeRegister>,
-    device_notify: Volatile<DeviceNotificationControlRegister>,
-    command_ring_control: Volatile<CommandRingControlRegister>,
-    device_context_bae_addr_array_ptr: Volatile<DeviceContextBaseAddressArrayPointerRegister>,
-    configure: Volatile<ConfigureRegister>,
+    pub usb_cmd: Volatile<UsbCmdRegister>,
+    pub usb_sts: Volatile<UsbStsRegister>,
+    pub page_size: Volatile<PageSizeRegister>,
+    pub device_notify: Volatile<DeviceNotificationControlRegister>,
+    pub command_ring_control: Volatile<CommandRingControlRegister>,
+    pub device_context_bae_addr_array_ptr: Volatile<DeviceContextBaseAddressArrayPointerRegister>,
+    pub configure: Volatile<ConfigureRegister>,
 }
 
 

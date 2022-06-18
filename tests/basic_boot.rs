@@ -58,7 +58,7 @@ pub fn should_impl_deref() {
 
 #[test_case]
 pub fn should_create_usb_cmd_with_check() {
-    let addr = extract_usb_base();
+    let addr = extract_usb_cmd_base_addr();
     let usb_cmd = CreateType::TransmuteWithCheck.new_usb_command(addr);
     if let Err(message) = usb_cmd {
         serial_println!("{}",message);
@@ -67,7 +67,7 @@ pub fn should_create_usb_cmd_with_check() {
 }
 
 
-fn extract_usb_base() -> u64 {
+pub fn extract_usb_cmd_base_addr() -> u64 {
     let mmio = extract_virtual_mmio_base_addr();
     let cap = extract_cap_register(mmio);
     let cap_len: u8 = cap.cap_length.into();
