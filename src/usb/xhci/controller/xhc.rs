@@ -4,6 +4,7 @@ use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operators::create::operationals::ICreateOperationalRegisters;
 use crate::usb::xhci::registers::operators::structs::operational_registers::OperationalRegisters;
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;
+use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
 
 #[allow(dead_code)]
@@ -36,13 +37,13 @@ impl XhcController {
             cmd.set_enable_wrap_event(false);
         });
         
-        if self.operational_registers.usb_sts.read_volatile().hc_halted() {
+        if !self.operational_registers.usb_sts.read_volatile().hc_halted() {
             self.operational_registers.usb_cmd.update_volatile(|cmd| {
                 cmd.set_run_stop(false);
             });
         }
         
-        while self.operational_registers.usb_cmd.read_volatile().run_stop() {}
+        while !self.operational_registers.usb_sts.read_volatile().hc_halted() {}
         
         if self.operational_registers.usb_sts.read_volatile().hc_halted() {
             Ok(())
@@ -53,24 +54,22 @@ impl XhcController {
 }
 
 
-// #[test_case]
-// pub fn should_new_xhc() {
-//     let xhc = XhcController::new(tmp_find_usb_mouse_base().unwrap());
-//
-//     assert!(xhc.is_ok());
-// }
+#[test_case]
+pub fn should_new_xhc() {
+    let xhc = XhcController::new(extract_virtual_mmio_base_addr());
+    
+    assert!(xhc.is_ok());
+}
 
 
-// #[test_case]
-// pub fn should_wait_hc_halted() {
-//     let xhc = XhcController::new(tmp_find_usb_mouse_base().unwrap());
-//
-//     assert!(xhc.is_ok());
-//     let mut xhc = xhc.unwrap();
-//     let is_halted = xhc.wait_usb_halted();
-//     assert!(is_halted.is_ok())
-// }
-//
-//
+#[test_case]
+pub fn should_wait_hc_halted() {
+    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    
+    let is_halted = xhc.wait_usb_halted();
+    assert!(is_halted.is_ok())
+}
+
+
 
 

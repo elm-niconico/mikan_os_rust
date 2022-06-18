@@ -1,5 +1,4 @@
 use crate::serial_println;
-use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
 use crate::usb::xhci::registers::capability::create::capability_registers_length::ICreateCapabilityRegister;
 use crate::usb::xhci::registers::capability::create::db_off::ICreateDbOff;
 use crate::usb::xhci::registers::capability::create::hcc_params1::ICreateHccParams1;
