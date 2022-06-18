@@ -5,6 +5,7 @@ use bitfield_struct::bitfield;
 use crate::{impl_debug_from_methods, impl_debug_only_fields};
 
 
+#[repr(C)]
 pub struct SlotContext {
     pub offset_0: SlotContextOffset0,
     pub offset_1: SlotContextOffset1,
