@@ -1,3 +1,4 @@
+use crate::test_cap_register;
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
@@ -25,11 +26,4 @@ fn uncheck_transmute(mmio_base: u64) -> CreateRegisterResult<CapLength> {
     Ok(Volatile::Core(RegisterInfo::new(mmio_base, cap_len)))
 }
 
-
-#[test_case]
-pub fn should_new_cap_length() {
-    let mmio_base = extract_virtual_mmio_base_addr();
-    let cap_len = uncheck_transmute(mmio_base);
-    
-    assert!(cap_len.is_ok());
-}
+test_cap_register!(should_new_cap_length, uncheck_transmute);

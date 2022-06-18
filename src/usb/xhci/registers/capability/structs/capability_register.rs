@@ -1,6 +1,7 @@
 use crate::impl_debug_only_fields;
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
 use crate::usb::xhci::registers::capability::structs::db_off::DbOff;
+use crate::usb::xhci::registers::capability::structs::hcc_params2::HccParams2;
 use crate::usb::xhci::registers::capability::structs::runtime_register_space_offset::RuntimeRegisterSpaceOffset;
 use crate::usb::xhci::registers::capability::structs::vci_version::VciVersion;
 use crate::usb::xhci::registers::capability::structs::xhc_parameters1::XhcParameters1;
@@ -33,7 +34,7 @@ pub struct CapabilityRegister {
     
     pub hcc_params2: RuntimeRegisterSpaceOffset,
     
-    pub vti_os_off: XhcParameters2,
+    pub vti_os_off: HccParams2,
 }
 
 impl_debug_only_fields! {

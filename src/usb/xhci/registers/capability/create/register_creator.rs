@@ -1,5 +1,3 @@
-use crate::serial_println;
-use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegister;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
@@ -30,9 +28,9 @@ fn uncheck_transmute(mmio_base_addr: u64) -> CreateRegisterResult<CapabilityRegi
 }
 
 
-#[test_case]
-pub fn should_uncheck_new_cap() {
-    let register = uncheck_transmute(tmp_find_usb_mouse_base().unwrap());
-    assert!(register.is_ok());
-    serial_println!("{:?}", register.unwrap());
-}
+// #[test_case]
+// pub fn should_uncheck_new_cap() {
+//     let register = uncheck_transmute(tmp_find_usb_mouse_base().unwrap());
+//     assert!(register.is_ok());
+//     serial_println!("{:?}", register.unwrap());
+// }

@@ -1,3 +1,10 @@
 pub mod register_creator;
 pub mod capability_registers_length;
 pub mod vci_version;
+pub mod xhc_params1;
+pub mod xhc_params2;
+pub mod xhc_params3;
+pub mod db_off;
+pub mod runtime_register_space_offset;
+pub mod hcc_params2;
+pub mod hcc_params1;
