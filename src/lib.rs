@@ -7,23 +7,26 @@
 #![feature(alloc_error_handler)]
 
 
+extern crate alloc;
+
+
+use core::alloc::Layout;
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
 
-use crate::qemu::{exit_qemu, QemuExitCode};
+use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
 
 
-mod asm_func;
-
-mod macros;
+pub mod asm_func;
+pub mod macros;
 pub mod qemu;
 pub mod serial_port;
 pub mod testable;
 pub mod usb;
 pub mod vga_buffer;
-mod utils;
+pub mod utils;
 pub mod allocators;
 
 #[cfg(test)]
@@ -35,14 +38,14 @@ pub fn test_runner_handler(tests: &[&dyn Testable]) {
         test.run();
     }
     
-    exit_qemu(QemuExitCode::Success);
+    exit_qemu(ExitCode::Success);
 }
 
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
     serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failed);
+    exit_qemu(ExitCode::Failed);
     loop {}
 }
 
@@ -60,4 +63,12 @@ fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
+}
+
+
+#[alloc_error_handler]
+pub fn on_oom(_layout: Layout) -> ! {
+    println!("alloc error!");
+    exit_qemu(ExitCode::Failed);
+    loop {}
 }

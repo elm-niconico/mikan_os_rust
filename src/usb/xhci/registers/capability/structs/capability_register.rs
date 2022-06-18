@@ -1,5 +1,5 @@
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
-use crate::usb::xhci::registers::capability::structs::db_off::DbOff;
+use crate::usb::xhci::registers::capability::structs::db_off::DoorbellOffsetRegister;
 use crate::usb::xhci::registers::capability::structs::hcc_params1::HccParams1;
 use crate::usb::xhci::registers::capability::structs::hcc_params2::HccParams2;
 use crate::usb::xhci::registers::capability::structs::hci_version::HciVersion;
@@ -29,7 +29,7 @@ pub struct CapabilityRegisters {
     
     pub hcc_params1: Volatile<HccParams1>,
     
-    pub db_off: Volatile<DbOff>,
+    pub db_off: Volatile<DoorbellOffsetRegister>,
     
     pub rts_off: Volatile<RuntimeRegisterSpaceOffset>,
     

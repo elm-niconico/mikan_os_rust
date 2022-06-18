@@ -3,3 +3,4 @@ pub mod operators;
 pub mod register_info;
 pub mod capability;
 pub mod create_type;
+pub mod doorbells;

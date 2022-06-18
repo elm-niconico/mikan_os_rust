@@ -17,22 +17,10 @@ use core::panic::PanicInfo;
 use bitfield_struct::bitfield;
 use bootloader::{BootInfo, entry_point};
 
+use mikan_os_rust::{println, serial_println};
+use mikan_os_rust::qemu::{exit_qemu, ExitCode};
+use mikan_os_rust::usb::pci::configuration::{Device, read_data, tmp_find_usb_mouse_base, write_address};
 use mikan_os_rust::usb::xhci::controller::xhc::XhcController;
-
-use crate::qemu::exit_qemu;
-use crate::QemuExitCode::Failed;
-use crate::usb::pci::configuration::{Device, read_data, tmp_find_usb_mouse_base, write_address};
-
-
-mod asm_func;
-mod macros;
-mod qemu;
-mod serial_port;
-mod testable;
-mod usb;
-mod vga_buffer;
-mod utils;
-mod allocators;
 
 entry_point!(kernel_main);
 
@@ -272,7 +260,7 @@ fn panic(info: &PanicInfo) -> ! {
     println!("panic!!");
     println!("{}", info);
     serial_println!("{}", info);
-    exit_qemu(Failed);
+    exit_qemu(ExitCode::Failed);
     loop {}
 }
 

@@ -1,7 +1,5 @@
-use core::alloc::Layout;
 use core::cell::UnsafeCell;
 
-use crate::{exit_qemu, println, QemuExitCode};
 use crate::allocators::dummy_allocator::BumpPointerAlloc;
 
 
@@ -15,9 +13,4 @@ pub static HEAP: BumpPointerAlloc = BumpPointerAlloc {
 };
 
 
-#[alloc_error_handler]
-pub fn on_oom(_layout: Layout) -> ! {
-    println!("alloc error!");
-    exit_qemu(QemuExitCode::Failed);
-    loop {}
-}
+

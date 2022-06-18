@@ -95,6 +95,7 @@ impl IXhcResetOperations for XhcController {
 
 trait IXhcInitializeOperations {
     fn set_max_slots(&mut self, max_slots: u8) -> Result<(), ()>;
+    
 }
 
 
