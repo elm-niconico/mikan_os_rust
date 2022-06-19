@@ -1,4 +1,4 @@
-use crate::usb::xhci::registers::runtime::structs::micro_frame_index::MicroFrameIndex;
+use crate::usb::xhci::registers::runtime::structs::interrupter::mf_index::MicroFrameIndex;
 
 
 #[repr(packed)]

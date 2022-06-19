@@ -13,7 +13,7 @@ uart_16550 = "0.2.0"
 pic8259 = "0.10.1"
 bitfield-struct = "0.1"
 bit_field = "0.10.1"
-xhci = "0.8.4"
+#xhci = "0.8.4"
 lazy_static = { version = "1.0.0", features = ["spin_no_std"] }
 
 
