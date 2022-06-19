@@ -12,6 +12,7 @@ pub struct InterrupterModerationRegister {
     /** interrupt_moderation_counter */
     pub imodc: u16,
 }
+
 impl_debug_bit_fields! {
     InterrupterModerationRegister{
         imodi,

@@ -5,11 +5,14 @@ use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operational::create::create_all_registers::ICreateAllOperationalRegisters;
 use crate::usb::xhci::registers::operational::structs::operational_registers::OperationalRegisters;
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;
+use crate::usb::xhci::registers::runtime::create::create_runtime_registers::ICreateRuntimeRegisters;
+use crate::usb::xhci::registers::runtime::structs::runtime_registers::RuntimeRegisters;
 
 
 pub struct XhcController {
     capability_register: CapabilityRegisters,
     operational_registers: OperationalRegisters,
+    runtime_registers: RuntimeRegisters,
     device_manager: DeviceManager,
 }
 
@@ -21,7 +24,10 @@ impl XhcController {
         me.reset_controller()?;
         me.set_max_slots(device_max_slots)?;
         me.set_dcb_aap()?;
+        // TODO ここでコマンドリングの登録
         
+        me.runtime_registers.interrupter_register_set[0].set_enable_interrupt()?;
+        me.operational_registers.usb_cmd.set_enable_interrupt()?;
         
         Ok(me)
     }
@@ -56,10 +62,11 @@ impl XhcController {
         let capability_register = create.new_all_capabilities(mmio_base)?;
         let operational_registers =
             create.new_all_operations(mmio_base, capability_register.cap_length.read_volatile())?;
-        
+        let runtime_registers = create.new_runtime_registers(mmio_base, capability_register.rts_off.read_volatile().rts_off())?;
         Ok(Self {
             capability_register,
             operational_registers,
+            runtime_registers,
             device_manager: DeviceManager::new(8),
         })
     }
