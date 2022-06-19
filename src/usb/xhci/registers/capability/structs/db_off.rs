@@ -1,4 +1,4 @@
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 use bitfield_struct::bitfield;
 
 #[bitfield(u32)]
@@ -11,7 +11,7 @@ pub struct DoorbellOffsetRegister {
     // DoorbellRegisterのアドレス = CAP_BASE + doorbell_array_offset
     pub doorbell_array_offset: u32,
 }
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     DoorbellOffsetRegister{
         doorbell_array_offset
     }

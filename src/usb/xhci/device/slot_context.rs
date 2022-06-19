@@ -2,7 +2,7 @@ use core::fmt::Debug;
 
 use bitfield_struct::bitfield;
 
-use crate::{impl_debug_bit_filed, impl_debug_packed_fields};
+use crate::{impl_debug_bit_fields, impl_debug_packed_fields};
 
 
 #[repr(packed)]
@@ -40,7 +40,7 @@ pub struct SlotContextOffset0 {
     pub context_entries: u8,
 }
 
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     SlotContextOffset0{
         route_string,
         speed,
@@ -59,7 +59,7 @@ pub struct SlotContextOffset1 {
     pub number_of_ports: u8,
 }
 
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     SlotContextOffset1{
         max_exit_latency,
         root_hub_port_number,
@@ -82,7 +82,7 @@ pub struct SlotContextOffset2 {
     #[bits(10)]
     pub interrupter_target: u16,
 }
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     SlotContextOffset2{
         parent_hub_slot_id,
         parent_port_number,
@@ -101,7 +101,7 @@ pub struct SlotContextOffset3 {
     #[bits(5)]
     pub slot_state: u8,
 }
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     SlotContextOffset3{
         usb_device_addr,
         slot_state

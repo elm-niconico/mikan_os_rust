@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
@@ -9,7 +9,7 @@ pub struct DoorbellRegister {
     _reserve: u8,
     db_stream_id: u16,
 }
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     DoorbellRegister{
         db_target,
         db_stream_id

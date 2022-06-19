@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
@@ -44,7 +44,7 @@ pub struct UsbCmdRegister {
     _reserve2: u32,
 }
 
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     UsbCmdRegister{
         run_stop,
         host_controller_reset,

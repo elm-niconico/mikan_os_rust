@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
@@ -9,7 +9,7 @@ pub struct PageSizeRegister {
     _reserve: u16,
 }
 
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     PageSizeRegister{
         page_size_ro
     }

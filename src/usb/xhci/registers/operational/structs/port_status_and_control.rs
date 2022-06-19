@@ -1,5 +1,5 @@
 use bitfield_struct::bitfield;
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
@@ -92,7 +92,7 @@ pub struct PortStatusControlRegister {
     
     pub warm_port_reset: bool
 }
-impl_debug_bit_filed!{
+impl_debug_bit_fields!{
     PortStatusControlRegister{
         current_connect_status,
         port_enabled_disabled,

@@ -2,8 +2,6 @@ use core::ptr;
 
 use bitfield_struct::bitfield;
 
-use crate::impl_debug;
-
 
 #[bitfield(u128)]
 pub struct TrbBase {
@@ -17,16 +15,6 @@ pub struct TrbBase {
     pub control: u16,
 }
 
-impl_debug! {
-    TrbBase{
-        parameter,
-        status,
-        cycle_bit,
-        evaluate_next_trb,
-        trb_type,
-        control
-    }
-}
 
 impl TrbBase {
     pub fn from(addr: u64) -> Self {

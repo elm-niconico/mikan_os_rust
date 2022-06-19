@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
@@ -12,7 +12,7 @@ pub struct MicroFrameIndex {
     reserve: u32,
 }
 
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     MicroFrameIndex{
         micro_frame_index
     }

@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_bit_filed;
+use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
@@ -13,7 +13,7 @@ pub struct HcsParameters3 {
     //U2からU0に移行するためのワーストケースのレイテンシーを示します。すべてのルートハブポートに適用されます。許容値は次のとおりです。
     pub u2_device_exit_latency: u16,
 }
-impl_debug_bit_filed! {
+impl_debug_bit_fields! {
     HcsParameters3{
         u1_device_exit_latency,
         u2_device_exit_latency
