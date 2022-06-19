@@ -29,8 +29,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     serial_println!("Hello World! {}", boot_info.physical_memory_offset);
     #[cfg(test)]
     test_main();
-    let xhc_mmio_base = tmp_find_usb_mouse_base().unwrap() + boot_info.physical_memory_offset;
-    let xhc_controller = XhcController::initialize(xhc_mmio_base, 8).expect("Failed Create Contorller");
+    
+    
+    let mmio_base_addr = tmp_find_usb_mouse_base().unwrap() + boot_info.physical_memory_offset;
+    let xhc_controller = XhcController::initialize(mmio_base_addr, 8).expect("Failed Create Contorller");
     
     
     loop {}

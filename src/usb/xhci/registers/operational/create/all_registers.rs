@@ -1,22 +1,22 @@
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
 use crate::usb::xhci::registers::create_type::CreateType;
-use crate::usb::xhci::registers::operators::create::command_ring_control::ICreateCommandRingControl;
-use crate::usb::xhci::registers::operators::create::configure::ICreateConfigure;
-use crate::usb::xhci::registers::operators::create::device_context_base_array_pointer::ICreateDeviceBaseAddressArrayPointer;
-use crate::usb::xhci::registers::operators::create::device_notify_control::ICreateDeviceNotifyControl;
-use crate::usb::xhci::registers::operators::create::page_size::ICreatePageSize;
-use crate::usb::xhci::registers::operators::create::usb_cmd::CreateUsbCommand;
-use crate::usb::xhci::registers::operators::create::usb_sts::ICreateUsbStatusRegister;
-use crate::usb::xhci::registers::operators::structs::operational_registers::OperationalRegisters;
+use crate::usb::xhci::registers::operational::create::command_ring_control::ICreateCommandRingControl;
+use crate::usb::xhci::registers::operational::create::configure::ICreateConfigure;
+use crate::usb::xhci::registers::operational::create::device_context_base_array_pointer::ICreateDeviceBaseAddressArrayPointer;
+use crate::usb::xhci::registers::operational::create::device_notify_control::ICreateDeviceNotifyControl;
+use crate::usb::xhci::registers::operational::create::page_size::ICreatePageSize;
+use crate::usb::xhci::registers::operational::create::usb_cmd::CreateUsbCommand;
+use crate::usb::xhci::registers::operational::create::usb_sts::ICreateUsbStatusRegister;
+use crate::usb::xhci::registers::operational::structs::operational_registers::OperationalRegisters;
 
 
-pub trait ICreateOperationalRegisters {
-    fn new_operational(&self, mmio_base_addr: u64, cap_length: CapLength) -> Result<OperationalRegisters, ()>;
+pub trait ICreateAllOperationalRegisters {
+    fn new_all_operations(&self, mmio_base_addr: u64, cap_length: CapLength) -> Result<OperationalRegisters, ()>;
 }
 
 
-impl ICreateOperationalRegisters for CreateType {
-    fn new_operational(&self, mmio_base_addr: u64, cap_len: CapLength) -> Result<OperationalRegisters, ()> {
+impl ICreateAllOperationalRegisters for CreateType {
+    fn new_all_operations(&self, mmio_base_addr: u64, cap_len: CapLength) -> Result<OperationalRegisters, ()> {
         let cap_len: u8 = cap_len.into();
         let operational_base_addr = mmio_base_addr + cap_len as u64;
         let usb_cmd = self.new_usb_command(operational_base_addr)?;

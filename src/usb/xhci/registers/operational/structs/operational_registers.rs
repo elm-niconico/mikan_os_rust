@@ -1,13 +1,13 @@
 use core::fmt::Debug;
 
 use crate::impl_debug_only_fields;
-use crate::usb::xhci::registers::operators::structs::command_ring_control::CommandRingControlRegister;
-use crate::usb::xhci::registers::operators::structs::configure::ConfigureRegister;
-use crate::usb::xhci::registers::operators::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
-use crate::usb::xhci::registers::operators::structs::device_notification_control::DeviceNotificationControlRegister;
-use crate::usb::xhci::registers::operators::structs::page_size::PageSizeRegister;
-use crate::usb::xhci::registers::operators::structs::usb_cmd::UsbCmdRegister;
-use crate::usb::xhci::registers::operators::structs::usb_sts::UsbStsRegister;
+use crate::usb::xhci::registers::operational::structs::command_ring_control::CommandRingControlRegister;
+use crate::usb::xhci::registers::operational::structs::configure::ConfigureRegister;
+use crate::usb::xhci::registers::operational::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
+use crate::usb::xhci::registers::operational::structs::device_notification_control::DeviceNotificationControlRegister;
+use crate::usb::xhci::registers::operational::structs::page_size::PageSizeRegister;
+use crate::usb::xhci::registers::operational::structs::usb_cmd::UsbCmdRegister;
+use crate::usb::xhci::registers::operational::structs::usb_sts::UsbStsRegister;
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 

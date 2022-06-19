@@ -2,8 +2,8 @@ use crate::usb::xhci::device_manager::device_manager::DeviceManager;
 use crate::usb::xhci::registers::capability::create::all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::CreateType;
-use crate::usb::xhci::registers::operators::create::operationals::ICreateOperationalRegisters;
-use crate::usb::xhci::registers::operators::structs::operational_registers::OperationalRegisters;
+use crate::usb::xhci::registers::operational::create::all_registers::ICreateAllOperationalRegisters;
+use crate::usb::xhci::registers::operational::structs::operational_registers::OperationalRegisters;
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;
 use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
@@ -20,7 +20,8 @@ impl XhcController {
         me.reset_controller()?;
         me.set_max_slots(device_max_slots)?;
         me.set_dcb_aap()?;
-
+        
+        
         Ok(me)
     }
 
@@ -52,7 +53,7 @@ impl XhcController {
         let create = CreateType::UncheckTransmute;
         let capability_register = create.new_all_capabilities(mmio_base)?;
         let operational_registers =
-            create.new_operational(mmio_base, capability_register.cap_length.read_volatile())?;
+            create.new_all_operations(mmio_base, capability_register.cap_length.read_volatile())?;
 
         Ok(Self {
             capability_register,

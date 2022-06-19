@@ -5,12 +5,12 @@ use crate::utils::raw_ptr::transmute_register;
 
 
 pub trait ICreateHcsParams3 {
-    fn new_xhc_params3(&self, mmio_base_addr: u64) -> CreateRegisterResult<HcsParameters3>;
+    fn new_hcs_params3(&self, mmio_base_addr: u64) -> CreateRegisterResult<HcsParameters3>;
 }
 
 
 impl ICreateHcsParams3 for CreateType {
-    fn new_xhc_params3(&self, mmio_base_addr: u64) -> CreateRegisterResult<HcsParameters3> {
+    fn new_hcs_params3(&self, mmio_base_addr: u64) -> CreateRegisterResult<HcsParameters3> {
         match self {
             CreateType::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }
         }

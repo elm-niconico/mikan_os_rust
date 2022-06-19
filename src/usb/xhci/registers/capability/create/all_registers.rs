@@ -23,9 +23,9 @@ impl ICreateAllCapabilityRegisters for CreateType {
     fn new_all_capabilities(&self, mmio_base_address: u64) -> Result<CapabilityRegisters, ()> {
         let cap_length = self.new_capability_length(mmio_base_address)?;
         let hci_version = self.new_hci_version(mmio_base_address)?;
-        let xhc_params1 = self.new_xhc_params1(mmio_base_address)?;
-        let xhc_params2 = self.new_xhc_params2(mmio_base_address)?;
-        let xhc_params3 = self.new_xhc_params3(mmio_base_address)?;
+        let hcs_params1 = self.new_hcs_params1(mmio_base_address)?;
+        let hcs_params2 = self.new_hcs_params2(mmio_base_address)?;
+        let hcs_params3 = self.new_hcs_params3(mmio_base_address)?;
         let hcc_params1 = self.new_hcc_params1(mmio_base_address)?;
         let db_off = self.new_db_off(mmio_base_address)?;
         let rts_off = self.new_runtime_register_space_offset(mmio_base_address)?;
@@ -33,9 +33,9 @@ impl ICreateAllCapabilityRegisters for CreateType {
         Ok(CapabilityRegisters {
             cap_length,
             hci_version,
-            hcs_params1: xhc_params1,
-            hcs_params2: xhc_params2,
-            hcs_params3: xhc_params3,
+            hcs_params1,
+            hcs_params2,
+            hcs_params3,
             hcc_params1,
             db_off,
             rts_off,

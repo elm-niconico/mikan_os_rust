@@ -1,4 +1,4 @@
-use crate::usb::xhci::registers::doorbells::doorbell::DoorbellRegister;
+use crate::usb::xhci::registers::doorbell::doorbell::DoorbellRegister;
 
 
 pub struct UsbDevice{

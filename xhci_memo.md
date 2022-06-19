@@ -3,14 +3,7 @@
 - [目次](#目次)
   - [USBリンク](#usbリンク)
   - [Wake Up Events](#wake-up-events)
-  - [Operators](#operators)
-    - [UsbCmdRegister](#usbcmdregister)
-    - [UsbStatusRegister(USBSTS)](#usbstatusregisterusbsts)
-      - [HcHalted(0)](#hchalted0)
-      - [Rsvdz(1)](#rsvdz1)
-      - [HostSystemError(2)](#hostsystemerror2)
-    - [EnableWrapEvent(EWE)](#enablewrapeventewe)
-  - [Microframe Index Register (MFINDEX)](#microframe-index-register-mfindex)
+  - [Runtime Registers](#runtime-registers)
   - [Device Context](#device-context)
   - [Slot Context](#slot-context)
 
@@ -30,52 +23,11 @@ U1 -> U2 -> U3に段階的に変更する必要があるらしい？
 
 [マイクロソフトの説明](https://docs.microsoft.com/ja-jp/windows/win32/power/system-wake-up-events)
 
-## Operators
+## Runtime Registers
 
-### UsbCmdRegister
+このレジスタスペースのベースアドレスは、ランタイムベースと呼ばれます。  
+ランタイムベースは32Byteにアラインされていなければならず、Capability Base Addressのオフセットの値を追加することによって計算されます。
 
-### UsbStatusRegister(USBSTS)
-
-説明 ｜値
------|----
-Address | Operational Base + 04H
-Default | 0000 0001
-Size | 32Bits
-
-#### HcHalted(0)
-
-R/Oビットが1のときは常に0に設定されます。
-R/Oビットが0になったら1になりますが、若干時価感がかかるので待機する必要があります。
-
-#### Rsvdz(1)
-
-予約
-
-#### HostSystemError(2)
-
-ホストシステムのアクセスに失敗したとき1がセットされます。
-
-### EnableWrapEvent(EWE)
-
-Bits 1  
-デフォルト 0
-
-----
-
-1に設定すると MFINDEXレジスタが03FFFhから0に遷移する度に、ラップイベントを生成します。
-
-## Microframe Index Register (MFINDEX)
-
-名 | 値
---|-----
-Address | Runtime Base
-Default Value  |0000 0000h
-Attribute | RO
-Size | 32bits
-
-周期フレームを決めるためにソフトウェアによって使用されるレジスタ
-
-このレジスタはUsbCmdのRun/Stop(R/s)が1の間インクリメントされます。
 
 ## Device Context
 

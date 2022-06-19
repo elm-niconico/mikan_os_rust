@@ -1,6 +1,7 @@
 pub mod read_write;
-pub mod operators;
+pub mod operational;
 pub mod register_info;
 pub mod capability;
 pub mod create_type;
-pub mod doorbells;
+pub mod doorbell;
+pub mod runtime;
