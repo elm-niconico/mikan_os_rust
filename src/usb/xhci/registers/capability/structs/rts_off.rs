@@ -7,10 +7,11 @@ pub struct RuntimeRegisterSpaceOffset {
     #[bits(5)]
     _resolve: u8,
     #[bits(27)]
-    pub runtime_register_space_offset: u32,
+    /** runtime_register_space_offset */
+    pub rts_off: u32,
 }
 impl_debug_bit_fields! {
     RuntimeRegisterSpaceOffset{
-        runtime_register_space_offset
+        rts_off
     }
 }

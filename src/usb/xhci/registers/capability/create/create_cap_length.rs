@@ -4,15 +4,14 @@ use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType}
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
-use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
 
-pub trait ICreateCapabilityRegister {
+pub trait ICreateCapLength {
     fn new_capability_length(&self, mmio_base_addr: u64) -> CreateRegisterResult<CapLength>;
 }
 
 
-impl ICreateCapabilityRegister for CreateType {
+impl ICreateCapLength for CreateType {
     fn new_capability_length(&self, mmio_base_addr: u64) -> CreateRegisterResult<CapLength> {
         match self {
             CreateType::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }

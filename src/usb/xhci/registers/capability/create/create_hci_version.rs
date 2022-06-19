@@ -1,8 +1,7 @@
-use crate::{serial_println, test_cap_register};
+use crate::test_cap_register;
 use crate::usb::xhci::registers::capability::structs::hci_version::HciVersion;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::utils::raw_ptr::transmute_register;
-use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
 
 pub trait ICreateVciVersion {

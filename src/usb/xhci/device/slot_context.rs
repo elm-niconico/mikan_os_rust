@@ -1,5 +1,3 @@
-use core::fmt::Debug;
-
 use bitfield_struct::bitfield;
 
 use crate::{impl_debug_bit_fields, impl_debug_packed_fields};

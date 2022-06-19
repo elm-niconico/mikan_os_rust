@@ -3,7 +3,7 @@ use core::fmt::Debug;
 use crate::impl_debug_only_fields;
 use crate::usb::xhci::registers::operational::structs::command_ring_control::CommandRingControlRegister;
 use crate::usb::xhci::registers::operational::structs::configure::ConfigureRegister;
-use crate::usb::xhci::registers::operational::structs::device_context_base_address_array_pointer::DeviceContextBaseAddressArrayPointerRegister;
+use crate::usb::xhci::registers::operational::structs::dcbaap::Dcbaap;
 use crate::usb::xhci::registers::operational::structs::device_notification_control::DeviceNotificationControlRegister;
 use crate::usb::xhci::registers::operational::structs::page_size::PageSizeRegister;
 use crate::usb::xhci::registers::operational::structs::usb_cmd::UsbCmdRegister;
@@ -18,7 +18,7 @@ pub struct OperationalRegisters {
     pub page_size: Volatile<PageSizeRegister>,
     pub device_notify: Volatile<DeviceNotificationControlRegister>,
     pub command_ring_control: Volatile<CommandRingControlRegister>,
-    pub device_context_bae_addr_array_ptr: Volatile<DeviceContextBaseAddressArrayPointerRegister>,
+    pub device_context_bae_addr_array_ptr: Volatile<Dcbaap>,
     pub configure: Volatile<ConfigureRegister>,
 }
 
@@ -30,7 +30,7 @@ impl OperationalRegisters {
         page_size: Volatile<PageSizeRegister>,
         device_notify: Volatile<DeviceNotificationControlRegister>,
         command_ring_control: Volatile<CommandRingControlRegister>,
-        device_context_bae_addr_array_ptr: Volatile<DeviceContextBaseAddressArrayPointerRegister>,
+        device_context_bae_addr_array_ptr: Volatile<Dcbaap>,
         configure: Volatile<ConfigureRegister>,
     ) -> Self {
         Self {

@@ -1,8 +1,8 @@
-use core::fmt::{Debug, Formatter};
 use core::simd::u32x8;
 
 use crate::impl_debug_packed_fields;
 use crate::usb::xhci::device::slot_context::SlotContext;
+
 
 #[repr(packed)]
 pub struct DeviceContext {

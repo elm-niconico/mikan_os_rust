@@ -1,11 +1,10 @@
 use crate::usb::xhci::device_manager::device_manager::DeviceManager;
-use crate::usb::xhci::registers::capability::create::all_registers::ICreateAllCapabilityRegisters;
+use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::CreateType;
-use crate::usb::xhci::registers::operational::create::all_registers::ICreateAllOperationalRegisters;
+use crate::usb::xhci::registers::operational::create::create_all_registers::ICreateAllOperationalRegisters;
 use crate::usb::xhci::registers::operational::structs::operational_registers::OperationalRegisters;
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;
-use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
 
 pub struct XhcController {
@@ -173,7 +172,7 @@ impl IXhcInitializeOperations for XhcController {
             .operational_registers
             .device_context_bae_addr_array_ptr
             .read_volatile();
-        dcp_aap.set_device_context_base_array_pointer(
+        dcp_aap.set_dcbaap(
             self.device_manager.get_device_context_arr_raw_ptr(),
         );
         self.operational_registers
@@ -184,7 +183,7 @@ impl IXhcInitializeOperations for XhcController {
             .operational_registers
             .device_context_bae_addr_array_ptr
             .read_volatile()
-            .device_context_base_array_pointer()
+            .dcbaap()
             != 0
         {
             Ok(())
@@ -197,7 +196,7 @@ impl IXhcInitializeOperations for XhcController {
 
 #[test_case]
 pub fn should_new_xhc() {
-    let xhc = XhcController::new(extract_virtual_mmio_base_addr());
+    let xhc = XhcController::new(crate::utils::test_fn::extract_virtual_mmio_base_addr());
     
     assert!(xhc.is_ok());
 }
@@ -205,7 +204,7 @@ pub fn should_new_xhc() {
 
 #[test_case]
 pub fn should_run_xhc() {
-    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    let mut xhc = XhcController::new(crate::utils::test_fn::extract_virtual_mmio_base_addr()).unwrap();
     let run_res = xhc.run();
     assert!(run_res.is_ok())
 }
@@ -213,7 +212,7 @@ pub fn should_run_xhc() {
 
 #[test_case]
 pub fn should_wait_hc_halted() {
-    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    let mut xhc = XhcController::new(crate::utils::test_fn::extract_virtual_mmio_base_addr()).unwrap();
     
     let halted_res = xhc.wait_usb_halted();
     assert!(halted_res.is_ok())
@@ -222,7 +221,7 @@ pub fn should_wait_hc_halted() {
 
 #[test_case]
 pub fn should_xhc_reset() {
-    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    let mut xhc = XhcController::new(crate::utils::test_fn::extract_virtual_mmio_base_addr()).unwrap();
     
     let reset_res = xhc.reset_controller();
     assert!(reset_res.is_ok())
@@ -231,7 +230,7 @@ pub fn should_xhc_reset() {
 
 #[test_case]
 pub fn should_xhc_set_max_slots() {
-    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    let mut xhc = XhcController::new(crate::utils::test_fn::extract_virtual_mmio_base_addr()).unwrap();
     
     let res = xhc.set_max_slots(8);
     assert!(res.is_ok())
@@ -240,7 +239,7 @@ pub fn should_xhc_set_max_slots() {
 
 #[test_case]
 pub fn should_xhc_set_dcb_base_addr() {
-    let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
+    let mut xhc = XhcController::new(crate::utils::test_fn::extract_virtual_mmio_base_addr()).unwrap();
     
     xhc.set_max_slots(8).unwrap();
     assert!(xhc.set_dcb_aap().is_ok());
@@ -249,5 +248,5 @@ pub fn should_xhc_set_dcb_base_addr() {
 
 #[test_case]
 pub fn should_xhc_initialize() {
-    assert!(XhcController::initialize(extract_virtual_mmio_base_addr(), 11).is_ok());
+    assert!(XhcController::initialize(crate::utils::test_fn::extract_virtual_mmio_base_addr(), 11).is_ok());
 }

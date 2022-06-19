@@ -1,5 +1,5 @@
 use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
-use crate::usb::xhci::registers::capability::create::all_registers::ICreateAllCapabilityRegisters;
+use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;

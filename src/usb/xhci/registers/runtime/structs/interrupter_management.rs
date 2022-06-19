@@ -4,20 +4,20 @@ use crate::impl_debug_bit_fields;
 
 
 #[bitfield(u32)]
-// IMAN
+/** IMAN */
 pub struct InterrupterManagementRegister {
-    // IP
-    pub interrupt_pending: bool,
+    /** interrupt_pending */
+    pub ip: bool,
     
-    // IE
-    pub interrupt_enable: bool,
+    /** interrupt_enable */
+    pub ie: bool,
     
     #[bits(30)]
     _reserve: u32,
 }
 impl_debug_bit_fields! {
     InterrupterManagementRegister{
-        interrupt_pending,
-        interrupt_enable
+        ip,
+        ie
     }
 }

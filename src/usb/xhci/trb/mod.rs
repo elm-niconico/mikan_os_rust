@@ -1,2 +1,2 @@
 pub mod transfer_request_block;
-pub mod NormalTrb;
+pub mod normal_trb;

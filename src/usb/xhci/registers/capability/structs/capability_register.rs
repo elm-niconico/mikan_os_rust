@@ -3,7 +3,7 @@ use crate::usb::xhci::registers::capability::structs::db_off::DoorbellOffsetRegi
 use crate::usb::xhci::registers::capability::structs::hcc_params1::HccParams1;
 use crate::usb::xhci::registers::capability::structs::hcc_params2::HccParams2;
 use crate::usb::xhci::registers::capability::structs::hci_version::HciVersion;
-use crate::usb::xhci::registers::capability::structs::runtime_register_space_offset::RuntimeRegisterSpaceOffset;
+use crate::usb::xhci::registers::capability::structs::rts_off::RuntimeRegisterSpaceOffset;
 use crate::usb::xhci::registers::capability::structs::hcs_parameters1::HcsParameters1;
 use crate::usb::xhci::registers::capability::structs::hcs_parameters2::HcsParameters2;
 use crate::usb::xhci::registers::capability::structs::hcs_parameters3::HcsParameters3;

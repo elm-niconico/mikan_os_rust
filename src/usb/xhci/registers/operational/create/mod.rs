@@ -1,8 +1,8 @@
-pub mod all_registers;
-mod usb_sts;
-mod page_size;
-mod device_notify_control;
-mod command_ring_control;
-mod device_context_base_array_pointer;
-mod configure;
-mod usb_cmd;
+pub mod create_all_registers;
+mod create_usb_sts;
+mod create_page_size;
+mod create_dnc;
+mod create_crcr;
+mod create_dcbap;
+mod create_configure;
+mod create_usb_cmd;

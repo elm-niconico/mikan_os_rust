@@ -1,5 +1,3 @@
-use core::fmt::Debug;
-
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
 
 

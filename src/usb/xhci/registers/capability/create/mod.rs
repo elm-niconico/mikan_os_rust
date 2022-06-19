@@ -1,12 +1,12 @@
-pub mod all_registers;
-mod capability_registers_length;
-mod hci_version;
-mod hcs_params1;
-mod hcs_params2;
-mod hcs_params3;
-mod db_off;
-mod runtime_register_space_offset;
-mod hcc_params2;
-mod hcc_params1;
+pub mod create_all_registers;
+mod create_cap_length;
+mod create_hci_version;
+mod create_hcs_params1;
+mod create_hcs_params2;
+mod create_hcs_params3;
+mod create_db_off;
+mod create_rts_off;
+mod create_hcc_params2;
+mod create_hcc_params1;
 
 

@@ -1,10 +1,9 @@
-use crate::serial_println;
+use crate::test_cap_register;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
 use crate::usb::xhci::registers::operational::structs::configure::ConfigureRegister;
 use crate::usb::xhci::registers::read_write::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
-use crate::utils::test_fn::extract_operational_base_addr;
 
 
 pub trait ICreateConfigure {
@@ -29,10 +28,4 @@ fn uncheck_transmute(operational_base: u64) -> CreateRegisterResult<ConfigureReg
 }
 
 
-#[test_case]
-pub fn should_new_configure() {
-    let configure = uncheck_transmute(extract_operational_base_addr());
-    
-    assert!(configure.is_ok());
-    serial_println!("{:?}", configure.unwrap());
-}
+test_cap_register!(should_new_configure, uncheck_transmute);
