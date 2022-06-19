@@ -1,3 +1,4 @@
+use crate::usb::rings::command_ring::CommandRing;
 use crate::usb::xhci::device_manager::device_manager::DeviceManager;
 use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
@@ -14,6 +15,7 @@ pub struct XhcController {
     operational_registers: OperationalRegisters,
     runtime_registers: RuntimeRegisters,
     device_manager: DeviceManager,
+    command_ring: CommandRing,
 }
 
 
@@ -24,7 +26,10 @@ impl XhcController {
         me.reset_controller()?;
         me.set_max_slots(device_max_slots)?;
         me.set_dcb_aap()?;
-        // TODO ここでコマンドリングの登録
+        
+        
+        let command_ring_buff_addr = me.command_ring.buffer_addr();
+        me.operational_registers.crctl.register_command_ring(command_ring_buff_addr);
         
         me.runtime_registers.interrupter_register_set[0].set_enable_interrupt()?;
         me.operational_registers.usb_cmd.set_enable_interrupt()?;
@@ -63,10 +68,12 @@ impl XhcController {
         let operational_registers =
             create.new_all_operations(mmio_base, capability_register.cap_length.read_volatile())?;
         let runtime_registers = create.new_runtime_registers(mmio_base, capability_register.rts_off.read_volatile().rts_off())?;
+        let command_ring = CommandRing::new();
         Ok(Self {
             capability_register,
             operational_registers,
             runtime_registers,
+            command_ring,
             device_manager: DeviceManager::new(8),
         })
     }

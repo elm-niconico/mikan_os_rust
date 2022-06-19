@@ -30,4 +30,5 @@ fn uncheck_transmute(operational_base_addr: u64) -> CreateRegisterResult<Command
     Ok(Volatile::Core(RegisterInfo::new(addr, command_ring_control)))
 }
 
+
 test_op_register!(should_new_crcr, uncheck_transmute);

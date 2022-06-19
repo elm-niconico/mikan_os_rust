@@ -2,7 +2,7 @@ use crate::usb::xhci::registers::capability::structs::capability_registers_lengt
 use crate::usb::xhci::registers::create_type::CreateType;
 use crate::usb::xhci::registers::operational::create::create_configure::ICreateConfigure;
 use crate::usb::xhci::registers::operational::create::create_crcr::ICreateCrcr;
-use crate::usb::xhci::registers::operational::create::create_dcbap::ICreateDcbaap;
+use crate::usb::xhci::registers::operational::create::create_dcbaap::ICreateDcbaap;
 use crate::usb::xhci::registers::operational::create::create_dnc::ICreateDnctrl;
 use crate::usb::xhci::registers::operational::create::create_page_size::ICreatePageSize;
 use crate::usb::xhci::registers::operational::create::create_usb_cmd::CreateUsbCommand;

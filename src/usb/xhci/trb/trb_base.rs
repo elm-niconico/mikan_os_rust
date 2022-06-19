@@ -9,7 +9,7 @@ pub struct TrbBase {
     pub status: u32,
     pub cycle_bit: bool,
     pub evaluate_next_trb: bool,
-    _resolved: u8,
+    _reserve: u8,
     #[bits(6)]
     pub trb_type: u8,
     pub control: u16,

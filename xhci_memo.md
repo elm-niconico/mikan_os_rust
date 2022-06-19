@@ -3,6 +3,8 @@
 - [目次](#目次)
   - [USBリンク](#usbリンク)
   - [Wake Up Events](#wake-up-events)
+  - [OperationalRegisters](#operationalregisters)
+    - [CommandRingControl](#commandringcontrol)
   - [Runtime Registers](#runtime-registers)
   - [Device Context](#device-context)
   - [Slot Context](#slot-context)
@@ -23,11 +25,39 @@ U1 -> U2 -> U3に段階的に変更する必要があるらしい？
 
 [マイクロソフトの説明](https://docs.microsoft.com/ja-jp/windows/win32/power/system-wake-up-events)
 
+## OperationalRegisters
+
+Offset | Mnemonic | Register Name
+----|--------|----------
+00h | USBCMD | Usb Command
+04h | USBSTS | Usb Status
+08h | PAGESIZE | Page Size
+0C-13h | Reserve |
+14h | DNCTRL | Device Notification Control
+18h | CRCR | [Command Ring Control](#commandringcontrol)
+20-2Fh | Reserve |
+30h | DCBAAP | Device Context Base Address Array Pointer
+38h | CONFIG | Configure
+3C-03FFh | Reserve |
+400-13FFh | | Port Register Set 1-MaxPorts
+
+### CommandRingControl
+
+コマンドリング制御レジスタは、コマンドリング制御およびステータス機能を提供します。  
+また、コマンドリングデキューポインタのアドレスとサイクルビットの状態を識別します。
+
+Bit | 名前 | 略称 | 説明
+----|-----|-----|----
+0   | Ring Cycle State | RCS | 
+1   | Command Stop | CS | 
+63:6 | Command Ring Pointer | このフィールドはは64bit Command Ring Dequeue Pointerの初期値の最上位ビットを識別します。
+
+
+
 ## Runtime Registers
 
 このレジスタスペースのベースアドレスは、ランタイムベースと呼ばれます。  
 ランタイムベースは32Byteにアラインされていなければならず、Capability Base Addressのオフセットの値を追加することによって計算されます。
-
 
 ## Device Context
 

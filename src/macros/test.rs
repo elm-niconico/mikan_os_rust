@@ -37,7 +37,7 @@ macro_rules! test_register {
             
             let register = $fn($addr);
             assert!(register.is_ok());
-            crate::serial_println!("{:?}", register.unwrap());
+            //crate::serial_println!("{:?}", register.unwrap());
         }
     };
 }

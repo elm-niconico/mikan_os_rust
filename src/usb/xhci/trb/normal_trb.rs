@@ -21,6 +21,7 @@ pub struct NormalTrb {
     pub evaluate_next_trb: bool,
     
     pub interrupt_on_short_packet: bool,
+    
     pub no_snoop: bool,
     pub chain_bit: bool,
     pub interrupt_on_completion: bool,
