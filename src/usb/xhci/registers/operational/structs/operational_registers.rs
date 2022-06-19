@@ -17,8 +17,12 @@ pub struct OperationalRegisters {
     pub usb_sts: Volatile<UsbStsRegister>,
     pub page_size: Volatile<PageSizeRegister>,
     pub device_notify: Volatile<DeviceNotificationControlRegister>,
-    pub command_ring_control: Volatile<CommandRingControlRegister>,
-    pub device_context_bae_addr_array_ptr: Volatile<Dcbaap>,
+    
+    //** Command Ring Control Register */
+    pub crctl: Volatile<CommandRingControlRegister>,
+    
+    //** Device Context Base Address Array Pointer Register */
+    pub dcbaap: Volatile<Dcbaap>,
     pub configure: Volatile<ConfigureRegister>,
 }
 
@@ -29,8 +33,8 @@ impl OperationalRegisters {
         usb_sts: Volatile<UsbStsRegister>,
         page_size: Volatile<PageSizeRegister>,
         device_notify: Volatile<DeviceNotificationControlRegister>,
-        command_ring_control: Volatile<CommandRingControlRegister>,
-        device_context_bae_addr_array_ptr: Volatile<Dcbaap>,
+        crctl: Volatile<CommandRingControlRegister>,
+        dcbaap: Volatile<Dcbaap>,
         configure: Volatile<ConfigureRegister>,
     ) -> Self {
         Self {
@@ -38,8 +42,8 @@ impl OperationalRegisters {
             usb_sts,
             page_size,
             device_notify,
-            command_ring_control,
-            device_context_bae_addr_array_ptr,
+            crctl,
+            dcbaap,
             configure,
         }
     }
@@ -55,7 +59,10 @@ impl_debug_only_fields! {
         usb_cmd,
         usb_sts,
         page_size,
-        device_notify
+        device_notify,
+        crctl,
+        dcbaap,
+        configure
     }
 }
 

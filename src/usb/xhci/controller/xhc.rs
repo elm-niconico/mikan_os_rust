@@ -86,31 +86,24 @@ impl IXhcResetOperations for XhcController {
             cmd.set_host_system_error_enable(false);
             cmd.set_enable_wrap_event(false);
         });
+        let is_not_halted = |me: &XhcController| {
+            !me
+                .operational_registers
+                .usb_sts
+                .read_volatile()
+                .hc_halted()
+        };
         
-        if !self
-            .operational_registers
-            .usb_sts
-            .read_volatile()
-            .hc_halted()
-        {
+        if is_not_halted(self) {
             self.operational_registers.usb_cmd.update_volatile(|cmd| {
                 cmd.set_run_stop(false);
             });
         }
         
-        while !self
-            .operational_registers
-            .usb_sts
-            .read_volatile()
-            .hc_halted()
-        {}
+        while is_not_halted(self) {}
         
-        if self
-            .operational_registers
-            .usb_sts
-            .read_volatile()
-            .hc_halted()
-        {
+        let is_stop_controller = !is_not_halted(self) && !self.operational_registers.usb_cmd.read_volatile().run_stop();
+        if is_stop_controller {
             Ok(())
         } else {
             Err(())
@@ -175,24 +168,20 @@ impl IXhcInitializeOperations for XhcController {
     }
     
     fn set_dcb_aap(&mut self) -> Result<(), ()> {
-        let mut dcp_aap = self
+        let mut dcb_aap = self
             .operational_registers
-            .device_context_bae_addr_array_ptr
+            .dcbaap
             .read_volatile();
-        dcp_aap.set_dcbaap(
-            self.device_manager.get_device_context_arr_raw_ptr(),
-        );
-        self.operational_registers
-            .device_context_bae_addr_array_ptr
-            .write_volatile(dcp_aap);
         
-        if self
-            .operational_registers
-            .device_context_bae_addr_array_ptr
-            .read_volatile()
-            .dcbaap()
-            != 0
-        {
+        dcb_aap.set_dcbaap(self.device_manager.get_device_context_arr_raw_ptr());
+        
+        self.operational_registers
+            .dcbaap
+            .write_volatile(dcb_aap);
+        
+        let is_setting_ptr = self.operational_registers.dcbaap.read_volatile().dcbaap() != 0;
+        
+        if is_setting_ptr {
             Ok(())
         } else {
             Err(())
