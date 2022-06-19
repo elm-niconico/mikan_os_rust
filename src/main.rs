@@ -11,7 +11,6 @@ extern crate alloc;
 extern crate bitfield_struct;
 
 
-use core::fmt::Debug;
 use core::panic::PanicInfo;
 
 use bitfield_struct::bitfield;

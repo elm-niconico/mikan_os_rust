@@ -2,8 +2,8 @@ use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
 use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
-use crate::usb::xhci::registers::create_type::CreateType;
-use crate::usb::xhci::registers::read_write::volatile::IVolatile;
+use crate::usb::xhci::registers::create_type::RegisterCreate;
+use crate::usb::xhci::registers::volatile::VolatileRegister;
 
 
 static OFFSET: u64 = 1649267441664;
@@ -33,15 +33,17 @@ pub fn extract_runtime_base() -> u64 {
     mmio + rts_off as u64
 }
 
-pub fn extract_cap_len(mmio_base: u64)->CapLength{
+
+pub fn extract_cap_len(mmio_base: u64) -> CapLength {
     extract_cap_register(mmio_base).cap_length.read_volatile()
 }
 
+
 #[allow(dead_code)]
 fn extract_cap_register(mmio_base: u64) -> CapabilityRegisters {
-    let create = CreateType::UncheckTransmute;
+    let create = RegisterCreate::UncheckTransmute;
     let capability_registers = create
-        .new_all_capabilities(mmio_base)
+        .new_capabilities(mmio_base)
         .expect("Failed Mapping to Cap Register");
     
     capability_registers

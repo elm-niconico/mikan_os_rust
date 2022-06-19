@@ -1,10 +1,9 @@
 use core::slice;
 
-use crate::usb::xhci::registers::create_type::CreateType;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::create_type::RegisterCreate;
+use crate::usb::xhci::registers::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::usb::xhci::registers::runtime::structs::interrupter::interrupter_registers::InterrupterRegisterSet;
-use crate::utils::test_fn::extract_runtime_base;
 
 
 pub type CreateInterrupterRegisterSetResult = [Volatile<InterrupterRegisterSet>; 1024];
@@ -15,10 +14,10 @@ pub trait ICreateInterrupterRegisterSet {
 }
 
 
-impl ICreateInterrupterRegisterSet for CreateType {
+impl ICreateInterrupterRegisterSet for RegisterCreate {
     fn new_interrupter_register_set(&self, runtime_base: u64) -> CreateInterrupterRegisterSetResult {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(runtime_base) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(runtime_base) }
         }
     }
 }
@@ -43,6 +42,7 @@ fn pop(barry: &[InterrupterRegisterSet]) -> &[InterrupterRegisterSet; 1024] {
 
 #[test_case]
 pub fn should_new_interrupter_sets() {
+    use crate::utils::test_fn::extract_runtime_base;
     let interrupters = uncheck_transmute(extract_runtime_base());
     assert_eq!(1024, interrupters.len());
 }

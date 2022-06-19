@@ -8,16 +8,16 @@ use crate::usb::xhci::registers::capability::create::create_hcs_params2::ICreate
 use crate::usb::xhci::registers::capability::create::create_hcs_params3::ICreateHcsParams3;
 use crate::usb::xhci::registers::capability::create::create_rts_off::ICreateRtsOff;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
-use crate::usb::xhci::registers::create_type::CreateType;
+use crate::usb::xhci::registers::create_type::RegisterCreate;
 
 
 pub trait ICreateAllCapabilityRegisters {
-    fn new_all_capabilities(&self, mmio_base_address: u64) -> Result<CapabilityRegisters, ()>;
+    fn new_capabilities(&self, mmio_base_address: u64) -> Result<CapabilityRegisters, ()>;
 }
 
 
-impl ICreateAllCapabilityRegisters for CreateType {
-    fn new_all_capabilities(&self, mmio_base_address: u64) -> Result<CapabilityRegisters, ()> {
+impl ICreateAllCapabilityRegisters for RegisterCreate {
+    fn new_capabilities(&self, mmio_base_address: u64) -> Result<CapabilityRegisters, ()> {
         let cap_length = self.new_capability_length(mmio_base_address)?;
         let hci_version = self.new_hci_version(mmio_base_address)?;
         let hcs_params1 = self.new_hcs_params1(mmio_base_address)?;
@@ -44,6 +44,6 @@ impl ICreateAllCapabilityRegisters for CreateType {
 
 #[test_case]
 pub fn should_uncheck_new_cap() {
-    let cap_registers = CreateType::UncheckTransmute.new_all_capabilities(crate::utils::test_fn::extract_virtual_mmio_base_addr());
+    let cap_registers = RegisterCreate::UncheckTransmute.new_capabilities(crate::utils::test_fn::extract_virtual_mmio_base_addr());
     assert!(cap_registers.is_ok());
 }

@@ -1,5 +1,5 @@
 use crate::test_runtime_register;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::runtime::structs::interrupter::iman::InterrupterManagementRegister;
 use crate::utils::raw_ptr::transmute_register;
 
@@ -9,10 +9,10 @@ pub trait ICreateIman {
 }
 
 
-impl ICreateIman for CreateType {
+impl ICreateIman for RegisterCreate {
     fn new_iman(&self, runtime_base: u64) -> CreateRegisterResult<InterrupterManagementRegister> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(runtime_base) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(runtime_base) }
         }
     }
 }

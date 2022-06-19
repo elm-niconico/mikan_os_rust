@@ -1,7 +1,7 @@
 use crate::test_op_register;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::operational::structs::page_size::PageSizeRegister;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 
@@ -11,10 +11,10 @@ pub trait ICreatePageSize {
 }
 
 
-impl ICreatePageSize for CreateType {
+impl ICreatePageSize for RegisterCreate {
     fn new_page_size(&self, operational_base_addr: u64) -> CreateRegisterResult<PageSizeRegister> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(operational_base_addr) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(operational_base_addr) }
         }
     }
 }

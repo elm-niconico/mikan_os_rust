@@ -1,6 +1,6 @@
 use crate::test_cap_register;
 use crate::usb::xhci::registers::capability::structs::rts_off::RuntimeRegisterSpaceOffset;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::utils::raw_ptr::transmute_register;
 
 
@@ -10,10 +10,10 @@ pub trait ICreateRtsOff {
 }
 
 
-impl ICreateRtsOff for CreateType {
+impl ICreateRtsOff for RegisterCreate {
     fn new_rts_off(&self, mmio_base_addr: u64) -> CreateRegisterResult<RuntimeRegisterSpaceOffset> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }
         }
     }
 }

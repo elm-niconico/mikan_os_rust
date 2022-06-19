@@ -1,4 +1,4 @@
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::volatile::Volatile;
 use crate::usb::xhci::registers::runtime::structs::interrupter::interrupter_registers::InterrupterRegisterSet;
 use crate::usb::xhci::registers::runtime::structs::interrupter::mf_index::MicroFrameIndex;
 

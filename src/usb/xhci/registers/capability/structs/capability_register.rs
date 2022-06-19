@@ -3,11 +3,11 @@ use crate::usb::xhci::registers::capability::structs::db_off::DoorbellOffsetRegi
 use crate::usb::xhci::registers::capability::structs::hcc_params1::HccParams1;
 use crate::usb::xhci::registers::capability::structs::hcc_params2::HccParams2;
 use crate::usb::xhci::registers::capability::structs::hci_version::HciVersion;
-use crate::usb::xhci::registers::capability::structs::rts_off::RuntimeRegisterSpaceOffset;
 use crate::usb::xhci::registers::capability::structs::hcs_parameters1::HcsParameters1;
 use crate::usb::xhci::registers::capability::structs::hcs_parameters2::HcsParameters2;
 use crate::usb::xhci::registers::capability::structs::hcs_parameters3::HcsParameters3;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::capability::structs::rts_off::RuntimeRegisterSpaceOffset;
+use crate::usb::xhci::registers::volatile::Volatile;
 
 // BAR 1 BAR 0
 // Operatational Register addr -> Cap Base + CAP LENGTH

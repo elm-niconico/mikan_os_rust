@@ -1,6 +1,6 @@
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::operational::structs::device_notification_control::DeviceNotificationControlRegister;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 
@@ -12,10 +12,10 @@ pub trait ICreateDnctrl {
 }
 
 
-impl ICreateDnctrl for CreateType {
+impl ICreateDnctrl for RegisterCreate {
     fn new_dnctrl(&self, operational_base_addr: u64) -> CreateRegisterResult<DeviceNotificationControlRegister> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(operational_base_addr) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(operational_base_addr) }
         }
     }
 }

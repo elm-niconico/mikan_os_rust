@@ -1,6 +1,6 @@
 use crate::test_cap_register;
 use crate::usb::xhci::registers::capability::structs::hcc_params1::HccParams1;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::utils::raw_ptr::transmute_register;
 
 
@@ -9,10 +9,10 @@ pub trait ICreateHccParams1 {
 }
 
 
-impl ICreateHccParams1 for CreateType {
+impl ICreateHccParams1 for RegisterCreate {
     fn new_hcc_params1(&self, mmio_base_addr: u64) -> CreateRegisterResult<HccParams1> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(mmio_base_addr) }
         }
     }
 }

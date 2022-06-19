@@ -1,7 +1,7 @@
 use crate::test_op_register;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::operational::structs::command_ring_control::CommandRingControlRegister;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 
@@ -12,10 +12,10 @@ pub trait ICreateCrcr {
 }
 
 
-impl ICreateCrcr for CreateType {
+impl ICreateCrcr for RegisterCreate {
     fn new_crcr(&self, operational_base_addr: u64) -> CreateRegisterResult<CommandRingControlRegister> {
         match self {
-            CreateType::UncheckTransmute => {
+            RegisterCreate::UncheckTransmute => {
                 uncheck_transmute(operational_base_addr)
             }
         }

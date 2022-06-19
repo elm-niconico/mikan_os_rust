@@ -1,5 +1,5 @@
 use crate::test_runtime_register;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::runtime::structs::interrupter::imod::InterrupterModerationRegister;
 use crate::utils::raw_ptr::transmute_register;
 
@@ -9,10 +9,10 @@ pub trait ICreateIMod {
 }
 
 
-impl ICreateIMod for CreateType {
+impl ICreateIMod for RegisterCreate {
     fn new_imod(&self, runtime_base: u64) -> CreateRegisterResult<InterrupterModerationRegister> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(runtime_base) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(runtime_base) }
         }
     }
 }

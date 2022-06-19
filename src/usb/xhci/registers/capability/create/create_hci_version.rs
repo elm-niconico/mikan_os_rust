@@ -1,6 +1,6 @@
 use crate::test_cap_register;
 use crate::usb::xhci::registers::capability::structs::hci_version::HciVersion;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::utils::raw_ptr::transmute_register;
 
 
@@ -9,10 +9,10 @@ pub trait ICreateVciVersion {
 }
 
 
-impl ICreateVciVersion for CreateType {
+impl ICreateVciVersion for RegisterCreate {
     fn new_hci_version(&self, mmio_base_address: u64) -> CreateRegisterResult<HciVersion> {
         match self {
-            CreateType::UncheckTransmute => uncheck_transmute(mmio_base_address),
+            RegisterCreate::UncheckTransmute => uncheck_transmute(mmio_base_address),
         }
     }
 }

@@ -1,7 +1,7 @@
 use crate::test_op_register;
-use crate::usb::xhci::registers::create_type::{CreateRegisterResult, CreateType};
+use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::operational::structs::usb_sts::UsbStsRegister;
-use crate::usb::xhci::registers::read_write::volatile::Volatile;
+use crate::usb::xhci::registers::volatile::Volatile;
 use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::utils::raw_ptr::transmute_from_u64;
 
@@ -11,10 +11,10 @@ pub trait ICreateUsbStatusRegister {
 }
 
 
-impl ICreateUsbStatusRegister for CreateType {
+impl ICreateUsbStatusRegister for RegisterCreate {
     fn new_usb_sts(&self, operational_base_addr: u64) -> CreateRegisterResult<UsbStsRegister> {
         match self {
-            CreateType::UncheckTransmute => { uncheck_transmute(operational_base_addr) }
+            RegisterCreate::UncheckTransmute => { uncheck_transmute(operational_base_addr) }
         }
     }
 }

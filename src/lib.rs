@@ -14,8 +14,6 @@ extern crate alloc;
 use core::alloc::Layout;
 use core::panic::PanicInfo;
 
-use bootloader::{BootInfo, entry_point};
-
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
 
@@ -31,7 +29,7 @@ pub mod utils;
 pub mod allocators;
 
 #[cfg(test)]
-entry_point!(test_kernel_main);
+bootloader::entry_point!(test_kernel_main);
 
 pub fn test_runner_handler(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
@@ -54,7 +52,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 /// Entry point for `cargo xtest`
 #[cfg(test)]
 #[no_mangle]
-fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
+fn test_kernel_main(boot_info: &'static bootloader::BootInfo) -> ! {
     test_main();
     loop {}
 }

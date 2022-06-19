@@ -1,5 +1,5 @@
 use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
-use crate::usb::xhci::registers::create_type::CreateType;
+use crate::usb::xhci::registers::create_type::RegisterCreate;
 use crate::usb::xhci::registers::operational::create::create_configure::ICreateConfigure;
 use crate::usb::xhci::registers::operational::create::create_crcr::ICreateCrcr;
 use crate::usb::xhci::registers::operational::create::create_dcbaap::ICreateDcbaap;
@@ -11,12 +11,12 @@ use crate::usb::xhci::registers::operational::structs::operational_registers::Op
 
 
 pub trait ICreateAllOperationalRegisters {
-    fn new_all_operations(&self, mmio_base_addr: u64, cap_length: CapLength) -> Result<OperationalRegisters, ()>;
+    fn new_operations(&self, mmio_base_addr: u64, cap_length: CapLength) -> Result<OperationalRegisters, ()>;
 }
 
 
-impl ICreateAllOperationalRegisters for CreateType {
-    fn new_all_operations(&self, mmio_base_addr: u64, cap_len: CapLength) -> Result<OperationalRegisters, ()> {
+impl ICreateAllOperationalRegisters for RegisterCreate {
+    fn new_operations(&self, mmio_base_addr: u64, cap_len: CapLength) -> Result<OperationalRegisters, ()> {
         let cap_len: u8 = cap_len.into();
         let operational_base_addr = mmio_base_addr + cap_len as u64;
         let usb_cmd = self.new_usb_command(operational_base_addr)?;
