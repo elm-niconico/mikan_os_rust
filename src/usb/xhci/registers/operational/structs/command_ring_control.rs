@@ -1,4 +1,4 @@
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 use bitfield_struct::bitfield;
 
 #[bitfield(u64)]
@@ -27,7 +27,7 @@ pub struct CommandRingControlRegister {
     command_ring_pointer: u64,
 }
 
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     CommandRingControlRegister{
         ring_cycle_state,
         command_stop,

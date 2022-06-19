@@ -1,5 +1,5 @@
 use bitfield_struct::bitfield;
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 
 
 #[bitfield(u32)]
@@ -18,7 +18,7 @@ pub struct HccParams2{
     #[bits(22)]
     _reserve: u32
 }
-impl_debug_from_methods!{
+impl_debug_bit_filed!{
     HccParams2{
         u3_entry_capability,
         configure_endpoint_command,

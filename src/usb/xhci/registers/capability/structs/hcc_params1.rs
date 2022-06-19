@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 
 
 #[bitfield(u32)]
@@ -24,7 +24,7 @@ pub struct HccParams1 {
 }
 
 
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     HccParams1{
         bit_64_address_capability,
         bw_negotiation_capability,

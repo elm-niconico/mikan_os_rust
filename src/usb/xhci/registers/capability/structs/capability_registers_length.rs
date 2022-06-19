@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 
 
 #[bitfield(u8)]
@@ -9,7 +9,7 @@ pub struct CapLength {
 }
 
 
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     CapLength{
         cap_len
     }

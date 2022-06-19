@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 
 
 #[bitfield(u32)]
@@ -12,7 +12,7 @@ pub struct ConfigureRegister {
     _reserve2: u32,
 }
 
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     ConfigureRegister{
         max_device_slots_enabled,
         u3_entry_enable,

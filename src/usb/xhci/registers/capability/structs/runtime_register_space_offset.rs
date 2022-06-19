@@ -1,5 +1,5 @@
 use bitfield_struct::bitfield;
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 
 
 #[bitfield(u32)]
@@ -9,7 +9,7 @@ pub struct RuntimeRegisterSpaceOffset {
     #[bits(27)]
     pub runtime_register_space_offset: u32,
 }
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     RuntimeRegisterSpaceOffset{
         runtime_register_space_offset
     }

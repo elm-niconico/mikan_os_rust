@@ -7,11 +7,13 @@ use crate::usb::xhci::registers::operational::structs::operational_registers::Op
 use crate::usb::xhci::registers::read_write::volatile::IVolatile;
 use crate::utils::test_fn::extract_virtual_mmio_base_addr;
 
+
 pub struct XhcController {
     capability_register: CapabilityRegisters,
     operational_registers: OperationalRegisters,
     device_manager: DeviceManager,
 }
+
 
 impl XhcController {
     pub fn initialize(mmio_base_addr: u64, device_max_slots: u8) -> Result<Self, ()> {
@@ -24,19 +26,19 @@ impl XhcController {
         
         Ok(me)
     }
-
+    
     pub fn run(&mut self) -> Result<(), ()> {
         self.operational_registers.usb_cmd.update_volatile(|cmd| {
             cmd.set_run_stop(true);
         });
-
+        
         while self
             .operational_registers
             .usb_sts
             .read_volatile()
             .hc_halted()
         {}
-
+        
         if self
             .operational_registers
             .usb_cmd
@@ -48,13 +50,14 @@ impl XhcController {
             Err(())
         }
     }
-
+    
     fn new(mmio_base: u64) -> Result<Self, ()> {
         let create = CreateType::UncheckTransmute;
+        
         let capability_register = create.new_all_capabilities(mmio_base)?;
         let operational_registers =
             create.new_all_operations(mmio_base, capability_register.cap_length.read_volatile())?;
-
+        
         Ok(Self {
             capability_register,
             operational_registers,
@@ -63,10 +66,12 @@ impl XhcController {
     }
 }
 
+
 pub trait IXhcResetOperations {
     fn wait_usb_halted(&mut self) -> Result<(), ()>;
     fn reset_controller(&mut self) -> Result<(), ()>;
 }
+
 
 impl IXhcResetOperations for XhcController {
     fn wait_usb_halted(&mut self) -> Result<(), ()> {
@@ -75,7 +80,7 @@ impl IXhcResetOperations for XhcController {
             cmd.set_host_system_error_enable(false);
             cmd.set_enable_wrap_event(false);
         });
-
+        
         if !self
             .operational_registers
             .usb_sts
@@ -86,14 +91,14 @@ impl IXhcResetOperations for XhcController {
                 cmd.set_run_stop(false);
             });
         }
-
+        
         while !self
             .operational_registers
             .usb_sts
             .read_volatile()
             .hc_halted()
         {}
-
+        
         if self
             .operational_registers
             .usb_sts
@@ -105,18 +110,18 @@ impl IXhcResetOperations for XhcController {
             Err(())
         }
     }
-
+    
     fn reset_controller(&mut self) -> Result<(), ()> {
         let read_cmd = |me: &XhcController| me.operational_registers.usb_cmd.read_volatile();
         let read_sts = |me: &XhcController| me.operational_registers.usb_sts.read_volatile();
         self.operational_registers.usb_cmd.update_volatile(|cmd| {
             cmd.set_host_controller_reset(true);
         });
-
+        
         while read_cmd(self).host_controller_reset() {}
-
+        
         while read_sts(self).controller_not_ready() {}
-
+        
         if (!read_cmd(self).host_controller_reset()) && (!read_sts(self).controller_not_ready()) {
             Ok(())
         } else {
@@ -125,10 +130,12 @@ impl IXhcResetOperations for XhcController {
     }
 }
 
+
 trait IXhcInitializeOperations {
     fn set_max_slots(&mut self, max_slots: u8) -> Result<(), ()>;
     fn set_dcb_aap(&mut self) -> Result<(), ()>;
 }
+
 
 impl IXhcInitializeOperations for XhcController {
     fn set_max_slots(&mut self, max_slots: u8) -> Result<(), ()> {
@@ -140,14 +147,14 @@ impl IXhcInitializeOperations for XhcController {
         if max_slots > limit_slots {
             return Err(());
         }
-
+        
         // max_slotsをキャプチャできないため、updateでは出来ない
         let mut configure = self.operational_registers.configure.read_volatile();
         configure.set_max_device_slots_enabled(max_slots);
         self.operational_registers
             .configure
             .write_volatile(configure);
-
+        
         if self
             .operational_registers
             .configure
@@ -160,7 +167,7 @@ impl IXhcInitializeOperations for XhcController {
             Err(())
         }
     }
-
+    
     fn set_dcb_aap(&mut self) -> Result<(), ()> {
         let mut dcp_aap = self
             .operational_registers
@@ -172,7 +179,7 @@ impl IXhcInitializeOperations for XhcController {
         self.operational_registers
             .device_context_bae_addr_array_ptr
             .write_volatile(dcp_aap);
-
+        
         if self
             .operational_registers
             .device_context_bae_addr_array_ptr
@@ -187,12 +194,14 @@ impl IXhcInitializeOperations for XhcController {
     }
 }
 
+
 #[test_case]
 pub fn should_new_xhc() {
     let xhc = XhcController::new(extract_virtual_mmio_base_addr());
-
+    
     assert!(xhc.is_ok());
 }
+
 
 #[test_case]
 pub fn should_run_xhc() {
@@ -201,37 +210,42 @@ pub fn should_run_xhc() {
     assert!(run_res.is_ok())
 }
 
+
 #[test_case]
 pub fn should_wait_hc_halted() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
-
+    
     let halted_res = xhc.wait_usb_halted();
     assert!(halted_res.is_ok())
 }
 
+
 #[test_case]
 pub fn should_xhc_reset() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
-
+    
     let reset_res = xhc.reset_controller();
     assert!(reset_res.is_ok())
 }
 
+
 #[test_case]
 pub fn should_xhc_set_max_slots() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
-
+    
     let res = xhc.set_max_slots(8);
     assert!(res.is_ok())
 }
 
+
 #[test_case]
 pub fn should_xhc_set_dcb_base_addr() {
     let mut xhc = XhcController::new(extract_virtual_mmio_base_addr()).unwrap();
-
+    
     xhc.set_max_slots(8).unwrap();
     assert!(xhc.set_dcb_aap().is_ok());
 }
+
 
 #[test_case]
 pub fn should_xhc_initialize() {

@@ -1,6 +1,6 @@
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_from_methods;
+use crate::impl_debug_bit_filed;
 
 
 #[bitfield(u32)]
@@ -15,7 +15,7 @@ pub struct HcsParameters1 {
     
     pub number_of_ports: u8,
 }
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     HcsParameters1{
         number_of_device_slots,
         number_of_interrupts,

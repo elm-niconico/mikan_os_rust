@@ -10,17 +10,16 @@
 extern crate alloc;
 extern crate bitfield_struct;
 
-
 use core::fmt::{Debug, Formatter};
 use core::panic::PanicInfo;
 
 use bitfield_struct::bitfield;
-use bootloader::{BootInfo, entry_point};
+use bootloader::{entry_point, BootInfo};
 
-use mikan_os_rust::{println, serial_println};
 use mikan_os_rust::qemu::{exit_qemu, ExitCode};
 use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
 use mikan_os_rust::usb::xhci::controller::xhc::XhcController;
+use mikan_os_rust::{println, serial_println};
 
 entry_point!(kernel_main);
 
@@ -29,15 +28,13 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     serial_println!("Hello World! {}", boot_info.physical_memory_offset);
     #[cfg(test)]
     test_main();
-    
-    
+
     let mmio_base_addr = tmp_find_usb_mouse_base().unwrap() + boot_info.physical_memory_offset;
-    let xhc_controller = XhcController::initialize(mmio_base_addr, 8).expect("Failed Create Contorller");
-    
-    
+    let xhc_controller =
+        XhcController::initialize(mmio_base_addr, 8).expect("Failed Create Contorller");
+
     loop {}
 }
-
 
 #[bitfield(u64)]
 struct TrbInfo {
@@ -55,7 +52,6 @@ struct TrbInfo {
     pub control: usize,
 }
 
-
 impl Debug for TrbInfo {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         f.write_fmt(format_args!(
@@ -71,28 +67,26 @@ impl Debug for TrbInfo {
     }
 }
 
-
 #[bitfield(u64)]
 struct PageTableEntry {
     /// defaults to 32 bits for u32
     addr: u32,
-    
+
     /// public field -> public accessor functions
     #[bits(12)]
     pub size: usize,
-    
+
     /// padding: No accessor functions are generated for fields beginning with `_`.
     #[bits(6)]
     _p: u8,
-    
+
     /// interpreted as 1 bit flag
     present: bool,
-    
+
     /// sign extend for signed integers
     #[bits(13)]
     negative: i16,
 }
-
 
 #[cfg(not(test))]
 #[panic_handler]
@@ -104,13 +98,11 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
-
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     use mikan_os_rust::test_panic_handler;
-    
+
     test_panic_handler(info);
     loop {}
 }
-

@@ -1,9 +1,12 @@
+use core::fmt::Debug;
+
 use bitfield_struct::bitfield;
 
-use crate::impl_debug_from_methods;
+use crate::{impl_debug_bit_filed, impl_debug_packed_fields};
 
 
 #[repr(packed)]
+#[derive(Clone, Copy)]
 pub struct SlotContext {
     pub offset_0: SlotContextOffset0,
     pub offset_1: SlotContextOffset1,
@@ -11,6 +14,14 @@ pub struct SlotContext {
     pub offset_3: SlotContextOffset3,
 }
 
+impl_debug_packed_fields! {
+    SlotContext{
+        offset_0,
+        offset_1,
+        offset_2,
+        offset_3
+    }
+}
 
 #[bitfield(u32)]
 pub struct SlotContextOffset0 {
@@ -29,9 +40,7 @@ pub struct SlotContextOffset0 {
     pub context_entries: u8,
 }
 
-
-
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     SlotContextOffset0{
         route_string,
         speed,
@@ -40,7 +49,6 @@ impl_debug_from_methods! {
         context_entries
     }
 }
-
 
 #[bitfield(u32)]
 pub struct SlotContextOffset1 {
@@ -51,15 +59,13 @@ pub struct SlotContextOffset1 {
     pub number_of_ports: u8,
 }
 
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     SlotContextOffset1{
         max_exit_latency,
         root_hub_port_number,
         number_of_ports
     }
 }
-
-
 
 #[bitfield(u32)]
 pub struct SlotContextOffset2 {
@@ -76,7 +82,7 @@ pub struct SlotContextOffset2 {
     #[bits(10)]
     pub interrupter_target: u16,
 }
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     SlotContextOffset2{
         parent_hub_slot_id,
         parent_port_number,
@@ -84,7 +90,6 @@ impl_debug_from_methods! {
         interrupter_target
     }
 }
-
 
 #[bitfield(u32)]
 pub struct SlotContextOffset3 {
@@ -96,7 +101,7 @@ pub struct SlotContextOffset3 {
     #[bits(5)]
     pub slot_state: u8,
 }
-impl_debug_from_methods! {
+impl_debug_bit_filed! {
     SlotContextOffset3{
         usb_device_addr,
         slot_state
