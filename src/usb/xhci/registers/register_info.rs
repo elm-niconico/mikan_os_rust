@@ -1,33 +1,24 @@
 use core::fmt::Debug;
-
-use crate::impl_debug_with_generic;
-
-
-#[derive(Clone, Copy)]
-pub struct RegisterInfo<T: Debug> {
-    register: T,
-    register_start_addr: u64,
-}
+use core::ops::{Deref, DerefMut};
 
 
-impl<T: core::fmt::Debug> RegisterInfo<T> {
-    pub fn new(register_start_addr: u64, register: T) -> Self {
-        Self {
-            register,
-            register_start_addr,
-        }
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
+pub struct RegisterInfo<T>(*mut T);
+
+
+impl<T: Debug> RegisterInfo<T> {
+    pub fn new(register_addr: u64) -> Self {
+        Self(register_addr as *mut T)
     }
     
+    pub fn addr(&self) -> usize {
+        self.0.addr()
+    }
     
-    pub fn get_register_raw_ptr(&self) -> *mut T {
-        self.register_start_addr as *mut T
+    pub fn ptr(&self) -> *mut T{
+        self.0
     }
 }
 
 
-impl_debug_with_generic! {
-    RegisterInfo{
-        register,
-        register_start_addr
-    }
-}
+

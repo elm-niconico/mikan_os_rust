@@ -4,6 +4,6 @@ use crate::usb::xhci::registers::volatile::{Volatile, VolatileRegister};
 
 impl Volatile<UsbStsRegister> {
     pub fn is_halted(&self) -> bool {
-        self.read_volatile().hc_halted()
+        self.read().hc_halted()
     }
 }

@@ -1,3 +1,4 @@
+use crate::serial_println;
 use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::RegisterCreate;
@@ -6,9 +7,9 @@ use crate::usb::xhci::registers::operational::structs::operational_registers::Op
 use crate::usb::xhci::registers::runtime::create::create_runtime_registers::ICreateRuntimeRegisters;
 use crate::usb::xhci::registers::runtime::structs::runtime_registers::RuntimeRegisters;
 use crate::usb::xhci::registers::volatile::VolatileRegister;
+use crate::utils::error::CommonResult;
 
 
-#[derive(Debug)]
 pub struct HostControllerRegisters {
     capabilities: CapabilityRegisters,
     operations: OperationalRegisters,
@@ -17,13 +18,16 @@ pub struct HostControllerRegisters {
 
 
 impl HostControllerRegisters {
-    pub fn new(create: RegisterCreate, mmio_base: u64) -> Result<Self, ()> {
+    pub fn new(create: RegisterCreate, mmio_base: u64) -> CommonResult<Self> {
         let capabilities = create.new_capabilities(mmio_base)?;
         
+        serial_println!("CAPABILITY");
         let operations =
-            create.new_operations(mmio_base, capabilities.cap_length.read_volatile())?;
+            create.new_operations(mmio_base, capabilities.cap_length.read())?;
         
-        let runtimes = create.new_runtimes(mmio_base, capabilities.rts_off.read_volatile().rts_off())?;
+        serial_println!("OPERATIONS");
+        let runtimes = create.new_runtimes(mmio_base, capabilities.rts_offset.read_rts_offset())?;
+        serial_println!("RUNTIME");
         
         Ok(Self {
             capabilities,

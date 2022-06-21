@@ -6,7 +6,7 @@ use crate::usb::xhci::registers::runtime::structs::interrupter::imod::Interrupte
 
 
 #[repr(C)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct InterrupterRegisterSet {
     pub iman: InterrupterManagementRegister,
     pub imod: InterrupterModerationRegister,
@@ -16,4 +16,12 @@ pub struct InterrupterRegisterSet {
     pub erdp: EventRingDequePointerRegister,
 }
 
-
+// impl_debug_packed_fields!{
+//     InterrupterRegisterSet{
+//         iman,
+//         imod,
+//         erstsz,
+//         erstba,
+//         erdp
+//     }
+// }

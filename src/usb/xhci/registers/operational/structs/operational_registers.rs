@@ -8,8 +8,9 @@ use crate::usb::xhci::registers::operational::structs::device_notification_contr
 use crate::usb::xhci::registers::operational::structs::page_size::PageSizeRegister;
 use crate::usb::xhci::registers::operational::structs::usb_cmd::UsbCmdRegister;
 use crate::usb::xhci::registers::operational::structs::usb_sts::UsbStsRegister;
-use crate::usb::xhci::registers::volatile::{Volatile, VolatileRegister};
 use crate::usb::xhci::registers::register_info::RegisterInfo;
+use crate::usb::xhci::registers::volatile::{Volatile, VolatileRegister};
+use crate::utils::error::CommonResult;
 
 
 pub struct OperationalRegisters {
@@ -66,24 +67,23 @@ impl_debug_only_fields! {
     }
 }
 pub trait XhcResetOperations {
-    fn wait_xhc_halted(&mut self) -> Result<(), ()>;
-    fn reset_controller(&mut self) -> Result<(), ()>;
+    fn wait_xhc_halted(&mut self) -> CommonResult<()>;
+    fn reset_controller(&mut self) -> CommonResult<()>;
 }
 
 
 impl XhcResetOperations for OperationalRegisters {
-    fn wait_xhc_halted(&mut self) -> Result<(), ()> {
-        self.usb_cmd.update_volatile(|cmd| {
+    fn wait_xhc_halted(&mut self) -> CommonResult<()> {
+        self.usb_cmd.update(|cmd| {
             cmd.set_interrupt_enable(false);
             cmd.set_host_system_error_enable(false);
             cmd.set_enable_wrap_event(false);
         });
         
-        
-        let is_not_halted = |o: &OperationalRegisters| { !o.usb_sts.is_halted() };
+        let is_not_halted = |o: &OperationalRegisters| !o.usb_sts.is_halted();
         
         if is_not_halted(self) {
-            self.usb_cmd.update_volatile(|cmd| {
+            self.usb_cmd.update(|cmd| {
                 cmd.set_run_stop(false);
             });
         }
@@ -94,16 +94,15 @@ impl XhcResetOperations for OperationalRegisters {
         if is_stop_controller {
             Ok(())
         } else {
-            Err(())
+            Err("Failed Stop Controller")
         }
     }
     
-    fn reset_controller(&mut self) -> Result<(), ()> {
-        let read_cmd = |o: &OperationalRegisters| o.usb_cmd.read_volatile();
-        let read_sts = |o: &OperationalRegisters| o.usb_sts.read_volatile();
+    fn reset_controller(&mut self) -> CommonResult<()> {
+        let read_cmd = |o: &OperationalRegisters| o.usb_cmd.read();
+        let read_sts = |o: &OperationalRegisters| o.usb_sts.read();
         
-        
-        self.usb_cmd.update_volatile(|cmd| {
+        self.usb_cmd.update(|cmd| {
             cmd.set_host_controller_reset(true);
         });
         
@@ -111,11 +110,12 @@ impl XhcResetOperations for OperationalRegisters {
         
         while read_sts(self).controller_not_ready() {}
         
-        let is_success_reset = (!read_cmd(self).host_controller_reset()) && (!read_sts(self).controller_not_ready());
+        let is_success_reset =
+            (!read_cmd(self).host_controller_reset()) && (!read_sts(self).controller_not_ready());
         if is_success_reset {
             Ok(())
         } else {
-            Err(())
+            Err("Failed Reset Controller")
         }
     }
 }
@@ -124,10 +124,13 @@ impl XhcResetOperations for OperationalRegisters {
 #[test_case]
 pub fn should_reset_xhc() {
     use crate::usb::xhci::registers::operational::create::create_all_registers::ICreateAllOperationalRegisters;
-    use crate::utils::test_fn::{extract_virtual_mmio_base_addr, extract_cap_len};
+    use crate::utils::test_fn::{extract_cap_len, extract_virtual_mmio_base_addr};
     
     let mut op = crate::usb::xhci::registers::create_type::RegisterCreate::UncheckTransmute
-        .new_operations(crate::utils::test_fn::extract_virtual_mmio_base_addr(), extract_cap_len(extract_virtual_mmio_base_addr()))
+        .new_operations(
+            crate::utils::test_fn::extract_virtual_mmio_base_addr(),
+            extract_cap_len(extract_virtual_mmio_base_addr()),
+        )
         .unwrap();
     
     assert!(op.wait_xhc_halted().is_ok())
@@ -137,12 +140,14 @@ pub fn should_reset_xhc() {
 #[test_case]
 pub fn should_xhc_reset() {
     use crate::usb::xhci::registers::operational::create::create_all_registers::ICreateAllOperationalRegisters;
-    use crate::utils::test_fn::{extract_virtual_mmio_base_addr, extract_cap_len};
+    use crate::utils::test_fn::{extract_cap_len, extract_virtual_mmio_base_addr};
     
     let mut op = crate::usb::xhci::registers::create_type::RegisterCreate::UncheckTransmute
-        .new_operations(crate::utils::test_fn::extract_virtual_mmio_base_addr(), extract_cap_len(extract_virtual_mmio_base_addr()))
+        .new_operations(
+            crate::utils::test_fn::extract_virtual_mmio_base_addr(),
+            extract_cap_len(extract_virtual_mmio_base_addr()),
+        )
         .unwrap();
     
     assert!(op.reset_controller().is_ok())
 }
-

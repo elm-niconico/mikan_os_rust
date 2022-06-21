@@ -13,7 +13,7 @@ static OFFSET: u64 = 1649267441664;
 pub fn extract_operational_base_addr() -> u64 {
     let mmio = extract_virtual_mmio_base_addr();
     let cap = extract_cap_register(mmio);
-    let cap_len: u8 = cap.cap_length.read_volatile().into();
+    let cap_len: u8 = cap.cap_length.read().into();
     mmio + cap_len as u64
 }
 
@@ -29,13 +29,13 @@ pub fn extract_virtual_mmio_base_addr() -> u64 {
 pub fn extract_runtime_base() -> u64 {
     let mmio = extract_virtual_mmio_base_addr();
     let cap = extract_cap_register(mmio);
-    let rts_off = cap.rts_off.read_volatile().rts_off();
+    let rts_off = cap.rts_offset.read().rts_offset();
     mmio + rts_off as u64
 }
 
 
 pub fn extract_cap_len(mmio_base: u64) -> CapLength {
-    extract_cap_register(mmio_base).cap_length.read_volatile()
+    extract_cap_register(mmio_base).cap_length.read()
 }
 
 

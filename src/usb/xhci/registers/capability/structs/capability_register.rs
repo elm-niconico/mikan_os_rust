@@ -29,9 +29,9 @@ pub struct CapabilityRegisters {
     
     pub hcc_params1: Volatile<HccParams1>,
     
-    pub db_off: Volatile<DoorbellOffsetRegister>,
+    pub db_offset: Volatile<DoorbellOffsetRegister>,
     
-    pub rts_off: Volatile<RuntimeRegisterSpaceOffset>,
+    pub rts_offset: Volatile<RuntimeRegisterSpaceOffset>,
     
     pub hcc_params2: Volatile<HccParams2>,
 }

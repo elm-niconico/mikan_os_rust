@@ -4,6 +4,7 @@ use crate::usb::xhci::device::device_context::DeviceContext;
 use crate::usb::xhci::device::usb_device::UsbDevice;
 
 
+#[derive(Debug)]
 pub struct DeviceManager {
     devices: Vec<UsbDevice>,
     device_contexts: Vec<DeviceContext>

@@ -1,6 +1,7 @@
 use crate::usb::xhci::trb::trb_base::TrbBase;
 
 
+#[derive(Debug)]
 pub struct CommandRing {
     pub ring_buffer: [Option<TrbBase>; 32],
 }

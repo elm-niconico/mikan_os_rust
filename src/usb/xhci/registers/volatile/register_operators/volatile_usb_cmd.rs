@@ -1,21 +1,22 @@
 use crate::usb::xhci::registers::operational::structs::usb_cmd::UsbCmdRegister;
 use crate::usb::xhci::registers::volatile::{Volatile, VolatileRegister};
+use crate::utils::error::CommonResult;
 
 
 impl Volatile<UsbCmdRegister> {
-    pub fn set_enable_interrupt(&mut self) -> Result<(), ()> {
-        self.update_volatile(|usb_cmd| {
+    pub fn set_enable_interrupt(&mut self) -> CommonResult<()> {
+        self.update(|usb_cmd| {
             usb_cmd.set_interrupt_enable(true);
         });
-        if self.read_volatile().interrupt_enable() {
+        if self.read().interrupt_enable() {
             Ok(())
         } else {
-            Err(())
+            Err("Failed Set Enable Interrupt")
         }
     }
     
     pub fn is_run(&self) -> bool {
-        self.read_volatile().run_stop()
+        self.read().run_stop()
     }
 }
 

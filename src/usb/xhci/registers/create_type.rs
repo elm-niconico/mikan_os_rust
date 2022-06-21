@@ -1,4 +1,4 @@
-use crate::usb::xhci::registers::volatile::Volatile;
+use crate::{usb::xhci::registers::volatile::Volatile, utils::error::CommonResult};
 
 
 pub enum RegisterCreate {
@@ -8,4 +8,4 @@ pub enum RegisterCreate {
 }
 
 
-pub type CreateRegisterResult<T> = Result<Volatile<T>, ()>;
+pub type CreateRegisterResult<T> = CommonResult<Volatile<T>>;

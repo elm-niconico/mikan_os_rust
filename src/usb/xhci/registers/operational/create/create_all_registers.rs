@@ -8,15 +8,16 @@ use crate::usb::xhci::registers::operational::create::create_page_size::ICreateP
 use crate::usb::xhci::registers::operational::create::create_usb_cmd::CreateUsbCommand;
 use crate::usb::xhci::registers::operational::create::create_usb_sts::ICreateUsbStatusRegister;
 use crate::usb::xhci::registers::operational::structs::operational_registers::OperationalRegisters;
+use crate::utils::error::CommonResult;
 
 
 pub trait ICreateAllOperationalRegisters {
-    fn new_operations(&self, mmio_base_addr: u64, cap_length: CapLength) -> Result<OperationalRegisters, ()>;
+    fn new_operations(&self, mmio_base_addr: u64, cap_length: CapLength) -> CommonResult<OperationalRegisters>;
 }
 
 
 impl ICreateAllOperationalRegisters for RegisterCreate {
-    fn new_operations(&self, mmio_base_addr: u64, cap_len: CapLength) -> Result<OperationalRegisters, ()> {
+    fn new_operations(&self, mmio_base_addr: u64, cap_len: CapLength) -> CommonResult<OperationalRegisters> {
         let cap_len: u8 = cap_len.into();
         let operational_base_addr = mmio_base_addr + cap_len as u64;
         let usb_cmd = self.new_usb_command(operational_base_addr)?;
