@@ -7,3 +7,4 @@ pub mod dcbaap;
 pub mod configure;
 pub mod port_status_and_control;
 pub mod operational_registers;
+pub mod port_register_set;

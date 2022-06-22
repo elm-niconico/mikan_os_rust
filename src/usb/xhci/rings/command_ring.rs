@@ -3,14 +3,14 @@ use crate::usb::xhci::trb::trb_base::TrbBase;
 
 #[derive(Debug)]
 pub struct CommandRing {
-    pub ring_buffer: [Option<TrbBase>; 32],
+    pub ring_buffer: [TrbBase; 32],
 }
 
 
 impl CommandRing {
     pub fn new() -> Self {
         Self {
-            ring_buffer: [Option::None; 32]
+            ring_buffer: [TrbBase::new_zeros(); 32]
         }
     }
     

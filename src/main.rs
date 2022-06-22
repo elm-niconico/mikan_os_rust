@@ -20,7 +20,6 @@ use bootloader::{BootInfo, entry_point};
 use mikan_os_rust::{println, serial_println};
 use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
 use mikan_os_rust::usb::xhci::controller::xhc::XhcController;
-use mikan_os_rust::usb::xhci::trb::trb_base::TrbBase;
 
 entry_point!(kernel_main);
 
@@ -31,21 +30,24 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     
     serial_println!("Hello World! {}", 0b100000 * 1024);
     
-    
     let mmio_base = tmp_find_usb_mouse_base().unwrap() + boot_info.physical_memory_offset;
     println!("mmio_base {}", mmio_base);
-    println!("physical_memory_offset {}", boot_info.physical_memory_offset);
-    let mut xhc = XhcController::initialize(mmio_base, boot_info.physical_memory_offset, 6).expect("FAILED RESULT");
+    println!(
+        "physical_memory_offset {}",
+        boot_info.physical_memory_offset
+    );
+    let mut xhc = XhcController::initialize(mmio_base, boot_info.physical_memory_offset, 6)
+        .expect("FAILED RESULT");
     
-    xhc.run().unwrap();
-    println!("{}", core::mem::size_of::<TrbBase>());
+    xhc.run().expect("Failed Running Xhc Controller");
+    
+    xhc.reset_all_ports().expect("Failed Reset Ports");
+    
     let mut count = 0;
-    loop {
-        xhc.process_event();
-
-        count += 1;
-    }
-    
+    // loop {
+    //     xhc.process_event();
+    // }
+    //
     //
     // let mut xhc_controller =
     //     XhcController::initialize(mmio_base_addr, 8).expect("Failed Create Contorller");
@@ -53,10 +55,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //xhc_controller.run().expect("Failed Run Xhc Controller");
     println!("Success Run Controller!");
     //
-    loop {
-        // xhc_controller.process_event();
-    }
-    
     
     loop {
         x86_64::instructions::hlt();

@@ -1,8 +1,14 @@
-use crate::{println, serial_println};
+use core::slice;
+
+use crate::serial_println;
+use crate::usb::xhci::controller::port::Port;
 use crate::usb::xhci::device_manager::device_manager::DeviceManager;
 use crate::usb::xhci::registers::create_type::RegisterCreate;
 use crate::usb::xhci::registers::host_controller_registers::HostControllerRegisters;
-use crate::usb::xhci::registers::operational::structs::operational_registers::{OperationalRegisters, XhcResetOperations};
+use crate::usb::xhci::registers::operational::structs::operational_registers::{
+    OperationalRegisters, XhcResetOperations,
+};
+use crate::usb::xhci::registers::operational::structs::port_register_set::PortRegisterSet;
 use crate::usb::xhci::registers::volatile::VolatileRegister;
 use crate::usb::xhci::rings::command_ring::CommandRing;
 use crate::usb::xhci::rings::event_ring::EventRing;
@@ -14,11 +20,16 @@ pub struct XhcController {
     device_manager: DeviceManager,
     command_ring: CommandRing,
     event_ring: EventRing,
+    mmio_virt_addr: u64,
 }
 
 
 impl XhcController {
-    pub fn initialize(mmio_base_addr: u64, physical_memory_offset: u64, device_max_slots: u8) -> CommonResult<XhcController> {
+    pub fn initialize(
+        mmio_base_addr: u64,
+        physical_memory_offset: u64,
+        device_max_slots: u8,
+    ) -> CommonResult<XhcController> {
         let res = XhcController::new(mmio_base_addr, physical_memory_offset);
         if let Err(error) = res {
             return Err(error);
@@ -26,11 +37,16 @@ impl XhcController {
         
         let mut me = res.unwrap();
         me.operations().wait_xhc_halted()?;
-        serial_println!("WAIT");
+        
         me.operations().reset_controller()?;
-        serial_println!("RESET");
+        
         me.set_max_slots(device_max_slots)?;
-        serial_println!("SET MAX SLOTS");
+        
+        
+        // let hcs_params2 = me.xhc_registers.capabilities_mut().hcs_params2.read();
+        // let max_scratchpad_buffers = hcs_params2.max_scratchpad_buffers_high() << 5 | hcs_params2.max_scratch_pad_buffer_low();
+        // serial_println!("max {:?}", hcs_params2);
+        // serial_println!("event {:?}", me.xhc_registers.capabilities_mut().hcc_params1.read());
         me.set_dcbaap()?;
         
         let command_ring_buff_addr = me.command_ring.buffer_addr();
@@ -39,22 +55,23 @@ impl XhcController {
           .crctl
           .register_command_ring(command_ring_buff_addr);
         
-        me.xhc_registers.runtimes_mut().interrupter_register_set.primary().set_enable_interrupt()?;
+        me.xhc_registers
+          .runtimes_mut()
+          .interrupter_register_set
+          .primary()
+          .set_enable_interrupt()?;
         
         me.operations().usb_cmd.set_enable_interrupt()?;
         
-        
         Ok(me)
     }
-    
     
     pub fn run(&mut self) -> CommonResult<()> {
         self.operations().usb_cmd.update(|cmd| {
             cmd.set_run_stop(true);
         });
         
-        while self.operations().usb_sts.read()
-                  .hc_halted() {}
+        while self.operations().usb_sts.read().hc_halted() {}
         
         if self.operations().usb_cmd.read().run_stop() {
             Ok(())
@@ -63,13 +80,12 @@ impl XhcController {
         }
     }
     
-    pub fn new(mmio_base: u64, physical_offset: u64) -> CommonResult<XhcController> {
+    pub fn new(mmio_virt_addr: u64, physical_offset: u64) -> CommonResult<XhcController> {
         let create = RegisterCreate::UncheckTransmute;
         serial_println!("BEFORE");
-        let xhc_registers = HostControllerRegisters::new(create, mmio_base);
+        let xhc_registers = HostControllerRegisters::new(create, mmio_virt_addr);
         serial_println!("{}", xhc_registers.is_ok());
         let mut xhc_registers = xhc_registers.unwrap();
-        
         
         serial_println!("CREATE REGISTER");
         let device_manager = DeviceManager::new(8);
@@ -82,26 +98,74 @@ impl XhcController {
             device_manager,
             command_ring,
             event_ring,
+            mmio_virt_addr,
         })
     }
     
+    pub fn max_pots(&mut self) -> u8 {
+        self.xhc_registers
+            .capabilities_mut()
+            .hcs_params1
+            .read()
+            .number_of_ports()
+    }
     
     pub fn process_event(&mut self) {
-        let primary = self.xhc_registers.runtimes_mut().interrupter_register_set.primary();
+        let primary = self
+            .xhc_registers
+            .runtimes_mut()
+            .interrupter_register_set
+            .primary();
         if !self.event_ring.has_front(&primary) {
             return;
         }
-        println!("hello");
+        
         let event_trb = self.event_ring.front_trb(&primary);
         if event_trb.trb_type() != 0 {
-            serial_println!("event {:?}", event_trb);
+            serial_println!("event trb type {:?}", event_trb.trb_type());
         }
         
-        
-        self.event_ring.pop(&mut self.xhc_registers.runtimes_mut().interrupter_register_set.primary());
+        self.event_ring.pop(
+            &mut self
+                .xhc_registers
+                .runtimes_mut()
+                .interrupter_register_set
+                .primary(),
+        );
     }
     
+    pub fn reset_all_ports(&mut self) -> CommonResult<()>{
+        for n in 0..self.max_pots() + 1 {
+            let mut port = self.port_at(n as usize);
+            if port.is_current_connect(){
+                
+                port.reset()?
+            }
+            serial_println!("RESET {:?}", port);
+        }
+        Ok(())
+    }
+    pub fn port_at(&mut self, index: usize) -> Port {
+        let port_sets = (self.port_register_sets());
+        Port::new(&port_sets[index])
+    }
     
+    fn port_register_sets(&mut self) -> &mut [PortRegisterSet] {
+        let cap_len: u64 = self
+            .xhc_registers
+            .capabilities_mut()
+            .cap_length
+            .read()
+            .cap_len() as u64;
+        let port_register_set_addr = self.mmio_virt_addr + cap_len + 0x400;
+        
+        unsafe {
+            slice::from_raw_parts_mut(
+                port_register_set_addr as *mut PortRegisterSet,
+                (self.max_pots() + 1) as usize,
+            )
+        }
+    }
     fn operations(&mut self) -> &mut OperationalRegisters {
         self.xhc_registers.operations_mut()
     }
@@ -194,7 +258,33 @@ pub fn should_xhc_set_dcb_base_addr() {
 
 #[test_case]
 pub fn should_xhc_initialize() {
-    let is_success = XhcController::initialize(crate::utils::test_fn::extract_virtual_mmio_base_addr(), 1, 8)
+    let is_success = XhcController::initialize(
+        crate::utils::test_fn::extract_virtual_mmio_base_addr(),
+        1,
+        8,
+    )
         .is_ok();
     assert!(is_success);
+}
+
+
+#[test_case]
+pub fn should_read_max_pots() {
+    let mut xhc = XhcController::initialize(
+        crate::utils::test_fn::extract_virtual_mmio_base_addr(),
+        1,
+        8,
+    )
+        .unwrap();
+    assert_ne!(0, xhc.max_pots());
+}
+#[test_case]
+pub fn should_reset_all_ports() {
+    let mut xhc = XhcController::initialize(
+        crate::utils::test_fn::extract_virtual_mmio_base_addr(),
+        1,
+        8,
+    )
+        .unwrap();
+    assert!(xhc.reset_all_ports().is_ok());
 }

@@ -40,7 +40,7 @@ impl TrbBase {
         }
     }
     
-    pub fn test_new() -> Self {
+    pub fn new_zeros() -> Self {
         Self::new()
     }
 }
