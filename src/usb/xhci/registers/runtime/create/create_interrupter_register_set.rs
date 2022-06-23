@@ -1,29 +1,25 @@
+use crate::serial_println;
 use crate::usb::xhci::registers::create_type::RegisterCreate;
 use crate::usb::xhci::registers::runtime::structs::runtime_registers::InterruptersArray;
 
-
+// 1024
 pub const INTERRUPTER_SET_COUNTS: usize = 1024;
-
 
 pub trait ICreateInterrupterRegisterSet {
     fn new_interrupter_register_set(&self, runtime_base: u64) -> InterruptersArray;
 }
 
-
 impl ICreateInterrupterRegisterSet for RegisterCreate {
     fn new_interrupter_register_set(&self, runtime_base: u64) -> InterruptersArray {
         match self {
-            RegisterCreate::UncheckTransmute => { uncheck_transmute(runtime_base) }
+            RegisterCreate::UncheckTransmute => uncheck_transmute(runtime_base),
         }
     }
 }
 
-
 fn uncheck_transmute(runtime_base: u64) -> InterruptersArray {
-    let addr = runtime_base + 0x20;
-    InterruptersArray::new(addr)
+    InterruptersArray::new(runtime_base)
 }
-
 
 // fn uncheck_transmute(runtime_base: u64) -> CreateInterrupterRegisterSetResult {
 //     let base = runtime_base + 0x20;
@@ -43,10 +39,9 @@ fn uncheck_transmute(runtime_base: u64) -> InterruptersArray {
 //     })
 // }
 
-
-#[test_case]
-pub fn should_new_interrupter_sets() {
-    use crate::utils::test_fn::extract_runtime_base;
-    let interrupters = uncheck_transmute(extract_runtime_base());
-    //assert_eq!(1024, interrupters.);
-}
+// #[test_case]
+// pub fn should_new_interrupter_sets() {
+//     use crate::utils::test_fn::extract_runtime_base;
+//     let interrupters = uncheck_transmute(extract_runtime_base());
+//     //assert_eq!(1024, interrupters.);
+// }

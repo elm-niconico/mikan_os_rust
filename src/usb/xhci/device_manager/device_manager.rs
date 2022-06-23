@@ -1,4 +1,5 @@
 use alloc::vec::Vec;
+use core::ptr::null_mut;
 
 use crate::usb::xhci::device::device_context::DeviceContext;
 use crate::usb::xhci::device::usb_device::UsbDevice;
@@ -6,16 +7,24 @@ use crate::usb::xhci::device::usb_device::UsbDevice;
 
 #[derive(Debug)]
 pub struct DeviceManager {
-    devices: Vec<UsbDevice>,
-    device_contexts: Vec<DeviceContext>,
+    devices: Vec<*mut UsbDevice>,
+    device_contexts: Vec<*mut DeviceContext>,
 }
 
 
 impl DeviceManager {
     pub fn new(device_max_slots: u8) -> Self {
-        let max_slots = usize::from(device_max_slots);
-        let devices = Vec::<UsbDevice>::with_capacity(max_slots + 1);
-        let device_contexts = Vec::<DeviceContext>::with_capacity(max_slots + 1);
+        let max_slots = usize::from(device_max_slots) + 1;
+        let mut devices = Vec::<*mut UsbDevice>::with_capacity(max_slots);
+        
+        
+        let mut device_contexts = Vec::<*mut DeviceContext>::with_capacity(max_slots);
+        
+        unsafe{
+            devices.set_len(max_slots);
+            device_contexts.set_len(max_slots);
+        }
+        
         Self {
             devices,
             device_contexts,

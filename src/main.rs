@@ -11,15 +11,14 @@
 extern crate alloc;
 extern crate bitfield_struct;
 
-
 use core::panic::PanicInfo;
 
 use bitfield_struct::bitfield;
-use bootloader::{BootInfo, entry_point};
+use bootloader::{entry_point, BootInfo};
 
-use mikan_os_rust::{println, serial_println};
 use mikan_os_rust::usb::pci::configuration::tmp_find_usb_mouse_base;
 use mikan_os_rust::usb::xhci::controller::xhc::XhcController;
+use mikan_os_rust::{println, serial_println};
 
 entry_point!(kernel_main);
 
@@ -27,9 +26,9 @@ entry_point!(kernel_main);
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     #[cfg(test)]
     test_main();
-    
+
     serial_println!("Hello World! {}", 0b100000 * 1024);
-    
+
     let mmio_base = tmp_find_usb_mouse_base().unwrap() + boot_info.physical_memory_offset;
     println!("mmio_base {}", mmio_base);
     println!(
@@ -38,15 +37,16 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     );
     let mut xhc = XhcController::initialize(mmio_base, boot_info.physical_memory_offset, 6)
         .expect("FAILED RESULT");
-    
+
     xhc.run().expect("Failed Running Xhc Controller");
-    
+
     xhc.reset_all_ports().expect("Failed Reset Ports");
-    
+
     let mut count = 0;
-    // loop {
-    //     xhc.process_event();
-    // }
+
+    loop {
+        xhc.process_event();
+    }
     //
     //
     // let mut xhc_controller =
@@ -55,12 +55,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //xhc_controller.run().expect("Failed Run Xhc Controller");
     println!("Success Run Controller!");
     //
-    
+
     loop {
         x86_64::instructions::hlt();
     }
 }
-
 
 #[bitfield(u64)]
 struct TrbInfo {
@@ -78,34 +77,32 @@ struct TrbInfo {
     pub control: usize,
 }
 
-
 #[bitfield(u64)]
 struct PageTableEntry {
     /// defaults to 32 bits for u32
     addr: u32,
-    
+
     /// public field -> public accessor functions
     #[bits(12)]
     pub size: usize,
-    
+
     /// padding: No accessor functions are generated for fields beginning with `_`.
     #[bits(6)]
     _p: u8,
-    
+
     /// interpreted as 1 bit flag
     present: bool,
-    
+
     /// sign extend for signed integers
     #[bits(13)]
     negative: i16,
 }
 
-
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     use mikan_os_rust::qemu::{exit_qemu, ExitCode};
-    
+
     mikan_os_rust::println!("panic!!");
     mikan_os_rust::println!("{}", info);
     serial_println!("{}", info);
@@ -113,15 +110,14 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
-
 #[cfg(test)]
 #[panic_handler]
 // TODO Panic Handlerの定義
 fn panic(info: &PanicInfo) -> ! {
     use mikan_os_rust::test_panic_handler;
-    
+
     test_panic_handler(info);
-    
+
     loop {
         x86_64::instructions::hlt()
     }

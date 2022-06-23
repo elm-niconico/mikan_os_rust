@@ -1,5 +1,4 @@
 use core::fmt::Debug;
-use core::ops::{Deref, DerefMut};
 
 
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
@@ -10,12 +9,15 @@ impl<T: Debug> RegisterInfo<T> {
     pub fn new(register_addr: u64) -> Self {
         Self(register_addr as *mut T)
     }
+    pub fn from(register: &mut T) -> Self {
+        Self(register as *mut T)
+    }
     
     pub fn addr(&self) -> usize {
         self.0.addr()
     }
     
-    pub fn ptr(&self) -> *mut T{
+    pub fn ptr(&self) -> *mut T {
         self.0
     }
 }
