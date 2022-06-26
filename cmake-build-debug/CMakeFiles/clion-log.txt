@@ -1,1 +1,0 @@
-CMakeLists.txt が \\wsl$\Ubuntu\home\elm\program\mikan_os_rust に見つかりません CMakeLists.txt の選択
