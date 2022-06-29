@@ -34,6 +34,8 @@ run-args = [
     "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04",
     "-device", "nec-usb-xhci,id=xhci",
     "-device", "usb-mouse",
+    "-gdb", "tcp::3022",
+    "-S"
 ]
 
 #    "-device", "usb-mouse",

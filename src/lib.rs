@@ -7,9 +7,7 @@
 #![feature(alloc_error_handler)]
 #![feature(portable_simd)]
 
-
 extern crate alloc;
-
 
 use core::alloc::Layout;
 use core::panic::PanicInfo;
@@ -17,16 +15,16 @@ use core::panic::PanicInfo;
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
 
-
+pub mod allocators;
 pub mod asm_func;
 pub mod macros;
+pub mod page;
 pub mod qemu;
 pub mod serial_port;
 pub mod testable;
 pub mod usb;
-pub mod vga_buffer;
 pub mod utils;
-pub mod allocators;
+pub mod vga_buffer;
 
 #[cfg(test)]
 bootloader::entry_point!(test_kernel_main);
@@ -36,10 +34,9 @@ pub fn test_runner_handler(tests: &[&dyn Testable]) {
     for test in tests {
         test.run();
     }
-    
+
     exit_qemu(ExitCode::Success);
 }
-
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[failed]\n");
@@ -47,7 +44,6 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     exit_qemu(ExitCode::Failed);
     loop {}
 }
-
 
 /// Entry point for `cargo xtest`
 #[cfg(test)]
@@ -57,13 +53,11 @@ fn test_kernel_main(boot_info: &'static bootloader::BootInfo) -> ! {
     loop {}
 }
 
-
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
 }
-
 
 #[alloc_error_handler]
 pub fn on_oom(_layout: Layout) -> ! {
