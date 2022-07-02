@@ -1,9 +1,9 @@
-use crate::usb_my::pci::configuration::tmp_find_usb_mouse_base;
-use crate::usb_my::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
-use crate::usb_my::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
-use crate::usb_my::xhci::registers::capability::structs::capability_registers_length::CapLength;
-use crate::usb_my::xhci::registers::create_type::RegisterCreate;
-use crate::usb_my::xhci::registers::volatile::VolatileRegister;
+use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
+use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
+use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
+use crate::usb::xhci::registers::capability::structs::capability_registers_length::CapLength;
+use crate::usb::xhci::registers::create_type::RegisterCreate;
+use crate::usb::xhci::registers::volatile::VolatileRegister;
 
 static OFFSET: u64 = 1649267441664;
 

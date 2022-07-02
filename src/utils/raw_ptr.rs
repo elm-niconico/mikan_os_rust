@@ -1,8 +1,8 @@
 use core::fmt::Debug;
 use core::ptr;
 
-use crate::usb_my::xhci::registers::register_info::RegisterInfo;
-use crate::usb_my::xhci::registers::volatile::Volatile;
+use crate::usb::xhci::registers::register_info::RegisterInfo;
+use crate::usb::xhci::registers::volatile::Volatile;
 
 pub fn transmute_from_u64<T>(addr: u64) -> T {
     let ptr = addr as *const T;

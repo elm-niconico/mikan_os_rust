@@ -42,7 +42,7 @@ run-args = [
     "-S"
 ]
 
-#    "-device", "usb_my-mouse",
+#    "-device", "usb-mouse",
 
 
 test-success-exit-code = 33
