@@ -1,0 +1,288 @@
+# cmake_minimum_required(VERSION <specify CMake version here>)
+project(mikan_os_rust)
+
+set(CMAKE_CXX_STANDARD 14)
+
+include_directories(mikanos_usb/cxx_src)
+include_directories(mikanos_usb/cxx_src/usb)
+include_directories(mikanos_usb/cxx_src/usb/classdriver)
+include_directories(mikanos_usb/cxx_src/usb/xhci)
+include_directories(target)
+include_directories(target/x86_64-blog_os)
+include_directories(target/x86_64-blog_os/debug)
+include_directories(target/x86_64-blog_os/debug/build)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/android)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/fuchsia)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/ibm)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/musl)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/newlib)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/solaris)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/win32)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/xlocale)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/config)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp)
+include_directories(target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys)
+
+add_executable(mikan_os_rust
+        mikanos_usb/cxx_src/usb/classdriver/base.cpp
+        mikanos_usb/cxx_src/usb/classdriver/base.hpp
+        mikanos_usb/cxx_src/usb/classdriver/hid.cpp
+        mikanos_usb/cxx_src/usb/classdriver/hid.hpp
+        mikanos_usb/cxx_src/usb/classdriver/keyboard.cpp
+        mikanos_usb/cxx_src/usb/classdriver/keyboard.hpp
+        mikanos_usb/cxx_src/usb/classdriver/mouse.cpp
+        mikanos_usb/cxx_src/usb/classdriver/mouse.hpp
+        mikanos_usb/cxx_src/usb/xhci/context.hpp
+        mikanos_usb/cxx_src/usb/xhci/device.cpp
+        mikanos_usb/cxx_src/usb/xhci/device.hpp
+        mikanos_usb/cxx_src/usb/xhci/devmgr.cpp
+        mikanos_usb/cxx_src/usb/xhci/devmgr.hpp
+        mikanos_usb/cxx_src/usb/xhci/port.cpp
+        mikanos_usb/cxx_src/usb/xhci/port.hpp
+        mikanos_usb/cxx_src/usb/xhci/registers.cpp
+        mikanos_usb/cxx_src/usb/xhci/registers.hpp
+        mikanos_usb/cxx_src/usb/xhci/ring.cpp
+        mikanos_usb/cxx_src/usb/xhci/ring.hpp
+        mikanos_usb/cxx_src/usb/xhci/speed.hpp
+        mikanos_usb/cxx_src/usb/xhci/trb.cpp
+        mikanos_usb/cxx_src/usb/xhci/trb.hpp
+        mikanos_usb/cxx_src/usb/xhci/xhci.cpp
+        mikanos_usb/cxx_src/usb/xhci/xhci.hpp
+        mikanos_usb/cxx_src/usb/arraymap.hpp
+        mikanos_usb/cxx_src/usb/descriptor.hpp
+        mikanos_usb/cxx_src/usb/device.cpp
+        mikanos_usb/cxx_src/usb/device.hpp
+        mikanos_usb/cxx_src/usb/endpoint.hpp
+        mikanos_usb/cxx_src/usb/memory.cpp
+        mikanos_usb/cxx_src/usb/memory.hpp
+        mikanos_usb/cxx_src/usb/setupdata.hpp
+        mikanos_usb/cxx_src/cxx_support.h
+        mikanos_usb/cxx_src/error.hpp
+        mikanos_usb/cxx_src/register.hpp
+        mikanos_usb/cxx_src/sabios_support.cpp
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/android/locale_bionic.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/fuchsia/xlocale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/ibm/limits.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/ibm/locale_mgmt_aix.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/ibm/support.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/ibm/xlocale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/musl/xlocale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/newlib/xlocale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/solaris/floatingpoint.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/solaris/wchar.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/solaris/xlocale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/win32/limits_msvc_win32.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/win32/locale_win32.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/xlocale/__nop_locale_mgmt.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/xlocale/__posix_l_fallback.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/xlocale/__strtonum_fallback.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/support/xlocale/xlocale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/__bsd_locale_defaults.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/__bsd_locale_fallbacks.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/__cxxabi_config.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/complex.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/ctype.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/cxxabi.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/errno.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/float.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/inttypes.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/limits.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/locale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/math.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/setjmp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/stdbool.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/stddef.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/stdint.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/stdio.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/stdlib.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/string.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/tgmath.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/wchar.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/c++/v1/wctype.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/config/ftconfig.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/config/ftheader.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/config/ftmodule.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/config/ftoption.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/config/ftstdlib.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/freetype.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftadvanc.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftbbox.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftbdf.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftbitmap.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftbzip2.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftcache.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftchapters.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftcid.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftcolor.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftdriver.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/fterrdef.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/fterrors.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftfntfmt.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftgasp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftglyph.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftgxval.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftgzip.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftimage.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftincrem.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftlcdfil.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftlist.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftlzw.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftmac.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftmm.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftmodapi.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftmoderr.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftotval.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftoutln.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftparams.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftpfr.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftrender.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftsizes.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftsnames.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftstroke.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftsynth.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftsystem.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/fttrigon.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/fttypes.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ftwinfnt.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/t1tables.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/ttnameid.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/tttables.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/freetype/tttags.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/freetype2/ft2build.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/_arc4random.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/_default_types.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/_endian.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/_time.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/_types.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/ansi.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/endian.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/fastmath.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/ieeefp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/malloc.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/param.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/setjmp-dj.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/setjmp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/stdlib.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/termios.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/time.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/machine/types.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/ssp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/stdio.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/stdlib.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/string.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/strings.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/unistd.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ssp/wchar.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_default_fcntl.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_intsup.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_locale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_pthreadtypes.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_sigset.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_stdint.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_timespec.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_timeval.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/_types.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/cdefs.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/config.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/custom_file.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/dir.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/dirent.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/errno.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/fcntl.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/features.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/file.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/iconvnls.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/lock.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/param.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/queue.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/reent.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/resource.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/sched.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/select.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/signal.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/stat.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/stdio.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/string.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/syslimits.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/time.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/timeb.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/times.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/timespec.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/tree.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/types.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/unistd.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/utime.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sys/wait.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/_ansi.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/_newlib_version.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/_syslist.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/alloca.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ar.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/argz.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/assert.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/complex.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/cpio.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ctype.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/devctl.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/dirent.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/elf.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/envlock.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/envz.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/errno.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/fastmath.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/fcntl.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/fnmatch.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/getopt.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/glob.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/grp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/iconv.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/ieeefp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/inttypes.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/langinfo.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/libgen.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/limits.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/locale.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/malloc.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/math.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/memory.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/newlib.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/paths.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/pthread.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/pwd.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/reent.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/regdef.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/regex.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/sched.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/search.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/setjmp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/signal.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/spawn.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/stdatomic.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/stdint.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/stdio.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/stdio_ext.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/stdlib.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/string.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/strings.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/tar.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/termios.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/tgmath.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/threads.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/time.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/unctrl.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/unistd.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/utime.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/utmp.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/wchar.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/wctype.h
+        target/x86_64-blog_os/debug/build/mikanos_usb-9f47f02c13cee728/out/x86_64-elf/include/wordexp.h)

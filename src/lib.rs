@@ -6,6 +6,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![feature(alloc_error_handler)]
 #![feature(portable_simd)]
+#![feature(abi_x86_interrupt)]
 
 extern crate alloc;
 
@@ -17,12 +18,14 @@ use crate::testable::Testable;
 
 pub mod allocators;
 pub mod asm_func;
+pub mod gdt;
+pub mod interrupt;
 pub mod macros;
 pub mod page;
 pub mod qemu;
 pub mod serial_port;
 pub mod testable;
-pub mod usb;
+pub mod usb_my;
 pub mod utils;
 pub mod vga_buffer;
 

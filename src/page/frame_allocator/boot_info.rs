@@ -2,9 +2,19 @@ use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use x86_64::structures::paging::{FrameAllocator, PhysFrame, Size4KiB};
 use x86_64::PhysAddr;
 
+#[derive(Copy, Debug)]
 pub struct BootInfoFrameAllocator {
     memory_map: &'static MemoryMap,
     next: usize,
+}
+
+impl Clone for BootInfoFrameAllocator {
+    fn clone(&self) -> Self {
+        Self {
+            memory_map: self.memory_map,
+            next: self.next + 1,
+        }
+    }
 }
 
 impl BootInfoFrameAllocator {
