@@ -3,7 +3,6 @@ use pic8259::ChainedPics;
 use spin;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
-use crate::gdt::DOUBLE_FAULT_IST_INDEX;
 use crate::{print, println};
 
 pub const PIC_1_OFFSET: u8 = 32;
@@ -34,11 +33,11 @@ lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
         let mut idt = InterruptDescriptorTable::new();
         idt.breakpoint.set_handler_fn(breakpoint_handler);
-        unsafe {
-            idt.double_fault
-                .set_handler_fn(double_fault_handler)
-                .set_stack_index(DOUBLE_FAULT_IST_INDEX);
-        }
+        // unsafe {
+        //     idt.double_fault
+        //         .set_handler_fn(double_fault_handler)
+        //         .set_stack_index(mikan_os_rust::gdt::DOUBLE_FAULT_IST_INDEX);
+        // }
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
         idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(mouse_interrupt_handler);

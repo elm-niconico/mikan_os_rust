@@ -24,7 +24,6 @@ use mikan_os_rust::allocators::init_heap;
 use mikan_os_rust::page::active_level_4_table;
 use mikan_os_rust::page::frame_allocator::boot_info::BootInfoFrameAllocator;
 use mikan_os_rust::usb_my::pci::configuration::tmp_find_usb_mouse_base;
-use mikan_os_rust::usb_my::xhci::controller::xhc::XhcController;
 use mikan_os_rust::{interrupt, println, serial_println};
 
 entry_point!(kernel_main);
@@ -102,10 +101,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     let mut registers = unsafe { Registers::new(xhc_mmio_base as usize, mapper) };
     println!("New Registers!");
-    let mut xhc =
-        XhcController::initialize(xhc_mmio_base, boot_info.physical_memory_offset, 8).unwrap();
-    xhc.run().unwrap();
-
+    registers.interrupt_register_set.update_volatile_at(0, |r| {
+        r.imod.set_interrupt_moderation_interval(400);
+        r.iman.set_interrupt_enable();
+        r.iman.clear_interrupt_pending();
+    });
     //
     // println!("{:?}", registers.interrupt_register_set.read_volatile_at(0));
     //let mut b = registers.interrupt_register_set.read_volatile_at(0);
