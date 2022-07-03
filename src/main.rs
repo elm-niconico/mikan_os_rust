@@ -24,6 +24,7 @@ use crate::testable::Testable;
 
 mod allocators;
 mod asm_func;
+mod frame_buffer;
 mod gdt;
 mod interrupt;
 mod macros;
@@ -33,7 +34,6 @@ mod serial_port;
 mod testable;
 mod usb;
 mod utils;
-mod vga_buffer;
 
 entry_point!(kernel_main);
 
@@ -45,8 +45,9 @@ pub fn init() {
 }
 
 #[no_mangle]
-fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    serial_println!("Hello World!");
+fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
+    // serial_println!("Hello World!");
     println!("Hello World!");
     //
     // let physical_memory_offset = VirtAddr::new(boot_info.physical_memory_offset);
@@ -59,10 +60,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     //     init_heap(&mut mapper, &mut FRAME_ALLOC.unwrap()).expect("Failed Init Heap");
     // };
 
-    init();
+    //init();
 
-    #[cfg(test)]
-    test_main();
+    // #[cfg(test)]
+    // test_main();
 
     loop {
         x86_64::instructions::hlt();

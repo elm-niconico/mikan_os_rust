@@ -101,24 +101,29 @@ static CONFIG_ADDRESS: u16 = 0x0CF8;
 
 static CONFIG_DATA: u16 = 0x0CFC;
 
+#[allow(unused)]
 pub fn write_address(data: u32) {
     unsafe { io_out_32(CONFIG_ADDRESS, data) };
 }
 
+#[allow(unused)]
 pub fn write_data(value: u32) {
     unsafe { io_out_32(CONFIG_DATA, value) };
 }
 
+#[allow(unused)]
 pub fn read_vendor_id(bus: u32, device: u32, func: u32) -> u32 {
     write_address(make_address(bus, device, func, 0x00));
 
     read_data() & 0xFFFF
 }
 
+#[allow(unused)]
 pub fn read_vendor_id_from_dev(dev: &Device) -> u32 {
     read_vendor_id(dev.bus, dev.device, dev.func)
 }
 
+#[allow(unused)]
 pub fn read_class_code(bus: u32, device: u32, func: u32) -> ClassCode {
     write_address(make_address(bus, device, func, 0x08));
     let data = read_data();
@@ -197,20 +202,23 @@ fn to_base_bar(bar: u64) -> u64 {
     bar & !mask
 }
 
-const kCapabilityMSI: u8 = 0x05;
-const kCapabilityMSIX: u8 = 0x11;
+#[allow(unused)]
+const CAPABILITY_MSI: u8 = 0x05;
+
+#[allow(unused)]
+const CAPABILITY_MSI_X: u8 = 0x11;
 
 pub fn tmp_find_usb_mouse_base() -> Result<u64, ()> {
     let xhc_dev = find_xhc_device();
 
-    if let Some(xhc_dev) = xhc_dev {
+    return if let Some(xhc_dev) = xhc_dev {
         let base_bus = read_bar(&xhc_dev, 0).unwrap();
 
         let xhc_mmio_base = to_base_bar(base_bus);
-        return Ok(xhc_mmio_base);
+        Ok(xhc_mmio_base)
     } else {
-        return Err(());
-    }
+        Err(())
+    };
 }
 
 pub fn read_conf_reg(dev: &Device, reg_addr: u8) -> u32 {
@@ -218,10 +226,12 @@ pub fn read_conf_reg(dev: &Device, reg_addr: u8) -> u32 {
     read_data()
 }
 
+#[allow(unused)]
 fn read_capability_header(dev: &Device, addr: u32) -> CapabilityHeader {
     CapabilityHeader::try_from(read_conf_reg(dev, addr as u8)).unwrap()
 }
 
+#[allow(unused)]
 pub fn configure_msi_fixed_destination(
     dev: &Device,
     apic_id: u32,
@@ -239,15 +249,16 @@ pub fn configure_msi_fixed_destination(
     configure_msi(dev, msg_addr, msg_data, num_vector_exponent);
 }
 
+#[allow(unused)]
 fn configure_msi(dev: &Device, msg_addr: u32, msg_data: u32, num_vector_exponent: usize) {
     let mut cap_addr = read_conf_reg(dev, 0x34) & 0xff;
     let mut msi_cap_addr: u32 = 0;
     let mut msix_cap_addr = 0;
     while cap_addr != 0 {
         let header = read_capability_header(dev, cap_addr);
-        if header.cap_id() == kCapabilityMSI {
+        if header.cap_id() == CAPABILITY_MSI {
             msi_cap_addr = cap_addr;
-        } else if header.cap_id() == kCapabilityMSIX {
+        } else if header.cap_id() == CAPABILITY_MSI_X {
             msix_cap_addr = cap_addr;
         }
         cap_addr = header.next_ptr() as u32;
@@ -255,7 +266,7 @@ fn configure_msi(dev: &Device, msg_addr: u32, msg_data: u32, num_vector_exponent
 
     if msi_cap_addr != 0 {
         unsafe {
-            ConfigureMSIRegister(dev, msi_cap_addr, msg_addr, msg_data, num_vector_exponent);
+            configure_msi_register(dev, msi_cap_addr, msg_addr, msg_data, num_vector_exponent);
         };
     } else if msix_cap_addr != 0 {
         //ConfigureMSIXRegister(dev, msix_cap_addr, msg_addr, msg_data, num_vector_exponent);
@@ -263,14 +274,15 @@ fn configure_msi(dev: &Device, msg_addr: u32, msg_data: u32, num_vector_exponent
 }
 
 /** @brief 指定された MSI レジスタを設定する */
-unsafe fn ConfigureMSIRegister(
+#[allow(unused)]
+unsafe fn configure_msi_register(
     dev: &Device,
     cap_addr: u32,
     msg_addr: u32,
     msg_data: u32,
     num_vector_exponent: usize,
 ) {
-    let mut msi_cap = ReadMSICapability(dev, cap_addr as u8);
+    let mut msi_cap = read_msi_capability(dev, cap_addr as u8);
 
     if msi_cap.header.bits.multi_msg_capable() <= num_vector_exponent as u8 {
         msi_cap
@@ -288,10 +300,11 @@ unsafe fn ConfigureMSIRegister(
     msi_cap.msg_addr = msg_addr;
     msi_cap.msg_data = msg_data;
 
-    WriteMSICapability(dev, cap_addr, &msi_cap);
+    write_msi_capability(dev, cap_addr, &msi_cap);
 }
 
-unsafe fn ReadMSICapability(dev: &Device, cap_addr: u8) -> MsiCapability {
+#[allow(unused)]
+unsafe fn read_msi_capability(dev: &Device, cap_addr: u8) -> MsiCapability {
     let mut msi_cap = MsiCapability::new(dev, cap_addr);
     msi_cap.msg_addr = read_conf_reg(dev, cap_addr + 4);
 
@@ -311,7 +324,8 @@ unsafe fn ReadMSICapability(dev: &Device, cap_addr: u8) -> MsiCapability {
     return msi_cap;
 }
 
-unsafe fn WriteMSICapability(dev: &Device, cap_addr: u32, msi_cap: &MsiCapability) {
+#[allow(unused)]
+unsafe fn write_msi_capability(dev: &Device, cap_addr: u32, msi_cap: &MsiCapability) {
     write_conf_reg(dev, cap_addr, msi_cap.header.data);
     write_conf_reg(dev, cap_addr + 4, msi_cap.msg_addr);
 
@@ -329,6 +343,7 @@ unsafe fn WriteMSICapability(dev: &Device, cap_addr: u32, msi_cap: &MsiCapabilit
     }
 }
 
+#[allow(unused)]
 fn write_conf_reg(dev: &Device, reg_addr: u32, value: u32) {
     write_address(make_address(dev.bus, dev.device, dev.func, reg_addr));
     write_data(value);

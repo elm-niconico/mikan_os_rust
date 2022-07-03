@@ -29,11 +29,12 @@ pub fn extract_runtime_base() -> u64 {
     mmio + rts_off as u64
 }
 
+#[allow(unused)]
 pub fn extract_cap_len(mmio_base: u64) -> CapLength {
     extract_cap_register(mmio_base).cap_length.read()
 }
 
-#[allow(dead_code)]
+#[allow(unused)]
 fn extract_cap_register(mmio_base: u64) -> CapabilityRegisters {
     let create = RegisterCreate::UncheckTransmute;
     let capability_registers = create

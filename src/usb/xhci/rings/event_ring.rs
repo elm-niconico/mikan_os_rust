@@ -7,6 +7,7 @@ use crate::usb::xhci::registers::volatile::{Volatile, VolatileRegister};
 use crate::usb::xhci::rings::event_ring_segment_table_entry::EventRingSegmentTableEntry;
 use crate::usb::xhci::trb::trb_base::TrbBase;
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct EventRing {
     cycle_bit: bool,
@@ -16,6 +17,7 @@ pub struct EventRing {
 }
 
 impl EventRing {
+    #[allow(unused)]
     pub fn new(runtime: &mut RuntimeRegisters, physical_offset: u64) -> Self {
         let buff = [0; 10];
         let mut erste: [EventRingSegmentTableEntry; 1] = [EventRingSegmentTableEntry::new(); 1];
@@ -40,6 +42,7 @@ impl EventRing {
         }
     }
 
+    #[allow(unused)]
     pub fn pop(&mut self, interrupter: &mut Volatile<InterrupterRegisterSet>) {
         let dequeue_ptr: u64 = interrupter.get_dequeue_ptr();
 
@@ -58,12 +61,14 @@ impl EventRing {
 
         interrupter.set_dequeue_ptr(dequeue_ptr);
     }
+    #[allow(unused)]
     pub fn has_front(&self, interrupter: &Volatile<InterrupterRegisterSet>) -> bool {
         let trb = self.front_trb(interrupter);
         serial_println!("TRB {:?}", trb);
         trb.cycle_bit() == self.cycle_bit
     }
 
+    #[allow(unused)]
     pub fn front_trb(&self, interrupter: &Volatile<InterrupterRegisterSet>) -> TrbBase {
         let dequeue_ptr = interrupter.get_dequeue_ptr();
         let src = dequeue_ptr;

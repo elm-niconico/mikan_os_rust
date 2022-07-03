@@ -5,12 +5,14 @@ use crate::usb::xhci::device::device_context::DeviceContext;
 use crate::usb::xhci::device::usb_device::UsbDevice;
 
 #[derive(Debug)]
+#[allow(unused)]
 pub struct DeviceManager {
     devices: Vec<*mut UsbDevice>,
     device_contexts: Vec<*mut DeviceContext>,
 }
 
 impl DeviceManager {
+    #[allow(unused)]
     pub fn new(device_max_slots: u8) -> Self {
         let max_slots = usize::from(device_max_slots) + 1;
         let mut devices = Vec::<*mut UsbDevice>::with_capacity(max_slots);
