@@ -19,6 +19,7 @@ const RUN_ARGS: &[&str] = &[
     "tcp::3022",
     "-S",
 ];
+
 const TEST_ARGS: &[&str] = &[
     "-device",
     "isa-debug-exit,iobase=0xf4,iosize=0x04",
@@ -26,19 +27,22 @@ const TEST_ARGS: &[&str] = &[
     "stdio",
     "-display",
     "none",
+    "-device",
+    "nec-usb-xhci,id=xhci",
+    "-device",
+    "usb-mouse",
     "--no-reboot",
 ];
 const TEST_TIMEOUT_SECS: u64 = 10;
 
 fn main() -> anyhow::Result<()> {
-    println!("hello");
     let kernel_binary_path = {
         let path = PathBuf::from(std::env::args().nth(1).unwrap());
         path.canonicalize()?
     };
-    println!("befoer create Image");
+
     let disk_image = disk_image::create_disk_image(&kernel_binary_path, true)?;
-    println!("create Image");
+
     let mut run_cmd = Command::new("qemu-system-x86_64");
     run_cmd
         .arg("-drive")

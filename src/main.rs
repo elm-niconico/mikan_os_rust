@@ -79,10 +79,8 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     //     init_heap(&mut mapper, &mut FRAME_ALLOC.unwrap()).expect("Failed Init Heap");
     // };
 
-    //init();
-
-    // #[cfg(test)]
-    // test_main();
+    #[cfg(test)]
+    test_main();
 
     loop {
         x86_64::instructions::hlt();

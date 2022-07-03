@@ -30,14 +30,7 @@ map-physical-memory = true
 
 # BootImage Version 10.0以前
 #[package.metadata.bootimage]
-#test-args = [
-#    "-device",
-#    "isa-debug-exit,iobase=0xf4,iosize=0x04",
-#    "-serial", "stdio",
-#    "-display", "none",
-#    "-device", "nec-usb-xhci,id=xhci",
-#    "-device", "usb-mouse",
-#]
+
 #run-args = [
 #    "-serial", "stdio",
 #    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04",
