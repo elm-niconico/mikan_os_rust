@@ -27,7 +27,7 @@ mod asm_func;
 mod gdt;
 mod interrupt;
 mod macros;
-mod page;
+mod paging;
 mod qemu;
 mod serial_port;
 mod testable;
