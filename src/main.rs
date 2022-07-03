@@ -17,13 +17,16 @@ extern crate bitfield_struct;
 
 use core::panic::PanicInfo;
 
+use bootloader::boot_info::Optional;
 use bootloader::{entry_point, BootInfo};
+use x86_64::structures::paging::{Mapper, Translate};
 
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
 
 mod allocators;
 mod asm_func;
+mod cell;
 mod frame_buffer;
 mod gdt;
 mod interrupt;
@@ -37,18 +40,34 @@ mod utils;
 
 entry_point!(kernel_main);
 
-pub fn init() {
-    gdt::init();
-    interrupt::init_idt();
-    unsafe { interrupt::PICS.lock().initialize() };
-    x86_64::instructions::interrupts::enable();
-}
-
 #[no_mangle]
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
-    // serial_println!("Hello World!");
+    let physical_offset = offset_as_u64(boot_info.physical_memory_offset);
+    unsafe { init_kernel(boot_info) };
+
     println!("Hello World!");
+    //
+    // let mapper = unsafe { init_mapper(VirtAddr::new(physical_offset)) };
+    // let xhc_mmio_base = tmp_find_usb_mouse_base().unwrap();
+    // println!(
+    //     "Xhc Mmio Base physical {:?} {}",
+    //     mapper
+    //         .translate_addr(VirtAddr::new(xhc_mmio_base + physical_offset))
+    //         .unwrap()
+    //         .as_u64(),
+    //     VirtAddr::new(xhc_mmio_base).as_u64()
+    // );
+
+    // print_virtual_addr!(physical_offset);
+    //
+    // print_virtual_addr!("stack", 0x1100_1020_1a10);
+    //let virtual_offset = VirtAddr::new(physical_offset);
+
+    // let level_4_table = unsafe { active_level_4_table(physical_offset) };
+    // unsafe { print_all_use_entries(&*level_4_table) };
+
+    // serial_println!("Hello World!");
+
     //
     // let physical_memory_offset = VirtAddr::new(boot_info.physical_memory_offset);
     // let level_4_table = unsafe { active_level_4_table(physical_memory_offset) };
@@ -80,6 +99,19 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 //         init_heap(&mut mapper, &mut frame_allocator).expect("Failed Init Heap");
 //     };
 // }
+
+unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
+    frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
+    paging::init(&mut boot_info.memory_regions);
+    // gdt::init();
+    // interrupt::init_idt();
+    // interrupt::PICS.lock().initialize();
+    // x86_64::instructions::interrupts::enable();
+}
+
+fn offset_as_u64(physical_memory_offset: Optional<u64>) -> u64 {
+    physical_memory_offset.as_ref().copied().unwrap()
+}
 
 #[cfg(not(test))]
 #[panic_handler]

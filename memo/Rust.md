@@ -1,11 +1,12 @@
 # 目次
 
 - [目次](#目次)
-    - [命名規則](#命名規則)
-    - [生ポインタ](#生ポインタ)
-    - [build-stdフラグ](#build-stdフラグ)
-    - [参考](#参考)
-        - [お気楽Rustプログラミング超入門](#お気楽rustプログラミング超入門)
+  - [命名規則](#命名規則)
+  - [生ポインタ](#生ポインタ)
+  - [PhantomData](#phantomdata)
+  - [build-stdフラグ](#build-stdフラグ)
+  - [参考](#参考)
+    - [お気楽Rustプログラミング超入門](#お気楽rustプログラミング超入門)
 
 ## 命名規則
 
@@ -26,6 +27,26 @@ into_ | 可変 | 所有->所有(Copyでない型)
 [お気楽Rustプログラミング超入門](#http://www.nct9.ne.jp/m_hiroi/linux/rustabc04.html)が参考になった。
 
 メソッド定義については[公式リファレンス](https://doc.rust-lang.org/std/primitive.pointer.html)参照
+
+## PhantomData
+
+マーカーのためのジェリックをマーカーにする
+
+このような構造体を定義した場合に、_not_use_valueを使用している個所が見つからなかった場合は、通常コンパイルエラーが生じます。
+
+``` rust
+pub struct Test{
+    _not_use_value: T 
+}
+```
+
+しかしながらPhantomDataでラップすることによって使用箇所がなくともコンパイルできるようになります。
+
+``` rust
+pub struct Test<T>{
+    _marker: PhantomData<T> 
+}
+```
 
 ## build-stdフラグ
 

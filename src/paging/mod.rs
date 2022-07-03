@@ -1,12 +1,12 @@
-use x86_64::registers::control::Cr3;
-use x86_64::structures::paging::PageTable;
-use x86_64::VirtAddr;
+use crate::paging::frame_allocator::boot_info::BootInfoFrameAllocator;
+use crate::paging::frame_allocator::FRAME_ALLOCATOR;
+use bootloader::boot_info::MemoryRegions;
 
 pub mod frame_allocator;
+pub mod page_table;
 
-pub unsafe fn active_level_4_table(phys_offset: VirtAddr) -> *mut PageTable {
-    let (frame, _) = Cr3::read();
-    let physical_start = frame.start_address();
-    let virtual_start = phys_offset + physical_start.as_u64();
-    virtual_start.as_mut_ptr() as *mut PageTable
+pub(crate) unsafe fn init(memory_regions: &'static mut MemoryRegions) {
+    FRAME_ALLOCATOR
+        .set(BootInfoFrameAllocator::init(memory_regions))
+        .expect("Failed Init Frame Allocator");
 }

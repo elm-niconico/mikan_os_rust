@@ -33,14 +33,14 @@ lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
         let mut idt = InterruptDescriptorTable::new();
         idt.breakpoint.set_handler_fn(breakpoint_handler);
-        // unsafe {
-        //     idt.double_fault
-        //         .set_handler_fn(double_fault_handler)
-        //         .set_stack_index(mikan_os_rust::gdt::DOUBLE_FAULT_IST_INDEX);
-        // }
+        unsafe {
+            idt.double_fault
+                .set_handler_fn(double_fault_handler)
+                .set_stack_index(0);
+        }
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
-        idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
-        idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(mouse_interrupt_handler);
+       // idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
+       // idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(mouse_interrupt_handler);
 
         idt
     };
