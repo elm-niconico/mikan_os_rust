@@ -20,6 +20,7 @@ use core::panic::PanicInfo;
 use bootloader::boot_info::Optional;
 use bootloader::{entry_point, BootInfo};
 use x86_64::structures::paging::{Mapper, Translate};
+use x86_64::VirtAddr;
 
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
@@ -27,6 +28,7 @@ use crate::testable::Testable;
 mod allocators;
 mod asm_func;
 mod cell;
+mod error;
 mod frame_buffer;
 mod gdt;
 mod interrupt;
@@ -43,9 +45,10 @@ entry_point!(kernel_main);
 #[no_mangle]
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     let physical_offset = offset_as_u64(boot_info.physical_memory_offset);
-    unsafe { init_kernel(boot_info) };
 
-    println!("Hello World!");
+    unsafe { init_kernel(VirtAddr::new(physical_offset), boot_info) };
+    log!("hello world!");
+
     //
     // let mapper = unsafe { init_mapper(VirtAddr::new(physical_offset)) };
     // let xhc_mmio_base = tmp_find_usb_mouse_base().unwrap();
@@ -79,9 +82,9 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     //     init_heap(&mut mapper, &mut FRAME_ALLOC.unwrap()).expect("Failed Init Heap");
     // };
 
-    #[cfg(test)]
-    test_main();
-
+    // #[cfg(test)]
+    // test_main();
+    // x86_64::instructions::interrupts::int3();
     loop {
         x86_64::instructions::hlt();
     }
@@ -98,12 +101,12 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 //     };
 // }
 
-unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
+unsafe fn init_kernel(physical_memory_offset: VirtAddr, boot_info: &'static mut BootInfo) {
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
-    paging::init(&mut boot_info.memory_regions);
-    // gdt::init();
-    // interrupt::init_idt();
-    // interrupt::PICS.lock().initialize();
+    paging::init(physical_memory_offset, &mut boot_info.memory_regions);
+    gdt::init();
+    interrupt::init_idt();
+    interrupt::PICS.lock().initialize();
     // x86_64::instructions::interrupts::enable();
 }
 

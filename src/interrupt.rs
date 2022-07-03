@@ -37,8 +37,8 @@ lazy_static! {
                 .set_handler_fn(double_fault_handler)
                 .set_stack_index(0);
         }
-       // idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
-       idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
+        //idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
+       // idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
        // idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(mouse_interrupt_handler);
 
         idt
@@ -106,8 +106,8 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     }
 }
 
-// #[test_case]
-// fn test_breakpoint_exception() {
-//     // invoke a breakpoint exception
-//     x86_64::instructions::interrupts::int3();
-// }
+#[test_case]
+fn test_breakpoint_exception() {
+    // BreakPoint Exceptionを設定し、パニックを起こさなかったらテスト成功とみなします。
+    x86_64::instructions::interrupts::int3();
+}

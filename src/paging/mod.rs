@@ -1,12 +1,16 @@
-use crate::paging::frame_allocator::boot_info::BootInfoFrameAllocator;
-use crate::paging::frame_allocator::FRAME_ALLOCATOR;
 use bootloader::boot_info::MemoryRegions;
+use x86_64::VirtAddr;
 
-pub mod frame_allocator;
-pub mod page_table;
+mod frame_allocator;
+mod page_mapper;
 
-pub(crate) unsafe fn init(memory_regions: &'static mut MemoryRegions) {
-    FRAME_ALLOCATOR
-        .set(BootInfoFrameAllocator::init(memory_regions))
-        .expect("Failed Init Frame Allocator");
+pub(crate) use frame_allocator::FRAME_ALLOCATOR;
+pub(crate) use page_mapper::PAGE_MAPPER;
+
+pub(crate) unsafe fn init(
+    physical_memory_offset: VirtAddr,
+    memory_regions: &'static mut MemoryRegions,
+) {
+    frame_allocator::init(memory_regions);
+    page_mapper::init(physical_memory_offset);
 }
