@@ -24,6 +24,25 @@ macro_rules! serial_println {
         concat!($fmt, "\n"), $($arg)*));
 }
 
+#[macro_export]
+macro_rules! log {
+    () => {
+        $crate::println!();
+        $crate::serial_println!();
+    };
+
+    ($fmt: expr) => {
+        $crate::println!($fmt);
+        $crate::serial_println!($fmt);
+    };
+
+    ($fmt: expr, $($arg:tt)*) => {
+        $crate::println!($fmt,  $($arg)*);
+        $crate::serial_println!($fmt,  $($arg)*);
+    };
+
+}
+
 // 動作確認用
 #[macro_export]
 macro_rules! print_virtual_addr {

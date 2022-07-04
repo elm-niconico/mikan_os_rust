@@ -22,6 +22,7 @@ impl BootInfoFrameAllocator {
             .filter(|r| r.kind == MemoryRegionKind::Usable);
 
         let addr_ranges = usable_regions.map(|r| r.start..r.end);
+
         let frame_addresses = addr_ranges.flat_map(|r| r.step_by(4096));
 
         frame_addresses.map(|addr| PhysFrame::containing_address(PhysAddr::new(addr)))

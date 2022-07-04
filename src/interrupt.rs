@@ -1,7 +1,11 @@
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use x86_64::VirtAddr;
 
+use crate::cell::sync_once_cell::SyncOnceCell;
+use crate::error::{KernelError, KernelResult};
+use crate::paging::map;
 use crate::{print, println};
 
 pub const PIC_1_OFFSET: u8 = 32;
@@ -28,25 +32,52 @@ impl InterruptIndex {
 pub static PICS: spin::Mutex<ChainedPics> =
     spin::Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
 
-lazy_static! {
-    static ref IDT: InterruptDescriptorTable = {
-        let mut idt = InterruptDescriptorTable::new();
-        idt.breakpoint.set_handler_fn(breakpoint_handler);
-        unsafe {
-            idt.double_fault
-                .set_handler_fn(double_fault_handler)
-                .set_stack_index(0);
-        }
-       // idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
-       idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
-       // idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(mouse_interrupt_handler);
+static mut IDT: SyncOnceCell<InterruptDescriptorTable> = SyncOnceCell::new();
 
-        idt
+// lazy_static! {
+//     static ref IDT: InterruptDescriptorTable = {
+//         let mut idt = InterruptDescriptorTable::new();
+//         idt.breakpoint.set_handler_fn(breakpoint_handler);
+//         unsafe {
+//             idt.double_fault
+//                 .set_handler_fn(double_fault_handler)
+//                 .set_stack_index(0);
+//         }
+//         //idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
+//        // idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
+//        // idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(mouse_interrupt_handler);
+//
+//         idt
+//     };
+// }
+
+pub unsafe fn init_idt(physical_offset: VirtAddr) -> KernelResult<()> {
+    let mut idt = InterruptDescriptorTable::new();
+    map_handler_addr(&mut idt, physical_offset)?;
+
+    IDT.set(idt)?;
+
+    return if let Some(idt) = IDT.get_mut() {
+        idt.load();
+        Ok(())
+    } else {
+        Err(KernelError::None)
     };
 }
 
-pub fn init_idt() {
-    IDT.load();
+fn map_handler_addr(idt: &mut InterruptDescriptorTable, offset: VirtAddr) -> KernelResult<()> {
+    idt.breakpoint.set_handler_fn(breakpoint_handler);
+
+    let break_point_addr = idt.breakpoint.handler_addr();
+    map(break_point_addr.as_u64(), offset)?;
+
+    unsafe {
+        idt.double_fault
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(0);
+    }
+
+    Ok(())
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
@@ -106,8 +137,8 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     }
 }
 
-// #[test_case]
-// fn test_breakpoint_exception() {
-//     // invoke a breakpoint exception
-//     x86_64::instructions::interrupts::int3();
-// }
+#[test_case]
+fn test_breakpoint_exception() {
+    // BreakPoint Exceptionを設定し、パニックを起こさなかったらテスト成功とみなします。
+    x86_64::instructions::interrupts::int3();
+}
