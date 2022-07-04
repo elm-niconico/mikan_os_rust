@@ -4,8 +4,7 @@ use x86_64::VirtAddr;
 mod frame_allocator;
 mod page_mapper;
 
-pub(crate) use frame_allocator::FRAME_ALLOCATOR;
-pub(crate) use page_mapper::PAGE_MAPPER;
+pub(crate) use page_mapper::*;
 
 pub(crate) unsafe fn init(
     physical_memory_offset: VirtAddr,

@@ -22,6 +22,7 @@ use bootloader::{entry_point, BootInfo};
 use x86_64::structures::paging::{Mapper, Translate};
 use x86_64::VirtAddr;
 
+use crate::paging::PAGE_MAPPER;
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
 
@@ -49,7 +50,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     unsafe { init_kernel(VirtAddr::new(physical_offset), boot_info) };
     log!("hello world!");
 
-    //
     // let mapper = unsafe { init_mapper(VirtAddr::new(physical_offset)) };
     // let xhc_mmio_base = tmp_find_usb_mouse_base().unwrap();
     // println!(
@@ -82,8 +82,8 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     //     init_heap(&mut mapper, &mut FRAME_ALLOC.unwrap()).expect("Failed Init Heap");
     // };
 
-    // #[cfg(test)]
-    // test_main();
+    #[cfg(test)]
+    test_main();
     // x86_64::instructions::interrupts::int3();
     loop {
         x86_64::instructions::hlt();
@@ -102,12 +102,34 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 // }
 
 unsafe fn init_kernel(physical_memory_offset: VirtAddr, boot_info: &'static mut BootInfo) {
+    let addr = {
+        boot_info
+            .framebuffer
+            .as_ref()
+            .unwrap()
+            .buffer()
+            .as_ptr()
+            .addr()
+    };
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
     paging::init(physical_memory_offset, &mut boot_info.memory_regions);
+
+    let frame_buff_physical_addr = PAGE_MAPPER
+        .get_mut()
+        .unwrap()
+        .translate_addr(VirtAddr::new(addr as u64));
+
+    log!(
+        "Frame Buffer Physical Addr {:?} Physical memory Offset Virtual Address {} FrameBuffer Virtual Address {}",
+        frame_buff_physical_addr.unwrap().as_u64(),
+        physical_memory_offset.as_u64(),
+        VirtAddr::new(addr as u64).as_u64()
+    );
+
     gdt::init();
-    interrupt::init_idt();
+    interrupt::init_idt(physical_memory_offset).expect("Failed Init Interrupter");
     interrupt::PICS.lock().initialize();
-    // x86_64::instructions::interrupts::enable();
+    x86_64::instructions::interrupts::enable();
 }
 
 fn offset_as_u64(physical_memory_offset: Optional<u64>) -> u64 {
