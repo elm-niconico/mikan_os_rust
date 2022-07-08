@@ -1,0 +1,113 @@
+use volatile::Volatile;
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
+
+use crate::cell::sync_once_cell::SyncOnceCell;
+use crate::log;
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u8)]
+pub enum InterruptIndex {
+    APicTimer = 0x41,
+}
+
+impl InterruptIndex {
+    pub fn as_u8(self) -> u8 {
+        self as u8
+    }
+    pub fn as_u32(self) -> u32 {
+        self as u32
+    }
+    pub fn as_usize(self) -> usize {
+        usize::from(self.as_u8())
+    }
+}
+
+pub(crate) static mut IDT: SyncOnceCell<InterruptDescriptorTable> = SyncOnceCell::new();
+
+pub(crate) unsafe fn init_idt() {
+    IDT.set(create_idt());
+    IDT.get_mut().load();
+}
+
+pub(crate) fn create_idt() -> InterruptDescriptorTable {
+    let mut idt = InterruptDescriptorTable::new();
+
+    idt.breakpoint.set_handler_fn(breakpoint_handler);
+    idt.segment_not_present
+        .set_handler_fn(segment_not_present_handler);
+    idt.general_protection_fault
+        .set_handler_fn(general_protection_fault_handler);
+    idt.page_fault.set_handler_fn(page_fault_handler);
+    idt.invalid_tss.set_handler_fn(invalid_tss_handler);
+    unsafe {
+        idt.double_fault
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(0);
+    }
+
+    // / idt[InterruptIndex::APicTimer.as_usize()].set_handler_fn(timer_interrupt_handler);
+
+    idt
+}
+
+extern "x86-interrupt" fn general_protection_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: u64,
+) {
+    panic!(
+        "EXCEPTION: PROTECTION ERROR CODE {} \n{:#?}",
+        error_code, stack_frame
+    );
+}
+
+extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
+    log!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: PageFaultErrorCode,
+) {
+    use x86_64::registers::control::Cr2;
+
+    log!("EXCEPTION: PAGE FAULT");
+    log!("Accessed Address: {:?}", Cr2::read());
+    log!("Error Code: {:?}", error_code);
+    log!("{:#?}", stack_frame);
+    loop {}
+}
+
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: InterruptStackFrame,
+    _error_code: u64,
+) -> ! {
+    panic!(
+        "EXCEPTION: DOUBLE FAULT ERROR CODE: {} \n{:#?}",
+        _error_code, stack_frame
+    );
+}
+
+extern "x86-interrupt" fn segment_not_present_handler(
+    stack_frame: InterruptStackFrame,
+    _error_code: u64,
+) {
+    panic!(
+        "EXCEPTION: SEGMENT NOT PRESENT ERROR CODE: {} \n{:#?}",
+        _error_code, stack_frame
+    );
+}
+
+extern "x86-interrupt" fn invalid_tss_handler(stack_frame: InterruptStackFrame, _error_code: u64) {
+    panic!(
+        "EXCEPTION: INVALID TSS ERROR CODE: {} \n{:#?}",
+        _error_code, stack_frame
+    );
+}
+
+
+pub(crate) fn notify_end_of_interrupt() {
+    // アドレスはなんでもいいらしい
+    let notify_addr: u32 = 0xfee000b0;
+    let mut memory = Volatile::new(unsafe { (notify_addr as *mut u32).as_mut().unwrap() });
+    memory.write(0);
+}

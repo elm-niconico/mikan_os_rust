@@ -20,5 +20,6 @@ pub(crate) fn make_identity_mapping(
         let frame = base_frame + i as u64;
         unsafe { mapper.map_to(page, frame, flags, &mut *allocator) }?.flush();
     }
+
     Ok(())
 }

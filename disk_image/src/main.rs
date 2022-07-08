@@ -9,8 +9,8 @@ fn main() -> anyhow::Result<()> {
     // build all binaries
     let mut build_cmd = Command::new(env!("CARGO"));
     build_cmd.arg("build");
-    build_cmd.arg("--release");
-    build_cmd.arg("-Zbuild-std=core");
+    // build_cmd.arg("--release");
+    build_cmd.arg("-Z build-std=core,alloc");
     build_cmd
         .arg("--target")
         .arg(format!("{}.json", TARGET_NAME));
@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
 
     let kernel_manifest = locate_cargo_manifest::locate_manifest()?;
     let target_dir_root = kernel_manifest.parent().unwrap().join("target");
-    let target_dir = target_dir_root.join(TARGET_NAME).join("release");
+    let target_dir = target_dir_root.join(TARGET_NAME).join("debug");
 
     for binary_name in KERNEL_BINARIES {
         let binary_path = {

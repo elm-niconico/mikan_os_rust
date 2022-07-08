@@ -1,26 +1,29 @@
-use crate::allocators::{HEAP_SIZE, HEAP_START};
 use core::alloc::{GlobalAlloc, Layout};
 use core::cell::UnsafeCell;
 use core::ptr;
 
-pub struct BumpPointerAlloc {
+use crate::memory::heap::{HEAP_SIZE, HEAP_START};
+
+/// 制作初期段階で実装した不完全なメモリアロケータです。
+/// 動作確認用途以外では使用しません。
+pub(crate) struct DummyAllocator {
     pub head: UnsafeCell<usize>,
     pub end: usize,
 }
 
 #[allow(unused)]
-impl BumpPointerAlloc {
+impl DummyAllocator {
     pub fn new() -> Self {
-        BumpPointerAlloc {
+        DummyAllocator {
             head: UnsafeCell::new(HEAP_START),
             end: HEAP_START + HEAP_SIZE,
         }
     }
 }
 
-unsafe impl Sync for BumpPointerAlloc {}
+unsafe impl Sync for DummyAllocator {}
 
-unsafe impl GlobalAlloc for BumpPointerAlloc {
+unsafe impl GlobalAlloc for DummyAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let head = self.head.get();
 

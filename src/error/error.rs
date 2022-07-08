@@ -1,3 +1,4 @@
+use alloc::string::String;
 use x86_64::structures::paging::mapper::MapToError;
 use x86_64::structures::paging::page::AddressNotAligned;
 use x86_64::structures::paging::Size4KiB;
@@ -17,7 +18,6 @@ use x86_64::structures::paging::Size4KiB;
 /// }
 ///
 /// ```
-
 #[derive(Debug)]
 pub enum KernelError {
     MapToError(MapToError<Size4KiB>),
@@ -44,4 +44,9 @@ impl From<()> for KernelError {
     }
 }
 
+impl From<String> for KernelError{
+    fn from(_: String) -> Self {
+        Self::None
+    }
+}
 // TODO Option::Noneからエラーを作成したい

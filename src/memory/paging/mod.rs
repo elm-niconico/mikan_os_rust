@@ -1,15 +1,15 @@
-use bootloader::boot_info::MemoryRegions;
-use x86_64::VirtAddr;
+mod identity;
+mod offset;
 
-mod frame_allocator;
-mod page_mapper;
 
-pub(crate) use page_mapper::*;
+pub(crate) use identity::make_identity_mapping;
+pub(crate) use offset::PAGE_TABLE;
+pub(crate) use offset::init;
 
-pub(crate) unsafe fn init(
-    physical_memory_offset: VirtAddr,
-    memory_regions: &'static mut MemoryRegions,
-) {
-    frame_allocator::init(memory_regions);
-    page_mapper::init(physical_memory_offset);
-}
+// pub(crate) unsafe fn init(
+//     physical_memory_offset: VirtAddr,
+//     memory_regions: &'static mut MemoryRegions,
+// ) {
+//     // heap::init(memory_regions);
+//     // page_mapper::init(physical_memory_offset);
+// }

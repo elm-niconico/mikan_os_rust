@@ -1,23 +1,25 @@
+use anyhow::anyhow;
+
 use std::{
     path::PathBuf,
     process::{Command, ExitStatus},
     time::Duration,
 };
 
-use anyhow::anyhow;
-
 const RUN_ARGS: &[&str] = &[
     "-serial",
     "stdio",
     "-device",
     "isa-debug-exit,iobase=0xf4,iosize=0x04",
-    "-device",
-    "nec-usb-xhci,id=xhci",
-    "-device",
-    "usb-mouse",
-    "-gdb",
-    "tcp::3022",
-    "-S",
+    //"-device",
+    //"nec-usb-xhci,id=xhci",
+    // "-device",
+    // "usb-mouse",
+    // "-gdb",
+    // "tcp::3022",
+    // "-S",
+    //"-d", "int",
+    "--no-reboot",
 ];
 
 const TEST_ARGS: &[&str] = &[
@@ -40,6 +42,8 @@ fn main() -> anyhow::Result<()> {
         let path = PathBuf::from(std::env::args().nth(1).unwrap());
         path.canonicalize()?
     };
+
+    println!("BINARY {:?}", kernel_binary_path);
 
     let disk_image = disk_image::create_disk_image(&kernel_binary_path, true)?;
 

@@ -1,4 +1,4 @@
-use crate::asm_func::{io_in_32, io_out_32};
+use crate::assembly::configuration::{io_in_32, io_out_32};
 use crate::usb::pci::capability_header::{CapabilityHeader, MsiCapability};
 
 pub struct ConfigRegisterFinder {
