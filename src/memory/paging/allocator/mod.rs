@@ -4,9 +4,10 @@
 use bootloader::boot_info::MemoryRegions;
 
 use crate::cell::sync_once_cell::SyncOnceCell;
-use crate::paging::frame_allocator::boot_info::BootInfoFrameAllocator;
+use crate::memory::paging::frame_allocator::boot_info::BootInfoFrameAllocator;
 
 pub mod boot_info;
+mod identity;
 
 pub(crate) static mut FRAME_ALLOCATOR: SyncOnceCell<BootInfoFrameAllocator> = SyncOnceCell::new();
 
