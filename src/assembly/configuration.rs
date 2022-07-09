@@ -8,7 +8,7 @@ use core::arch::global_asm;
 // eax = data
 global_asm!(
     ".global io_out_32",
-    "io_out_32: ",
+    "io_out_32:",
     "mov dx, di",
     "mov eax, esi",
     "out dx, eax",
@@ -31,8 +31,8 @@ extern "C" {
     // コンフィグアドレスレジスタにコンフィギュレーション空間の読み込み先のアドレスを書き込みます
     // addrはRDIレジスタに,dataはRSIレジスタに設定される
     pub fn io_out_32(addr: u16, data: u32) -> u32;
-    
-    
+
+
     // コンフィギュレーション空間の値を読み込みます
     // 読み込む前にio_out_32で読み込みたいデータの先頭アドレスを指定する必要があります
     pub fn io_in_32(addr: u16) -> u32;

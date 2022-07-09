@@ -13,9 +13,26 @@ global_asm!(
 );
 
 
+global_asm!(
+    ".global set_cs",
+    "set_cs:",
+        "push rbp",
+        "mov rbp, rsp",
+        "mov ss, si",
+        "mov rax, .next",
+        "push rdi",
+        "push rax",
+        "retf",
+    ".next:",
+        "mov rsp, rbp",
+        "pop rbp",
+        "ret"
+);
 
 extern "C" {
     // コンフィグアドレスレジスタにコンフィギュレーション空間の読み込み先のアドレスを書き込みます
     // addrはRDIレジスタに,dataはRSIレジスタに設定される
     pub fn set_ds_all(value: u16);
+
+    pub fn set_cs(cs: u16, ss: u16);
 }

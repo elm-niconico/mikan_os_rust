@@ -1,12 +1,15 @@
+use pc_keyboard::KeyCode::P;
 use volatile::Volatile;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 
-use crate::cell::sync_once_cell::SyncOnceCell;
-use crate::log;
+use crate::{log};
+use crate::interrupt::pic;
+use crate::spin::sync_once_cell::StaticOnceCell;
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum InterruptIndex {
+    PicTimer = 32,
     APicTimer = 0x41,
 }
 
@@ -22,11 +25,11 @@ impl InterruptIndex {
     }
 }
 
-pub(crate) static mut IDT: SyncOnceCell<InterruptDescriptorTable> = SyncOnceCell::new();
+pub(crate) static mut IDT: StaticOnceCell<InterruptDescriptorTable> = StaticOnceCell::uninit();
 
 pub(crate) unsafe fn init_idt() {
-    IDT.set(create_idt());
-    IDT.get_mut().load();
+    IDT.init_once(|| create_idt());
+    IDT.get().load();
 }
 
 pub(crate) fn create_idt() -> InterruptDescriptorTable {
@@ -45,8 +48,7 @@ pub(crate) fn create_idt() -> InterruptDescriptorTable {
             .set_stack_index(0);
     }
 
-    // / idt[InterruptIndex::APicTimer.as_usize()].set_handler_fn(timer_interrupt_handler);
-
+    idt[InterruptIndex::PicTimer.as_usize()].set_handler_fn(pic::timer::pic_timer_handler);
     idt
 }
 
@@ -61,7 +63,7 @@ extern "x86-interrupt" fn general_protection_fault_handler(
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
-    log!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+    log!("Interrupt Breakpoint Handler {:?}", stack_frame);
 }
 
 extern "x86-interrupt" fn page_fault_handler(

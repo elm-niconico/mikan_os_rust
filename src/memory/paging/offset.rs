@@ -1,41 +1,42 @@
-use x86_64::{PhysAddr, VirtAddr};
-use x86_64::structures::paging::{Mapper, OffsetPageTable, Page, PageTable, PhysFrame, Size4KiB};
+use x86_64::VirtAddr;
+use x86_64::structures::paging::{OffsetPageTable, PageTable};
 
-use crate::{log, println};
-use crate::cell::sync_once_cell::SyncOnceCell;
-use crate::error::KernelResult;
-use crate::memory::frame::FRAME_ALLOCATOR;
+use crate::println;
+use crate::spin::sync_mutex::StaticSpinMutex;
+use crate::spin::sync_once_cell::StaticOnceCell;
 
-pub(crate) static mut PAGE_TABLE: SyncOnceCell<OffsetPageTable> =
-    SyncOnceCell::<OffsetPageTable>::new();
+pub(crate) static mut PAGE_TABLE: StaticOnceCell<StaticSpinMutex<OffsetPageTable>> =
+    StaticOnceCell::uninit();
+
 
 pub(crate) unsafe fn init(phys_offset: VirtAddr) {
     let page_table = &mut *active_level_4_table(phys_offset);
+
     PAGE_TABLE
-        .set(OffsetPageTable::new(page_table, phys_offset));
+        .init_once(|| StaticSpinMutex::new(OffsetPageTable::new(page_table, phys_offset)))
 }
 
-pub(crate) fn map(addr: u64, physical_offset: VirtAddr) -> KernelResult<()> {
-    let page = Page::<Size4KiB>::containing_address(VirtAddr::new(addr));
-
-    let frame = PhysFrame::containing_address(PhysAddr::new(addr));
-    let allocator = unsafe {
-        let x1 = FRAME_ALLOCATOR.get_mut();
-        x1
-    };
-    // let frame = allocator.allocate_frame().unwrap();
-
-    let frags = x86_64::structures::paging::PageTableFlags::empty();
-
-    let map = unsafe {
-        let x = PAGE_TABLE.get_mut().map_to(page, frame, frags, allocator);
-        x
-    }?;
-
-    log!("Success Mapping");
-    map.flush();
-    Ok(())
-}
+// pub(crate) fn map(addr: u64, physical_offset: VirtAddr) -> KernelResult<()> {
+//     let page = Page::<Size4KiB>::containing_address(VirtAddr::new(addr));
+//
+//     let frame = PhysFrame::containing_address(PhysAddr::new(addr));
+//     let allocator = unsafe {
+//         let x1 = FRAME_ALLOCATOR.get().lock();
+//         x1
+//     };
+//     // let frame = allocator.allocate_frame().unwrap();
+//
+//     let frags = x86_64::structures::paging::PageTableFlags::empty();
+//
+//     let map = unsafe {
+//         let x = PAGE_TABLE.get().lock().map_to(page, frame, frags, &mut *allocator);
+//         x
+//     }?;
+//
+//     log!("Success Mapping");
+//     map.flush();
+//     Ok(())
+//}
 
 // レベル4テーブルのポインターを返します
 // [map-physical-memory]によって、全物理アドレスが特定のオフセット値をつかって

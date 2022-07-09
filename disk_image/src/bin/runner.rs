@@ -1,10 +1,10 @@
-use anyhow::anyhow;
-
 use std::{
     path::PathBuf,
     process::{Command, ExitStatus},
     time::Duration,
 };
+
+use anyhow::anyhow;
 
 const RUN_ARGS: &[&str] = &[
     "-serial",
@@ -15,9 +15,9 @@ const RUN_ARGS: &[&str] = &[
     //"nec-usb-xhci,id=xhci",
     // "-device",
     // "usb-mouse",
-    // "-gdb",
-    // "tcp::3022",
-    // "-S",
+    "-gdb",
+    "tcp::3022",
+    "-S",
     //"-d", "int",
     "--no-reboot",
 ];

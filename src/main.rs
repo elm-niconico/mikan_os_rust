@@ -18,30 +18,34 @@ extern crate bitfield_struct;
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
+use lazy_static::initialize;
+use pic8259::ChainedPics;
 use x86_64::structures::paging::{Mapper, Translate};
 use x86_64::structures::paging::FrameAllocator;
+use x86_64::VirtAddr;
 
 use segmentation::gdt;
 
+use crate::memory::frame::FRAME_ALLOCATOR;
+use crate::memory::paging::PAGE_TABLE;
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
 
-mod cell;
+mod assembly;
+mod spin;
 mod error;
 mod frame_buffer;
+mod interrupt;
 mod macros;
 mod memory;
 mod qemu;
+mod segmentation;
 mod serial_port;
 mod testable;
 mod usb;
 mod utils;
-mod assembly;
-mod segmentation;
-mod interrupt;
-mod apic;
 
-
+mod task;
 
 entry_point!(kernel_main);
 
@@ -55,35 +59,35 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     assembly::hlt_loop();
 }
 
-
 unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
     log!("Init Frame Buffer");
-    //memory::frame::init(&boot_info.memory_regions);
 
-    // let physical_offset = offset_as_u64(boot_info.physical_memory_offset);
-    // let offset_addr = VirtAddr::new(physical_offset);
-    // memory::frame::init(&boot_info.memory_regions);
-    // memory::paging::init(offset_addr);
-    //
-    //
-    // memory::paging::make_identity_mapping(PAGE_TABLE.get_mut().unwrap(),
-    //                                       FRAME_ALLOCATOR.get_mut().unwrap(),
-    //                                       0xfee00000,
-    //                                       1).expect("Failed Make Identity");
-    //
-    //
-    // memory::heap::init_heap(PAGE_TABLE.get_mut().unwrap(),
-    //                         FRAME_ALLOCATOR.get_mut().unwrap()).expect("Failed To Init Heap");
+    let physical_offset = boot_info.physical_memory_offset.as_ref().copied().unwrap();
+    let offset_addr = VirtAddr::new(physical_offset);
+    memory::frame::init(&boot_info.memory_regions);
+    memory::paging::init(offset_addr);
+
+    memory::paging::make_identity_mapping(
+        &mut *PAGE_TABLE.get().lock(),
+        &mut *FRAME_ALLOCATOR.get().lock(),
+        0xfee00000,
+        1,
+    ).expect("Failed Make Identity");
+
+    memory::heap::init_heap(&mut *PAGE_TABLE.get().lock(), &mut *FRAME_ALLOCATOR.get().lock()).expect("Failed To Init Heap");
+
     gdt::init();
     log!("Init GDT");
     interrupt::init();
+
     log!("Init IDT");
+
+    //log!("Init Task");
 
     x86_64::instructions::interrupts::enable();
     log!("Interrupt Enable");
 }
-
 
 #[cfg(not(test))]
 #[panic_handler]

@@ -26,6 +26,7 @@ impl BootInfoFrameAllocator {
     }
 }
 
+
 impl InitAllocator for BootInfoFrameAllocator {
     fn new(memory_regions: &'static MemoryRegions) -> Self {
         Self {
