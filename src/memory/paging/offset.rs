@@ -5,7 +5,7 @@ use crate::println;
 use crate::spin::sync_mutex::StaticSpinMutex;
 use crate::spin::sync_once_cell::StaticOnceCell;
 
-pub(crate) static mut PAGE_TABLE: StaticOnceCell<StaticSpinMutex<OffsetPageTable>> =
+pub(crate) static PAGE_TABLE: StaticOnceCell<StaticSpinMutex<OffsetPageTable>> =
     StaticOnceCell::uninit();
 
 

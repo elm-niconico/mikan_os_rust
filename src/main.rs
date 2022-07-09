@@ -15,22 +15,27 @@
 extern crate alloc;
 extern crate bitfield_struct;
 
+use core::num::NonZeroUsize;
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
 use lazy_static::initialize;
 use pic8259::ChainedPics;
+use x86_64::{PhysAddr, VirtAddr};
 use x86_64::registers::control::Cr3;
-use x86_64::structures::paging::{Mapper, Translate};
+use x86_64::structures::idt::ExceptionVector::Page;
+use x86_64::structures::paging::{Mapper, PageTableFlags, PhysFrame, Size4KiB, Translate};
 use x86_64::structures::paging::FrameAllocator;
-use x86_64::VirtAddr;
+use xhci::Registers;
 
 use segmentation::gdt;
 
+use crate::interrupt::map;
 use crate::memory::frame::FRAME_ALLOCATOR;
 use crate::memory::paging::PAGE_TABLE;
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::testable::Testable;
+use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
 
 mod assembly;
 mod spin;
@@ -49,6 +54,7 @@ mod utils;
 mod task;
 
 entry_point!(kernel_main);
+
 
 #[no_mangle]
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
@@ -72,8 +78,10 @@ unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
     gdt::init();
     log!("Init GDT");
 
-    interrupt::init();
-    log!("Init IDT");
+    let rsdp = boot_info.rsdp_addr.as_ref().copied().unwrap();
+    interrupt::init(rsdp);
+    log!("Init Interrupt");
+
 
     x86_64::instructions::interrupts::enable();
     log!("Interrupt Enable");

@@ -16,6 +16,7 @@ pub fn create_disk_image(kernel_binary_path: &Path, bios_only: bool) -> anyhow::
         .arg("--kernel-manifest")
         .arg(&kernel_manifest_path);
     build_cmd.arg("--kernel-binary").arg(&kernel_binary_path);
+   
     build_cmd
         .arg("--target-dir")
         .arg(kernel_manifest_path.parent().unwrap().join("target"));
@@ -23,9 +24,10 @@ pub fn create_disk_image(kernel_binary_path: &Path, bios_only: bool) -> anyhow::
         .arg("--out-dir")
         .arg(kernel_binary_path.parent().unwrap());
     build_cmd.arg("--quiet");
-    if bios_only {
-        build_cmd.arg("--firmware").arg("bios");
-    }
+
+    // if bios_only {
+    //     build_cmd.arg("--firmware").arg("bios");
+    // }
 
     if !build_cmd.status()?.success() {
         return Err(anyhow!("build failed"));
@@ -35,7 +37,7 @@ pub fn create_disk_image(kernel_binary_path: &Path, bios_only: bool) -> anyhow::
     let disk_image = kernel_binary_path
         .parent()
         .unwrap()
-        .join(format!("boot-bios-{}.img", kernel_binary_name));
+        .join(format!("boot-uefi-{}.img", kernel_binary_name));
     if !disk_image.exists() {
         return Err(anyhow!(
             "Disk image does not exist at {} after bootloader build",

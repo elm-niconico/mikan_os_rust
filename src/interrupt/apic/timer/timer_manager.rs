@@ -1,16 +1,16 @@
 use spin::mutex::SpinMutex;
 use volatile::Volatile;
 
-pub(crate) static APIC_TIMER: SpinMutex<TimerManager> = SpinMutex::new(TimerManager::new());
+pub static APIC_TIMER: SpinMutex<TimerManager> = SpinMutex::new(TimerManager::new());
 
-pub(crate) trait APicTimer {
+pub trait APicTimer {
     fn lvt_timer(&mut self) -> Volatile<&mut u32>;
     fn initial_count(&mut self) -> Volatile<&mut u32>;
     fn current_count(&mut self) -> Volatile<&mut u32>;
     fn divide_config(&mut self) -> Volatile<&mut u32>;
 }
 
-pub(crate) struct TimerManager {
+pub struct TimerManager {
     time: u64,
 }
 
@@ -26,7 +26,7 @@ impl TimerManager {
     pub fn init(&mut self) {
         self.divide_config().write(0b1011); // divide 1:1
         self.lvt_timer().write((0b010 << 16) | 0x41);
-        self.initial_count().write(0x1000000);
+        self.initial_count().write(u32::MAX);
     }
 
     pub fn tick(&mut self) {

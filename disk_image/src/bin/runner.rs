@@ -11,10 +11,10 @@ const RUN_ARGS: &[&str] = &[
     "stdio",
     "-device",
     "isa-debug-exit,iobase=0xf4,iosize=0x04",
-    //"-device",
-    //"nec-usb-xhci,id=xhci",
-    // "-device",
-    // "usb-mouse",
+    "-device",
+    "nec-usb-xhci,id=xhci",
+    "-device",
+    "usb-mouse",
     "-gdb",
     "tcp::3022",
     "-S",
@@ -50,7 +50,12 @@ fn main() -> anyhow::Result<()> {
     let mut run_cmd = Command::new("qemu-system-x86_64");
     run_cmd
         .arg("-drive")
-        .arg(format!("format=raw,file={}", disk_image.display()));
+        .arg(format!("format=raw,file={}", disk_image.display()))
+
+        // UEFIでビルドするために指定するファイル
+        .arg("-bios")
+        // EDK2からビルドして生成されるファイル
+        .arg("/home/elm/edk2/Build/OvmfX64/DEBUG_GCC5/FV/OVMF.fd");
 
     let binary_kind = runner_utils::binary_kind(&kernel_binary_path);
     if binary_kind.is_test() {

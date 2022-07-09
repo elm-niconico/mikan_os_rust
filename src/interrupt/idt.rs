@@ -2,8 +2,9 @@ use pc_keyboard::KeyCode::P;
 use volatile::Volatile;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 
-use crate::{log};
+use crate::interrupt::apic::timer::apic_timer_handler;
 use crate::interrupt::pic;
+use crate::log;
 use crate::spin::sync_once_cell::StaticOnceCell;
 
 #[derive(Debug, Clone, Copy)]
@@ -35,20 +36,34 @@ pub(crate) unsafe fn init_idt() {
 pub(crate) fn create_idt() -> InterruptDescriptorTable {
     let mut idt = InterruptDescriptorTable::new();
 
-    idt.breakpoint.set_handler_fn(breakpoint_handler);
-    idt.segment_not_present
+    idt
+        .breakpoint
+        .set_handler_fn(breakpoint_handler);
+
+    idt
+        .segment_not_present
         .set_handler_fn(segment_not_present_handler);
-    idt.general_protection_fault
+
+    idt
+        .general_protection_fault
         .set_handler_fn(general_protection_fault_handler);
-    idt.page_fault.set_handler_fn(page_fault_handler);
-    idt.invalid_tss.set_handler_fn(invalid_tss_handler);
+
+    idt
+        .page_fault
+        .set_handler_fn(page_fault_handler);
+
+    idt
+        .invalid_tss
+        .set_handler_fn(invalid_tss_handler);
+
+
     unsafe {
         idt.double_fault
             .set_handler_fn(double_fault_handler)
             .set_stack_index(0);
     }
 
-    idt[InterruptIndex::PicTimer.as_usize()].set_handler_fn(pic::timer::pic_timer_handler);
+    idt[InterruptIndex::APicTimer.as_usize()].set_handler_fn(apic_timer_handler);
     idt
 }
 
@@ -104,12 +119,4 @@ extern "x86-interrupt" fn invalid_tss_handler(stack_frame: InterruptStackFrame, 
         "EXCEPTION: INVALID TSS ERROR CODE: {} \n{:#?}",
         _error_code, stack_frame
     );
-}
-
-
-pub(crate) fn notify_end_of_interrupt() {
-    // アドレスはなんでもいいらしい
-    let notify_addr: u32 = 0xfee000b0;
-    let mut memory = Volatile::new(unsafe { (notify_addr as *mut u32).as_mut().unwrap() });
-    memory.write(0);
 }
