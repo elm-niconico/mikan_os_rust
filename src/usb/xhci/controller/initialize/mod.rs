@@ -1,0 +1,6 @@
+
+/// Xhcのこん
+///
+pub trait XhcInitializeOperator{
+
+}

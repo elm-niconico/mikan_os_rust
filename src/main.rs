@@ -30,6 +30,7 @@ use xhci::Registers;
 
 use segmentation::gdt;
 
+use crate::interrupt::apic::mouse::XHC_MOUSE;
 use crate::interrupt::map;
 use crate::memory::frame::FRAME_ALLOCATOR;
 use crate::memory::paging::PAGE_TABLE;
@@ -63,6 +64,10 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     #[cfg(test)]
     test_main();
 
+    log!("is run {}", XHC_MOUSE.get().lock().is_run_command_ring());
+    loop {
+        XHC_MOUSE.get().lock().process_event();
+    }
     assembly::hlt_loop();
 }
 
@@ -79,7 +84,7 @@ unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
     log!("Init GDT");
 
     let rsdp = boot_info.rsdp_addr.as_ref().copied().unwrap();
-    interrupt::init(rsdp);
+    interrupt::init(phys_addr, VirtAddr::new(rsdp));
     log!("Init Interrupt");
 
 
@@ -92,9 +97,7 @@ unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
 fn panic(info: &PanicInfo) -> ! {
     use qemu::{exit_qemu, ExitCode};
 
-    println!("panic!!");
-    println!("{}", info);
-    serial_println!("{}", info);
+    log!("{}", info);
     exit_qemu(ExitCode::Failed);
     loop {}
 }

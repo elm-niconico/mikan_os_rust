@@ -8,7 +8,7 @@ use crate::memory::paging::make_identity_mapping;
 
 mod idt;
 mod pic;
-mod apic;
+pub mod apic;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -69,12 +69,11 @@ impl Xsdt {
     }
 }
 
-pub(crate) fn init(rsdp: u64) {
+pub(crate) fn init(phys_offset: VirtAddr, rsdp: VirtAddr) {
     unsafe { idt::init_idt() };
     log!("Init IDT");
 
     //unsafe { pic::PICS.lock().initialize() }
-
 
     const TIMER_FRAME_BASE_ADDR: u64 = 0xfee00000;
     map(TIMER_FRAME_BASE_ADDR);
@@ -82,7 +81,9 @@ pub(crate) fn init(rsdp: u64) {
     apic::timer::timer_manager::APIC_TIMER.lock().init();
     log!("Init APIC Timer");
 
-
+    log!("Start Xhc Mouse Init");
+    apic::mouse::init(phys_offset, rsdp);
+    log!("Init Xhc Mouse Controller");
 }
 
 pub fn map(rsdp: u64) {

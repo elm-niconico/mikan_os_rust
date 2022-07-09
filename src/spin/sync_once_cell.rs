@@ -2,11 +2,9 @@ use core::fmt::Debug;
 
 use conquer_once::spin::OnceCell;
 
-use crate::spin::sync_mutex::StaticSpinMutex;
-
 pub struct StaticOnceCell<T>(OnceCell<T>);
 
-impl<T: Debug> StaticOnceCell<T> {
+impl<T> StaticOnceCell<T> {
     pub const fn uninit() -> Self {
         StaticOnceCell(OnceCell::uninit())
     }

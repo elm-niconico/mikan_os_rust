@@ -1,6 +1,7 @@
+use core::fmt::{Debug, Formatter, Pointer};
 use core::slice;
 
-use crate::serial_println;
+use crate::{log, serial_println};
 use crate::usb::xhci::controller::port::Port;
 use crate::usb::xhci::device_manager::device_manager::DeviceManager;
 use crate::usb::xhci::registers::create_type::RegisterCreate;
@@ -14,7 +15,8 @@ use crate::usb::xhci::rings::command_ring::CommandRing;
 use crate::usb::xhci::rings::event_ring::EventRing;
 use crate::utils::error::CommonResult;
 
-pub struct XhcController {
+/// ライブラリを極力使わず、ゼロベースからの自作を試みてました。
+pub struct ZeroBaseController {
     xhc_registers: HostControllerRegisters,
     device_manager: DeviceManager,
     command_ring: CommandRing,
@@ -22,13 +24,14 @@ pub struct XhcController {
     mmio_virt_addr: u64,
 }
 
-impl XhcController {
+
+impl ZeroBaseController {
     pub fn initialize(
         mmio_base_addr: u64,
         physical_memory_offset: u64,
         device_max_slots: u8,
-    ) -> CommonResult<XhcController> {
-        let res = XhcController::new(mmio_base_addr, physical_memory_offset);
+    ) -> CommonResult<ZeroBaseController> {
+        let res = ZeroBaseController::new(mmio_base_addr, physical_memory_offset);
         if let Err(error) = res {
             return Err(error);
         }
@@ -77,7 +80,8 @@ impl XhcController {
         }
     }
 
-    pub fn new(mmio_virt_addr: u64, physical_offset: u64) -> CommonResult<XhcController> {
+    pub fn new(mmio_virt_addr: u64, physical_offset: u64) -> CommonResult<ZeroBaseController> {
+        log!("Start New");
         let create = RegisterCreate::UncheckTransmute;
 
         let xhc_registers = HostControllerRegisters::new(create, mmio_virt_addr);
@@ -171,7 +175,7 @@ trait XhcInitializeOperations {
     fn set_dcbaap(&mut self) -> CommonResult<()>;
 }
 
-impl XhcInitializeOperations for XhcController {
+impl XhcInitializeOperations for ZeroBaseController {
     fn set_max_slots(&mut self, max_slots: u8) -> CommonResult<()> {
         let cap = self.xhc_registers.capabilities_mut();
 
@@ -210,6 +214,7 @@ impl XhcInitializeOperations for XhcController {
         }
     }
 }
+
 
 // #[test_case]
 // pub fn should_new_xhc() {

@@ -1,6 +1,7 @@
 use pc_keyboard::KeyCode::P;
 use volatile::Volatile;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
+use crate::interrupt::apic::mouse::xhci_mouse_handler;
 
 use crate::interrupt::apic::timer::apic_timer_handler;
 use crate::interrupt::pic;
@@ -11,6 +12,7 @@ use crate::spin::sync_once_cell::StaticOnceCell;
 #[repr(u8)]
 pub enum InterruptIndex {
     PicTimer = 32,
+    Xhci = 0x40,
     APicTimer = 0x41,
 }
 
@@ -63,7 +65,9 @@ pub(crate) fn create_idt() -> InterruptDescriptorTable {
             .set_stack_index(0);
     }
 
+    idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(xhci_mouse_handler);
     idt[InterruptIndex::APicTimer.as_usize()].set_handler_fn(apic_timer_handler);
+
     idt
 }
 
