@@ -20,6 +20,7 @@ use core::panic::PanicInfo;
 use bootloader::{BootInfo, entry_point};
 use lazy_static::initialize;
 use pic8259::ChainedPics;
+use x86_64::registers::control::Cr3;
 use x86_64::structures::paging::{Mapper, Translate};
 use x86_64::structures::paging::FrameAllocator;
 use x86_64::VirtAddr;
@@ -60,30 +61,19 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 }
 
 unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
+    let phys_addr = VirtAddr::new(boot_info.physical_memory_offset.as_ref().copied().unwrap());
+
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
     log!("Init Frame Buffer");
 
-    let physical_offset = boot_info.physical_memory_offset.as_ref().copied().unwrap();
-    let offset_addr = VirtAddr::new(physical_offset);
-    memory::frame::init(&boot_info.memory_regions);
-    memory::paging::init(offset_addr);
-
-    memory::paging::make_identity_mapping(
-        &mut *PAGE_TABLE.get().lock(),
-        &mut *FRAME_ALLOCATOR.get().lock(),
-        0xfee00000,
-        1,
-    ).expect("Failed Make Identity");
-
-    memory::heap::init_heap(&mut *PAGE_TABLE.get().lock(), &mut *FRAME_ALLOCATOR.get().lock()).expect("Failed To Init Heap");
+    memory::init(&boot_info.memory_regions, phys_addr);
+    log!("Init Memory");
 
     gdt::init();
     log!("Init GDT");
+
     interrupt::init();
-
     log!("Init IDT");
-
-    //log!("Init Task");
 
     x86_64::instructions::interrupts::enable();
     log!("Interrupt Enable");

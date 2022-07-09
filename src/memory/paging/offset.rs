@@ -1,5 +1,5 @@
-use x86_64::VirtAddr;
 use x86_64::structures::paging::{OffsetPageTable, PageTable};
+use x86_64::VirtAddr;
 
 use crate::println;
 use crate::spin::sync_mutex::StaticSpinMutex;
@@ -16,27 +16,6 @@ pub(crate) unsafe fn init(phys_offset: VirtAddr) {
         .init_once(|| StaticSpinMutex::new(OffsetPageTable::new(page_table, phys_offset)))
 }
 
-// pub(crate) fn map(addr: u64, physical_offset: VirtAddr) -> KernelResult<()> {
-//     let page = Page::<Size4KiB>::containing_address(VirtAddr::new(addr));
-//
-//     let frame = PhysFrame::containing_address(PhysAddr::new(addr));
-//     let allocator = unsafe {
-//         let x1 = FRAME_ALLOCATOR.get().lock();
-//         x1
-//     };
-//     // let frame = allocator.allocate_frame().unwrap();
-//
-//     let frags = x86_64::structures::paging::PageTableFlags::empty();
-//
-//     let map = unsafe {
-//         let x = PAGE_TABLE.get().lock().map_to(page, frame, frags, &mut *allocator);
-//         x
-//     }?;
-//
-//     log!("Success Mapping");
-//     map.flush();
-//     Ok(())
-//}
 
 // レベル4テーブルのポインターを返します
 // [map-physical-memory]によって、全物理アドレスが特定のオフセット値をつかって
