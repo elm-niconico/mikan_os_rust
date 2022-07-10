@@ -1,4 +1,3 @@
-use crate::serial_println;
 use crate::usb::xhci::registers::create_type::RegisterCreate;
 use crate::usb::xhci::registers::runtime::structs::runtime_registers::InterruptersArray;
 

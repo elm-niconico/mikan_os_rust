@@ -1,10 +1,10 @@
 #[macro_export]
 macro_rules! test_cap_register {
     ($name: tt, $fn: ident) => {
-        crate::test_register!(
+        $crate::test_register!(
             $name,
             $fn,
-            crate::utils::test_fn::extract_virtual_mmio_base_addr()
+            $crate::utils::test_fn::extract_virtual_mmio_base_addr()
         );
     };
 }
@@ -12,10 +12,10 @@ macro_rules! test_cap_register {
 #[macro_export]
 macro_rules! test_op_register {
     ($name: tt, $fn: ident) => {
-        crate::test_register!(
+        $crate::test_register!(
             $name,
             $fn,
-            crate::utils::test_fn::extract_operational_base_addr()
+            $crate::utils::test_fn::extract_operational_base_addr()
         );
     };
 }
@@ -23,7 +23,7 @@ macro_rules! test_op_register {
 #[macro_export]
 macro_rules! test_runtime_register {
     ($name: tt, $fn: ident) => {
-        crate::test_register!($name, $fn, crate::utils::test_fn::extract_runtime_base());
+        $crate::test_register!($name, $fn, $crate::utils::test_fn::extract_runtime_base());
     };
 }
 

@@ -25,13 +25,7 @@ pub fn init() {
     };
     set_up_segment(&mut selectors);
 
-    unsafe {
-        segmentation::load_ds(null_segment);
-        segmentation::load_es(null_segment);
-        segmentation::load_fs(null_segment);
-        segmentation::load_gs(null_segment);
-    }
-    
+   
     // Set CS SS
     unsafe { segmentation::SS::set_reg(selectors.kernel_stack_selector) }
     unsafe { segmentation::CS::set_reg(selectors.kernel_code_selector) };

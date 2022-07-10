@@ -1,7 +1,6 @@
 use crate::test_cap_register;
 use crate::usb::xhci::registers::create_type::{CreateRegisterResult, RegisterCreate};
 use crate::usb::xhci::registers::operational::structs::configure::ConfigureRegister;
-use crate::usb::xhci::registers::volatile::Volatile;
 use crate::utils::raw_ptr::transmute_register;
 
 pub trait ICreateConfigure {

@@ -1,10 +1,7 @@
-use pc_keyboard::KeyCode::P;
-use volatile::Volatile;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 use crate::interrupt::apic::mouse::xhci_mouse_handler;
-
 use crate::interrupt::apic::timer::apic_timer_handler;
-use crate::interrupt::pic;
+
 use crate::log;
 use crate::spin::sync_once_cell::StaticOnceCell;
 
@@ -58,7 +55,15 @@ pub(crate) fn create_idt() -> InterruptDescriptorTable {
         .invalid_tss
         .set_handler_fn(invalid_tss_handler);
 
+    idt
+        .overflow
+        .set_handler_fn(over_flow_handler);
 
+    idt
+        .device_not_available
+        .set_handler_fn(over_flow_handler);
+
+    idt.stack_segment_fault.set_handler_fn(invalid_tss_handler);
     unsafe {
         idt.double_fault
             .set_handler_fn(double_fault_handler)
@@ -79,6 +84,12 @@ extern "x86-interrupt" fn general_protection_fault_handler(
         "EXCEPTION: PROTECTION ERROR CODE {} \n{:#?}",
         error_code, stack_frame
     );
+}
+
+extern "x86-interrupt" fn over_flow_handler(
+    stack_frame: InterruptStackFrame,
+) {
+    panic!("Exception: Over Flow {:#?}", stack_frame);
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {

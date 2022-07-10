@@ -1,4 +1,6 @@
 use alloc::string::String;
+use core::alloc::LayoutError;
+
 use x86_64::structures::paging::mapper::MapToError;
 use x86_64::structures::paging::page::AddressNotAligned;
 use x86_64::structures::paging::Size4KiB;
@@ -24,6 +26,18 @@ pub enum KernelError {
     AddressNotAligned(AddressNotAligned),
     None,
     Empty,
+    FailedHcHalted,
+    FailedHcReset,
+    OverFlowDeviceMaxSlots,
+    FailedSetDeviceContextBase(DeviceContextErrInfo),
+    LayoutError(LayoutError)
+}
+
+
+#[derive(Debug)]
+pub struct DeviceContextErrInfo {
+    pub expect: u64,
+    pub actual: u64,
 }
 
 impl From<MapToError<Size4KiB>> for KernelError {
@@ -44,9 +58,16 @@ impl From<()> for KernelError {
     }
 }
 
-impl From<String> for KernelError{
+impl From<String> for KernelError {
     fn from(_: String) -> Self {
         Self::None
     }
 }
+
+impl From<LayoutError> for KernelError {
+    fn from(e: LayoutError) -> Self {
+        Self::LayoutError(e)
+    }
+}
+
 // TODO Option::Noneからエラーを作成したい

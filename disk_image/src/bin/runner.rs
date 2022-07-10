@@ -18,7 +18,7 @@ const RUN_ARGS: &[&str] = &[
     "-gdb",
     "tcp::3022",
     "-S",
-    //"-d", "int",
+    // "-d", "int",
     "--no-reboot",
 ];
 
@@ -33,6 +33,9 @@ const TEST_ARGS: &[&str] = &[
     "nec-usb-xhci,id=xhci",
     "-device",
     "usb-mouse",
+    // "-gdb",
+    // "tcp::3022",
+    // "-S",
     "--no-reboot",
 ];
 const TEST_TIMEOUT_SECS: u64 = 10;
@@ -45,7 +48,7 @@ fn main() -> anyhow::Result<()> {
 
     println!("BINARY {:?}", kernel_binary_path);
 
-    let disk_image = disk_image::create_disk_image(&kernel_binary_path, true)?;
+    let disk_image = disk_image::create_disk_image(&kernel_binary_path)?;
 
     let mut run_cmd = Command::new("qemu-system-x86_64");
     run_cmd

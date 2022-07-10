@@ -1,21 +1,16 @@
 use core::fmt::Arguments;
 
-use lazy_static::lazy_static;
-use spin::Mutex;
+use spin::mutex::Mutex;
 use uart_16550::SerialPort;
 use x86_64::instructions::interrupts::without_interrupts;
 
-lazy_static! {
-    pub static ref SERIAL: Mutex<SerialPort> = new_serial_port();
-}
+pub static SERIAL: Mutex<SerialPort> = Mutex::new(unsafe { SerialPort::new(0x3F8) });
 
-fn new_serial_port() -> Mutex<SerialPort> {
-    //最初のシリアルインターフェースの標準のポート番号
-    let mut serial_port = unsafe { SerialPort::new(0x3F8) };
+
+pub fn init() {
+    let mut serial_port = SERIAL.lock();
     serial_port.init();
-    Mutex::new(serial_port)
 }
-
 
 #[doc(hidden)]
 pub fn _print(args: Arguments) {
@@ -25,6 +20,6 @@ pub fn _print(args: Arguments) {
         SERIAL
             .lock()
             .write_fmt(args)
-            .expect("Failed Print To Serial");
+            .expect("Printing to serial failed");
     });
 }

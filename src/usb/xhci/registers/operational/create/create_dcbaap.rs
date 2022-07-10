@@ -13,9 +13,6 @@ impl ICreateDcbaap for RegisterCreate {
     fn new_dcbaap(&self, operational_base_addr: u64) -> CreateRegisterResult<Dcbaap> {
         match self {
             RegisterCreate::UncheckTransmute => uncheck_transmute(operational_base_addr),
-            _ => {
-                todo!()
-            }
         }
     }
 }

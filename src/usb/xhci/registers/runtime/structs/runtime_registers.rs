@@ -1,4 +1,3 @@
-use core::ops::{Index, IndexMut};
 use core::slice;
 
 use crate::usb::xhci::registers::register_info::RegisterInfo;

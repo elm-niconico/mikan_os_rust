@@ -5,7 +5,7 @@ use std::{
 
 use anyhow::anyhow;
 
-pub fn create_disk_image(kernel_binary_path: &Path, bios_only: bool) -> anyhow::Result<PathBuf> {
+pub fn create_disk_image(kernel_binary_path: &Path) -> anyhow::Result<PathBuf> {
     let bootloader_manifest_path = bootloader_locator::locate_bootloader("bootloader")?;
     let kernel_manifest_path = locate_cargo_manifest::locate_manifest()?;
 
@@ -16,7 +16,7 @@ pub fn create_disk_image(kernel_binary_path: &Path, bios_only: bool) -> anyhow::
         .arg("--kernel-manifest")
         .arg(&kernel_manifest_path);
     build_cmd.arg("--kernel-binary").arg(&kernel_binary_path);
-   
+
     build_cmd
         .arg("--target-dir")
         .arg(kernel_manifest_path.parent().unwrap().join("target"));

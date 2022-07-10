@@ -4,14 +4,13 @@ use x86_64::structures::paging::{FrameAllocator, PhysFrame, Size4KiB};
 
 use crate::memory::frame::frame_init::InitAllocator;
 
-#[derive(Debug)]
-pub(crate) struct BootInfoFrameAllocator {
+pub struct BootInfoFrameAllocator {
     memory_regions: &'static MemoryRegions,
     next: usize,
 }
 
 impl BootInfoFrameAllocator {
-    fn usable_frames(&mut self) -> impl Iterator<Item = PhysFrame> {
+    fn usable_frames(&mut self) -> impl Iterator<Item=PhysFrame> {
         // 使用できるフレームを抽出
         let usable_regions = self
             .memory_regions
@@ -39,7 +38,9 @@ impl InitAllocator for BootInfoFrameAllocator {
 
 unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
     fn allocate_frame(&mut self) -> Option<PhysFrame<Size4KiB>> {
-        let frame = self.usable_frames().nth(self.next);
+        let mut frame = self.usable_frames();
+
+        let frame = frame.nth(self.next);
         self.next += 1;
         frame
     }

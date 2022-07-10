@@ -8,25 +8,18 @@
 #![feature(once_cell)]
 #![feature(default_alloc_error_handler)]
 #![feature(strict_provenance)]
-#![cfg_attr(test, no_main)]
 #![feature(portable_simd)]
 #![feature(abi_x86_interrupt)]
 
 extern crate alloc;
 extern crate bitfield_struct;
+// extern crate rlibc;
 
-use core::num::NonZeroUsize;
+
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
-use lazy_static::initialize;
-use pic8259::ChainedPics;
-use x86_64::{PhysAddr, VirtAddr};
-use x86_64::registers::control::Cr3;
-use x86_64::structures::idt::ExceptionVector::Page;
-use x86_64::structures::paging::{Mapper, PageTableFlags, PhysFrame, Size4KiB, Translate};
-use x86_64::structures::paging::FrameAllocator;
-use xhci::Registers;
+use x86_64::VirtAddr;
 
 use segmentation::gdt;
 
@@ -52,7 +45,6 @@ mod testable;
 mod usb;
 mod utils;
 
-mod task;
 
 entry_point!(kernel_main);
 
@@ -61,44 +53,54 @@ entry_point!(kernel_main);
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     unsafe { init_kernel(boot_info) };
 
+
     #[cfg(test)]
     test_main();
 
-    log!("is run {}", XHC_MOUSE.get().lock().is_run_command_ring());
+    let mut mouse = unsafe { XHC_MOUSE.get_unchecked().lock() };
+    mouse.run();
+
+    mouse.ports();
     loop {
-        XHC_MOUSE.get().lock().process_event();
+        mouse.process_event();
     }
-    assembly::hlt_loop();
+
+    #[allow(unreachable_code)]
+    assembly::hlt_loop()
 }
 
 unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
-    let phys_addr = VirtAddr::new(boot_info.physical_memory_offset.as_ref().copied().unwrap());
+    let phys_offset_addr = VirtAddr::new(boot_info.physical_memory_offset.as_ref().copied().unwrap());
 
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
-    log!("Init Frame Buffer");
+    serial_port::init();
 
-    memory::init(&boot_info.memory_regions, phys_addr);
-    log!("Init Memory");
+    serial_println!("Init Frame Buffer");
+
+    serial_println!("Offset {:?}", phys_offset_addr.as_u64());
+
+
+    memory::init(&boot_info.memory_regions, phys_offset_addr);
+    serial_println!("Init Memory");
 
     gdt::init();
-    log!("Init GDT");
+    serial_println!("Init GDT");
 
-    let rsdp = boot_info.rsdp_addr.as_ref().copied().unwrap();
-    interrupt::init(phys_addr, VirtAddr::new(rsdp));
-    log!("Init Interrupt");
+
+    interrupt::init(phys_offset_addr);
+    serial_println!("Init Interrupt");
 
 
     x86_64::instructions::interrupts::enable();
-    log!("Interrupt Enable");
+    serial_println!("Interrupt Enable");
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    use qemu::{exit_qemu, ExitCode};
-
-    log!("{}", info);
-    exit_qemu(ExitCode::Failed);
+    serial_println!("Panic!!");
+    serial_println!("{:?}", info);
+    qemu::exit_qemu(qemu::ExitCode::Failed);
     loop {}
 }
 
@@ -136,3 +138,6 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     exit_qemu(ExitCode::Failed);
     loop {}
 }
+
+#[lang = "eh_personality"]
+extern "C" fn eh_personality() {}

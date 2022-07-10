@@ -1,3 +1,5 @@
+use x86_64::VirtAddr;
+
 use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
 use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
@@ -14,6 +16,13 @@ pub fn extract_operational_base_addr() -> u64 {
     let cap_len: u8 = cap.cap_length.read().into();
     mmio + cap_len as u64
 }
+
+
+#[allow(dead_code)]
+pub fn extract_virtual_phys_addr() -> VirtAddr {
+    VirtAddr::new(OFFSET)
+}
+
 
 #[allow(dead_code)]
 pub fn extract_virtual_mmio_base_addr() -> u64 {

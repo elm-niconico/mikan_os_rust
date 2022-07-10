@@ -1,4 +1,3 @@
-use crate::serial_println;
 use crate::usb::xhci::registers::capability::create::create_all_registers::ICreateAllCapabilityRegisters;
 use crate::usb::xhci::registers::capability::structs::capability_register::CapabilityRegisters;
 use crate::usb::xhci::registers::create_type::RegisterCreate;

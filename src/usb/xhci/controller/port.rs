@@ -5,6 +5,7 @@ use crate::usb::xhci::registers::register_info::RegisterInfo;
 use crate::usb::xhci::registers::volatile::{Volatile, VolatileRegister};
 use crate::utils::error::CommonResult;
 
+#[allow(unused)]
 pub struct Port {
     port_register_set: Volatile<PortRegisterSet>,
 }
@@ -18,6 +19,7 @@ impl Debug for Port {
 }
 
 impl Port {
+    #[allow(unused)]
     pub fn new(port_register_set: &PortRegisterSet) -> Self {
         let addr = (port_register_set as *const PortRegisterSet).addr() as u64;
         Self {
@@ -25,10 +27,13 @@ impl Port {
         }
     }
 
+
+    #[allow(unused)]
     pub fn is_current_connect(&self) -> bool {
         self.port_register_set.read().current_connect_status()
     }
 
+    #[allow(unused)]
     pub fn reset(&mut self) -> CommonResult<()> {
         let mut port_register_set = self.port_register_set.read();
         port_register_set.set_connect_status_change(true);

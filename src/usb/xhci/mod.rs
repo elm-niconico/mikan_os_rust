@@ -4,3 +4,4 @@ pub mod controller;
 pub mod device_manager;
 pub mod device;
 pub mod rings;
+pub mod mapper;

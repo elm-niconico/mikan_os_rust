@@ -13,7 +13,7 @@ pub fn notify_end_of_interrupt() {
     memory.write(0);
 }
 
-pub extern "x86-interrupt" fn apic_timer_handler(stack_frame: InterruptStackFrame) {
+pub extern "x86-interrupt" fn apic_timer_handler(_: InterruptStackFrame) {
     print!(".");
 
     notify_end_of_interrupt();

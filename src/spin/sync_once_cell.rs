@@ -1,5 +1,3 @@
-use core::fmt::Debug;
-
 use conquer_once::spin::OnceCell;
 
 pub struct StaticOnceCell<T>(OnceCell<T>);
@@ -17,5 +15,6 @@ impl<T> StaticOnceCell<T> {
     }
 }
 
+unsafe impl<T> Sync for StaticOnceCell<T> {
 
-unsafe impl<T> Sync for StaticOnceCell<T> {}
+}

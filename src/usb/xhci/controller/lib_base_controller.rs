@@ -1,92 +1,114 @@
-use core::num::NonZeroUsize;
-use core::ops::{Add, AddAssign};
 use core::ptr;
 
 use x86_64::{PhysAddr, VirtAddr};
-use x86_64::structures::paging::{Mapper, PageSize, PageTableFlags, PhysFrame, Size4KiB};
 use xhci::Registers;
 
-use crate::{FRAME_ALLOCATOR, log, PAGE_TABLE, tmp_find_usb_mouse_base};
+use crate::error::KernelResult;
+use crate::serial_println;
+use crate::usb::xhci::device_manager::device_manager::{DeviceContextAddr, DeviceManager};
+use crate::usb::xhci::mapper::XhcMapper;
+use crate::usb::xhci::rings::command_ring::{CommandRing, CommandRingAddress};
+use crate::usb::xhci::rings::event_ring::{EventRing, EventRingAddress};
 use crate::usb::xhci::trb::trb_base::TrbBase;
 
 pub struct LibBaseController {
-    registers: Registers<XhcMapper>,
-    command_ring: CommandRing,
+    pub registers: Registers<XhcMapper>,
+    pub command_ring: CommandRing,
+    pub event_ring: EventRing,
+    pub device_manager: DeviceManager,
 }
 
+unsafe impl Send for LibBaseController {}
 
-#[repr(align(64))]
-struct CommandRing([TrbBase; 32]);
-
+unsafe impl Sync for LibBaseController {}
 
 impl LibBaseController {
-    pub fn new(phys_offset: VirtAddr) -> Self {
-        let mapper = XhcMapper { phys_offset };
-        let mut registers = unsafe { Registers::new(tmp_find_usb_mouse_base().unwrap() as usize, mapper) };
+    pub fn try_new(xhc_mmio_base: PhysAddr, device_max_slots: u8) -> KernelResult<Self> {
+        serial_println!("Try New Xhc");
+        let mapper = XhcMapper::new();
 
+        let registers = unsafe { Registers::new(xhc_mmio_base.as_u64() as usize, mapper) };
+        serial_println!("Create Register");
+        let command_ring = CommandRing::new();
+        let event_ring = unsafe { EventRing::new() };
+        let device_manager = DeviceManager::try_new(device_max_slots)?;
 
-        let command_ring = CommandRing([TrbBase::new_zeros(); 32]);
-        // registers.operational.crcr.update_volatile(|r| {
-        //     let ptr = unsafe { command_ring.0.as_ptr().addr() };
-        //     r.set_command_ring_pointer(ptr as u64);
-        // });
-
-        Self {
+        Ok(Self {
             registers,
             command_ring,
+            event_ring,
+            device_manager,
+        })
+    }
+
+    pub fn run(&mut self) {
+        self.registers.operational.usbcmd.update_volatile(|r| {
+            r.set_run_stop();
+        });
+
+        while self.registers.operational.usbsts.read_volatile().hc_halted() {};
+    }
+
+    pub fn process_event(&mut self) {
+        let erdp = self.registers.interrupt_register_set.read_volatile_at(0).erdp.event_ring_dequeue_pointer();
+        let trb_base = unsafe { ptr::read_volatile(erdp as *const TrbBase) };
+        if !trb_base.cycle_bit() {
+            serial_println!("Parameter {:?}", trb_base.parameter());
+            return;
+        }
+
+
+        self.log_usb_sts();
+        self.log_usb_cmd();
+
+        serial_println!("TRB BASE {:#?}", trb_base);
+    }
+
+    pub fn ports(&self) {
+        for i in 0..self.registers.capability.hcsparams1.read_volatile().number_of_ports() {
+            let port = self.registers.port_register_set.read_volatile_at(i as usize);
+            let is_connect = port.portsc.current_connect_status();
+            serial_println!("Port {} \n {:#?}", i, port);
         }
     }
 
 
-    pub fn process_event(&mut self) {
-        let erdp = self.registers.interrupt_register_set.read_volatile_at(0).erdp.event_ring_dequeue_pointer();
-        log!("ERDP {}", erdp);
-        self.log_usb_sts();
-        self.log_usb_cmd();
-        let trb_base = unsafe { ptr::read_volatile(erdp as *const TrbBase) };
-        log!("TRB BASE {:#?}", trb_base);
-    }
+    #[allow(unused)]
     pub fn log_usb_sts(&self) {
-        log!("{:#?}", self.registers.operational.usbsts.read_volatile());
+        serial_println!("{:#?}", self.registers.operational.usbsts.read_volatile());
     }
+
+    #[allow(unused)]
     pub fn log_usb_cmd(&self) {
-        log!("{:#?}", self.registers.operational.usbcmd.read_volatile());
+        serial_println!("{:#?}", self.registers.operational.usbcmd.read_volatile());
     }
+
+    #[allow(unused)]
     pub fn is_run_command_ring(&self) -> bool {
         self.registers.operational.crcr.read_volatile().command_ring_running()
     }
 }
 
-#[derive(Clone, Debug)]
-struct XhcMapper {
-    phys_offset: VirtAddr,
-}
 
-impl xhci::accessor::Mapper for XhcMapper {
-    unsafe fn map(&mut self, phys_start: usize, bytes: usize) -> NonZeroUsize {
-        let mut virt_addr = VirtAddr::new(self.phys_offset.as_u64() + phys_start as u64);
-
-        let frame = PhysFrame::<Size4KiB>::containing_address(PhysAddr::new(phys_start as u64));
-        let frags = PageTableFlags::WRITABLE | PageTableFlags::PRESENT | PageTableFlags::ACCESSED | PageTableFlags::USER_ACCESSIBLE;
-
-        loop {
-            let page = x86_64::structures::paging::Page::<Size4KiB>::containing_address(virt_addr);
-            let res = PAGE_TABLE.get().lock().map_to(page, frame, frags, &mut *FRAME_ALLOCATOR.get().lock());
-            if let Ok(res) = res {
-                res.flush();
-                break;
-            } else {
-                virt_addr.add_assign(Size4KiB::SIZE);
-                // page.add_assign(4096);
-            }
-        }
-
-        NonZeroUsize::new_unchecked(virt_addr.as_u64() as usize)
-        //NonZeroUsize::new_unchecked(self.phys_offset.as_u64() as usize + phys_start )
+impl EventRingAddress for LibBaseController {
+    fn dequeue_ptr_addr(&self) -> VirtAddr {
+        self.event_ring.dequeue_ptr_addr()
     }
 
-    fn unmap(&mut self, virt_start: usize, bytes: usize) {
-        log!("Unmap Usb Mouse MMIO {:#?}", virt_start);
-        todo!()
+    fn segment_tbl_base_addr(&self) -> VirtAddr {
+        self.event_ring.segment_tbl_base_addr()
+    }
+}
+
+impl CommandRingAddress for LibBaseController {
+    fn command_ring_base_addr(&self) -> VirtAddr {
+        self.command_ring.command_ring_base_addr()
+    }
+}
+
+
+impl DeviceContextAddr for LibBaseController {
+    fn device_context_base_addr(&self) -> VirtAddr {
+        self.device_manager.device_context_base_addr()
     }
 }
