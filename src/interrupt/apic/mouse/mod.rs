@@ -1,5 +1,3 @@
-use core::ptr;
-use bit_field::BitField;
 use spin::mutex::SpinMutex;
 use x86_64::{PhysAddr, VirtAddr};
 use x86_64::structures::idt::InterruptStackFrame;
@@ -26,14 +24,14 @@ pub fn init(phys_offset: VirtAddr) {
     serial_println!("Start Find MMIO Base Address!");
     let xhc_mmio_base_addr = tmp_find_usb_mouse_base().unwrap();
     let mmio_base = PhysAddr::new(xhc_mmio_base_addr);
-    // map(mmio_base.as_u64());
+
     serial_println!("Mapped Mmio Base");
-    //serial_println!("MMIO Base Address {:?}", mmio_base);
-    let bsp_local_apic_id: u8 = unsafe { ptr::read_volatile(0xfee00020 as *mut u32).get_bits(24..32) } as u8;
+
+    //let bsp_local_apic_id: u8 = unsafe { ptr::read_volatile(0xfee00020 as *mut u32).get_bits(24..32) } as u8;
     let bsp_local_apic_id = unsafe { *(0xfee00020 as *const u32) } >> 24;
 
     let device = find_xhc_device().unwrap();
-    log!("Find Device {:#?}", device);
+
     configure_msi_fixed_destination(&device, bsp_local_apic_id as u32, true, 0, InterruptIndex::Xhci.as_u8(), 0);
     log!("Configure Msi Fixed");
 
@@ -42,7 +40,7 @@ pub fn init(phys_offset: VirtAddr) {
     let mut xhc_controller = LibBaseController::try_new(mmio_base, DEVICE_MAX_SLOTS).expect("Failed New Xhci");
     serial_println!("New Xhci");
 
-    init_xhci(&mut xhc_controller, DEVICE_MAX_SLOTS).expect("Failed Initialize Xhc Controller");
+    init_xhci(&mut xhc_controller, DEVICE_MAX_SLOTS, phys_offset).expect("Failed Initialize Xhc Controller");
     serial_println!("Init Xhci");
 
     XHC_MOUSE.try_init_once(move || SpinMutex::new(xhc_controller)).expect("Failed Init Once Xhc Mouse");

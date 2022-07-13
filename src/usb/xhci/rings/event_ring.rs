@@ -17,48 +17,28 @@ pub trait EventRingAddress {
 }
 
 
-#[repr(align(64))]
-struct InterruptArray([EventRingSegmentTableEntry; 1024]);
-
-impl InterruptArray {
-    pub fn new() -> Self {
-        Self([EventRingSegmentTableEntry::new_zeros(); 1024])
-    }
-}
-
-#[repr(align(64))]
-struct EventDataBuff([TrbBase; 32]);
-
-impl EventDataBuff {
-    pub fn new() -> Self {
-        Self([TrbBase::new_zeros(); 32])
-    }
-}
-
 #[allow(unused)]
 pub struct EventRing {
     cycle_bit: bool,
-    data_buff: *mut [TrbBase],
-    erste: *mut [EventRingSegmentTableEntry],
+    event_ring_segment: *mut [u128],
+    event_ring_segment_tbl: *mut [EventRingSegmentTableEntry],
 }
 
 impl EventRing {
     pub unsafe fn new() -> Self {
-        let data_buff = unsafe { HEAP.alloc_zeroed(Layout::from_size_align(32 * 32, 64).unwrap()) };
-        let erste = unsafe { HEAP.alloc_zeroed(Layout::from_size_align_unchecked(128 * 1024, 64)) };
-        let mut data_buff = ptr::slice_from_raw_parts_mut(data_buff as *mut TrbBase, 32);
-        let mut erste = ptr::slice_from_raw_parts_mut(erste as *mut EventRingSegmentTableEntry, 1024);
+        let event_ring_segment_tbl = unsafe { HEAP.alloc_zeroed(Layout::from_size_align_unchecked(128, 64)) };
+        let event_ring_segment = unsafe { HEAP.alloc_zeroed(Layout::from_size_align(128 * 32, 64).unwrap()) };
 
-        // TODO  Event Ring セグメントサイズの設定
+        let event_ring_segment_tbl = ptr::slice_from_raw_parts_mut(event_ring_segment_tbl as *mut EventRingSegmentTableEntry, 1);
+        let event_ring_segment = ptr::slice_from_raw_parts_mut(event_ring_segment as *mut u128, 32);
 
-
-        (*erste)[0].set_ring_segment_base_address((*data_buff).as_ptr().addr() as u64);
-        (*erste)[0].set_ring_segment_size(32);
+        (*event_ring_segment_tbl)[0].set_ring_segment_base_address((*event_ring_segment).as_ptr().addr() as u64);
+        (*event_ring_segment_tbl)[0].set_ring_segment_size(32);
 
         Self {
             cycle_bit: true,
-            data_buff,
-            erste,
+            event_ring_segment,
+            event_ring_segment_tbl,
         }
     }
 
@@ -83,35 +63,40 @@ impl EventRing {
         // interrupter.set_dequeue_ptr(dequeue_ptr);
     }
     #[allow(unused)]
-    pub fn has_front(&self, interrupter: &Volatile<InterrupterRegisterSet>) -> bool {
-        let trb = self.front_trb(interrupter);
-        serial_println!("TRB {:?}", trb);
+    pub fn has_front(&self, interrupter: xhci::registers::InterruptRegisterSet, offset: u64) -> bool {
+        let trb = self.front_trb(interrupter, offset, 0);
+        serial_println!("trb {:?}",trb);
+        if trb.trb_type() != 0 {}
+
+
         trb.cycle_bit() == self.cycle_bit
     }
 
     #[allow(unused)]
-    pub fn front_trb(&self, interrupter: &Volatile<InterrupterRegisterSet>) -> TrbBase {
-        let dequeue_ptr = interrupter.get_dequeue_ptr();
-        let src = dequeue_ptr;
-        unsafe { ptr::read_volatile(src as *const TrbBase) }
+    pub fn front_trb(&self, interrupter: xhci::registers::InterruptRegisterSet, offset: u64, o: isize) -> TrbBase {
+        let dequeue_ptr = interrupter.erdp.event_ring_dequeue_pointer() + offset;
+
+        unsafe { ptr::read_volatile(self.event_ring_segment as *mut TrbBase) }
     }
 }
 
 impl EventRingAddress for EventRing {
     fn dequeue_ptr_addr(&self) -> VirtAddr {
-        unsafe { VirtAddr::new((*self.data_buff).as_ptr().addr() as u64) }
+        unsafe {
+            VirtAddr::new((*self.event_ring_segment).as_ptr().addr() as u64)
+        }
     }
 
     fn segment_tbl_base_addr(&self) -> VirtAddr {
-        unsafe { VirtAddr::new((*self.erste).as_ptr().addr() as u64) }
+        unsafe { VirtAddr::new((*self.event_ring_segment_tbl).as_ptr().addr() as u64) }
     }
 }
 
 impl Drop for EventRing {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(self.data_buff);
-            drop_in_place(self.erste);
+            drop_in_place(self.event_ring_segment);
+            drop_in_place(self.event_ring_segment_tbl);
         }
     }
 }
