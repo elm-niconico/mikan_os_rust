@@ -1,10 +1,10 @@
-mod identity;
+pub(crate) use identity::make_identity_mapping;
+pub(crate) use offset::init;
+pub(crate) use offset::PAGE_TABLE;
+
+pub mod identity;
 mod offset;
 
-
-pub(crate) use identity::make_identity_mapping;
-pub(crate) use offset::PAGE_TABLE;
-pub(crate) use offset::init;
 
 // pub(crate) unsafe fn init(
 //     physical_memory_offset: VirtAddr,

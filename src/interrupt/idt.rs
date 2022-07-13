@@ -1,7 +1,7 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
+
 use crate::interrupt::apic::mouse::xhci_mouse_handler;
 use crate::interrupt::apic::timer::apic_timer_handler;
-
 use crate::log;
 use crate::spin::sync_once_cell::StaticOnceCell;
 
@@ -106,7 +106,7 @@ extern "x86-interrupt" fn page_fault_handler(
     log!("Accessed Address: {:?}", Cr2::read());
     log!("Error Code: {:?}", error_code);
     log!("{:#?}", stack_frame);
-    loop {}
+    panic!("{:#?}", stack_frame);
 }
 
 extern "x86-interrupt" fn double_fault_handler(

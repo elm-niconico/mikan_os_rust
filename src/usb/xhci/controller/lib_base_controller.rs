@@ -1,15 +1,12 @@
-use core::ptr;
-
 use x86_64::{PhysAddr, VirtAddr};
 use xhci::Registers;
 
+use crate::{println, serial_println};
 use crate::error::KernelResult;
-use crate::serial_println;
 use crate::usb::xhci::device_manager::device_manager::{DeviceContextAddr, DeviceManager};
 use crate::usb::xhci::mapper::XhcMapper;
 use crate::usb::xhci::rings::command_ring::{CommandRing, CommandRingAddress};
 use crate::usb::xhci::rings::event_ring::{EventRing, EventRingAddress};
-use crate::usb::xhci::trb::trb_base::TrbBase;
 
 pub struct LibBaseController {
     pub registers: Registers<XhcMapper>,
@@ -24,11 +21,10 @@ unsafe impl Sync for LibBaseController {}
 
 impl LibBaseController {
     pub fn try_new(xhc_mmio_base: PhysAddr, device_max_slots: u8) -> KernelResult<Self> {
-        serial_println!("Try New Xhc");
         let mapper = XhcMapper::new();
 
         let registers = unsafe { Registers::new(xhc_mmio_base.as_u64() as usize, mapper) };
-        serial_println!("Create Register");
+
         let command_ring = CommandRing::new();
         let event_ring = unsafe { EventRing::new() };
         let device_manager = DeviceManager::try_new(device_max_slots)?;
@@ -46,22 +42,31 @@ impl LibBaseController {
             r.set_run_stop();
         });
 
+
         while self.registers.operational.usbsts.read_volatile().hc_halted() {};
     }
 
-    pub fn process_event(&mut self) {
-        let erdp = self.registers.interrupt_register_set.read_volatile_at(0).erdp.event_ring_dequeue_pointer();
-        let trb_base = unsafe { ptr::read_volatile(erdp as *const TrbBase) };
-        if !trb_base.cycle_bit() {
-            serial_println!("Parameter {:?}", trb_base.parameter());
+
+    pub fn notify(&mut self) {
+        println!("{:#?}", self.registers.operational.crcr.read_volatile().command_ring_running());
+        self.registers.doorbell.update_volatile_at(0, |r| {
+            r.set_doorbell_target(0);
+            r.set_doorbell_stream_id(0);
+        });
+    }
+    pub fn process_event(&mut self, offset: u64) {
+        let primary = self
+            .registers
+            .interrupt_register_set
+            .read_volatile_at(0);
+        if !self.event_ring.has_front(primary, offset) {
             return;
         }
 
+        serial_println!("Event");
 
         self.log_usb_sts();
         self.log_usb_cmd();
-
-        serial_println!("TRB BASE {:#?}", trb_base);
     }
 
     pub fn ports(&self) {

@@ -51,6 +51,7 @@ entry_point!(kernel_main);
 
 #[no_mangle]
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    let offset = boot_info.physical_memory_offset.as_ref().copied().unwrap();
     unsafe { init_kernel(boot_info) };
 
 
@@ -60,10 +61,11 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     let mut mouse = unsafe { XHC_MOUSE.get_unchecked().lock() };
     mouse.run();
 
-    mouse.ports();
-    loop {
-        mouse.process_event();
-    }
+    // mouse.ports();
+    //
+    mouse.command_ring.push();
+    mouse.notify();
+    mouse.process_event(offset);
 
     #[allow(unreachable_code)]
     assembly::hlt_loop()
@@ -71,13 +73,11 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
 
 unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
     let phys_offset_addr = VirtAddr::new(boot_info.physical_memory_offset.as_ref().copied().unwrap());
-
+    let rsdp = VirtAddr::new(boot_info.rsdp_addr.as_ref().copied().unwrap()).align_down(64u64);
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
     serial_port::init();
 
     serial_println!("Init Frame Buffer");
-
-    serial_println!("Offset {:?}", phys_offset_addr.as_u64());
 
 
     memory::init(&boot_info.memory_regions, phys_offset_addr);
@@ -87,7 +87,7 @@ unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
     serial_println!("Init GDT");
 
 
-    interrupt::init(phys_offset_addr);
+    interrupt::init(rsdp);
     serial_println!("Init Interrupt");
 
 

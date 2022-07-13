@@ -1,19 +1,19 @@
+use conquer_once::noblock::OnceCell;
+use spin::mutex::Mutex;
 use x86_64::structures::paging::{OffsetPageTable, PageTable};
 use x86_64::VirtAddr;
 
 use crate::println;
-use crate::spin::sync_mutex::StaticSpinMutex;
-use crate::spin::sync_once_cell::StaticOnceCell;
 
-pub(crate) static PAGE_TABLE: StaticOnceCell<StaticSpinMutex<OffsetPageTable>> =
-    StaticOnceCell::uninit();
+pub static PAGE_TABLE: OnceCell<Mutex<OffsetPageTable>> = OnceCell::uninit();
 
 
-pub(crate) unsafe fn init(phys_offset: VirtAddr) {
+pub unsafe fn init(phys_offset: VirtAddr) {
     let page_table = &mut *active_level_4_table(phys_offset);
 
-    PAGE_TABLE
-        .init_once(|| StaticSpinMutex::new(OffsetPageTable::new(page_table, phys_offset)))
+    PAGE_TABLE.try_init_once(|| {
+        Mutex::new(OffsetPageTable::new(page_table, phys_offset))
+    }).expect("Failed Init Page Table");
 }
 
 

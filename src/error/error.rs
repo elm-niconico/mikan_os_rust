@@ -30,7 +30,7 @@ pub enum KernelError {
     FailedHcReset,
     OverFlowDeviceMaxSlots,
     FailedSetDeviceContextBase(DeviceContextErrInfo),
-    LayoutError(LayoutError)
+    LayoutError(LayoutError),
 }
 
 
@@ -69,5 +69,6 @@ impl From<LayoutError> for KernelError {
         Self::LayoutError(e)
     }
 }
+
 
 // TODO Option::Noneからエラーを作成したい
