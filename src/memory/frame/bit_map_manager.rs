@@ -21,7 +21,7 @@ const fn gib(num: u64) -> u64 {
     num * mib(1024)
 }
 
-pub(crate) const BYTES_PER_FRAME: u64 = kib(4);
+pub const BYTES_PER_FRAME: u64 = kib(4);
 const MAX_PHYSICAL_MEMORY_BYTE: u64 = gib(128);
 const FRAME_COUNT: u64 = MAX_PHYSICAL_MEMORY_BYTE / BYTES_PER_FRAME;
 

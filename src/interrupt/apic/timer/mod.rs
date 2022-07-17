@@ -15,6 +15,7 @@ pub fn notify_end_of_interrupt() {
 
 pub extern "x86-interrupt" fn apic_timer_handler(_: InterruptStackFrame) {
     print!(".");
-
-    notify_end_of_interrupt();
+    let mut memory = Volatile::new(unsafe { (0xfee000b0 as *mut u32).as_mut().unwrap() });
+    memory.write(0);
+    // notify_end_of_interrupt();
 }

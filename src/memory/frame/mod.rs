@@ -6,7 +6,7 @@ use crate::memory::frame::frame_init::InitAllocator;
 
 mod boot_info;
 mod bit_map;
-mod bit_map_manager;
+pub mod bit_map_manager;
 mod frame_id;
 mod frame_init;
 

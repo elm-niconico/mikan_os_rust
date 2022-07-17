@@ -26,6 +26,7 @@ pub enum KernelError {
     AddressNotAligned(AddressNotAligned),
     None,
     Empty,
+    FrameBuffOverFlow,
     FailedHcHalted,
     FailedHcReset,
     OverFlowDeviceMaxSlots,

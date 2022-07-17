@@ -44,11 +44,11 @@ impl BlogOsWriter {
         self.y_pos -= 8;
     }
 
-    fn width(&self) -> usize {
+    pub fn width(&self) -> usize {
         self.info.horizontal_resolution
     }
 
-    fn height(&self) -> usize {
+    pub fn height(&self) -> usize {
         self.info.vertical_resolution
     }
 
@@ -81,7 +81,7 @@ impl BlogOsWriter {
         self.x_pos += 8;
     }
 
-    fn write_pixel(&mut self, x: usize, y: usize, on: bool) {
+    pub fn write_pixel(&mut self, x: usize, y: usize, on: bool) {
         let pixel_offset = y * self.info.stride + x;
         let color = if on {
             match self.info.pixel_format {
