@@ -22,8 +22,8 @@ use bootloader::{BootInfo, entry_point};
 use x86_64::VirtAddr;
 
 use segmentation::gdt;
-
 use crate::interrupt::apic::mouse::XHC_MOUSE;
+
 use crate::interrupt::map;
 use crate::memory::frame::FRAME_ALLOCATOR;
 use crate::memory::paging::PAGE_TABLE;
@@ -44,7 +44,8 @@ mod serial_port;
 mod testable;
 mod usb;
 mod utils;
-
+mod log;
+mod cxx_support;
 
 entry_point!(kernel_main);
 
@@ -58,14 +59,19 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     #[cfg(test)]
     test_main();
 
-    let mut mouse = unsafe { XHC_MOUSE.get_unchecked().lock() };
-    mouse.run();
-
-    // mouse.ports();
+    // loop {
+    //     let mut mouse = unsafe { crate::interrupt::apic::mouse::XHC_MOUSE.get_unchecked().lock() };
     //
-    mouse.command_ring.push();
-    mouse.notify();
-    mouse.process_event(offset);
+    //     mouse.process_event();
+    // }
+    // let mut mouse = unsafe { XHC_MOUSE.get_unchecked().lock() };
+    // mouse.run();
+    //
+    // // mouse.ports();
+    // //
+    // mouse.command_ring.push();
+    // mouse.notify();
+    // mouse.process_event(offset);
 
     #[allow(unreachable_code)]
     assembly::hlt_loop()
