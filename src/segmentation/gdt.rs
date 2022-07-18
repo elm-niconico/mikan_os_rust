@@ -4,9 +4,6 @@ use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector
 
 use crate::spin::sync_once_cell::StaticOnceCell;
 
-pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
-
-
 static mut GDT: StaticOnceCell<GlobalDescriptorTable> = StaticOnceCell::uninit();
 
 #[derive(Debug)]
@@ -25,7 +22,7 @@ pub fn init() {
     };
     set_up_segment(&mut selectors);
 
-   
+
     // Set CS SS
     unsafe { segmentation::SS::set_reg(selectors.kernel_stack_selector) }
     unsafe { segmentation::CS::set_reg(selectors.kernel_code_selector) };

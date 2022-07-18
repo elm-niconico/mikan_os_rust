@@ -1,6 +1,6 @@
-use x86_64::{PhysAddr, VirtAddr};
+use x86_64::PhysAddr;
 
-use crate::error::{KernelError, KernelResult};
+use crate::error::kernel_error::{KernelError, KernelResult};
 use crate::memory::paging::identity::virt_to_phys;
 use crate::usb::xhci::device_manager::device_manager::DeviceContextAddr;
 use crate::usb::xhci::rings::command_ring::CommandRingAddress;
@@ -9,7 +9,7 @@ use crate::usb::xhci::rings::event_ring::EventRingAddress;
 mod lib_base_initializer;
 
 
-pub fn init_xhci<T>(xhc: &mut T, max_slots: u8, a: VirtAddr) -> KernelResult<()>
+pub fn init_xhci<T>(xhc: &mut T, max_slots: u8) -> KernelResult<()>
     where T:
     XhcInitializer +
     EventRingAddress +
@@ -23,8 +23,8 @@ pub fn init_xhci<T>(xhc: &mut T, max_slots: u8, a: VirtAddr) -> KernelResult<()>
     xhc.set_device_context_base_addr(virt_to_phys(xhc.device_context_base_addr()).ok_or(KernelError::None)?)?;
     xhc.set_segment_base_addr(virt_to_phys(xhc.segment_tbl_base_addr()).ok_or(KernelError::None)?);
     xhc.init_segment_size();
-    xhc.set_dequeue_ptr(virt_to_phys(xhc.dequeue_ptr_addr()).ok_or(KernelError::None)?);
-    xhc.register_command_ring(virt_to_phys(xhc.command_ring_base_addr()).ok_or(KernelError::None)?)?;
+    xhc.set_dequeue_ptr(PhysAddr::new(xhc.dequeue_ptr_addr().as_u64()));
+    xhc.register_command_ring(PhysAddr::new(xhc.command_ring_base_addr().as_u64()))?;
     xhc.interrupt_enable()?;
 
     Ok(())

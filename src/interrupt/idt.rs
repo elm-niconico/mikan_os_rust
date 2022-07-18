@@ -1,6 +1,5 @@
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 
-use crate::interrupt::apic::mouse::xhci_mouse_handler;
 use crate::interrupt::apic::timer::apic_timer_handler;
 use crate::log;
 use crate::spin::sync_once_cell::StaticOnceCell;
@@ -70,7 +69,9 @@ pub(crate) fn create_idt() -> InterruptDescriptorTable {
             .set_stack_index(0);
     }
 
-    idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(xhci_mouse_handler);
+
+    //idt[InterruptIndex::PicTimer.as_usize()].set_handler_fn(pic_timer_handler);
+    // idt[InterruptIndex::Xhci.as_usize()].set_handler_fn(xhci_mouse_handler);
     idt[InterruptIndex::APicTimer.as_usize()].set_handler_fn(apic_timer_handler);
 
     idt

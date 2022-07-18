@@ -12,8 +12,4 @@ impl<T> StaticSpinMutex<T> {
     pub fn lock(&self) -> SpinMutexGuard<T> {
         self.0.lock()
     }
-
-    pub fn get_mut(&mut self) -> &mut T {
-        self.0.get_mut()
-    }
 }

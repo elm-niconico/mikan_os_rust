@@ -2,12 +2,11 @@ use bootloader::boot_info::MemoryRegions;
 use spin::Mutex;
 
 use crate::memory::frame::bit_map_manager::BitMapFrameAllocator;
-use crate::memory::frame::frame_init::InitAllocator;
 
 mod boot_info;
 mod bit_map;
 pub mod bit_map_manager;
-mod frame_id;
+
 mod frame_init;
 
 

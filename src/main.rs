@@ -11,7 +11,7 @@
 #![feature(portable_simd)]
 #![feature(abi_x86_interrupt)]
 
-extern crate alloc;
+// extern crate alloc;
 extern crate bitfield_struct;
 // extern crate rlibc;
 
@@ -19,25 +19,18 @@ extern crate bitfield_struct;
 use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
-use x86_64::VirtAddr;
 
-use segmentation::gdt;
-use crate::interrupt::apic::mouse::XHC_MOUSE;
-
-use crate::interrupt::map;
-use crate::memory::frame::FRAME_ALLOCATOR;
-use crate::memory::paging::PAGE_TABLE;
 use crate::qemu::{exit_qemu, ExitCode};
+use crate::segmentation::gdt;
 use crate::testable::Testable;
-use crate::usb::pci::configuration::tmp_find_usb_mouse_base;
 
 mod assembly;
 mod spin;
 mod error;
 mod frame_buffer;
-mod interrupt;
+// mod interrupt;
 mod macros;
-mod memory;
+// mod memory;
 mod qemu;
 mod segmentation;
 mod serial_port;
@@ -52,53 +45,42 @@ entry_point!(kernel_main);
 
 #[no_mangle]
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    let offset = boot_info.physical_memory_offset.as_ref().copied().unwrap();
+    // let offset = boot_info.physical_memory_offset.as_ref().copied().unwrap();
     unsafe { init_kernel(boot_info) };
 
 
     #[cfg(test)]
     test_main();
 
-    // loop {
-    //     let mut mouse = unsafe { crate::interrupt::apic::mouse::XHC_MOUSE.get_unchecked().lock() };
-    //
-    //     mouse.process_event();
-    // }
-    // let mut mouse = unsafe { XHC_MOUSE.get_unchecked().lock() };
-    // mouse.run();
-    //
-    // // mouse.ports();
-    // //
-    // mouse.command_ring.push();
-    // mouse.notify();
-    // mouse.process_event(offset);
 
     #[allow(unreachable_code)]
-    assembly::hlt_loop()
+    assembly::hlt::hlt_loop()
 }
 
 unsafe fn init_kernel(boot_info: &'static mut BootInfo) {
-    let phys_offset_addr = VirtAddr::new(boot_info.physical_memory_offset.as_ref().copied().unwrap());
-    let rsdp = VirtAddr::new(boot_info.rsdp_addr.as_ref().copied().unwrap()).align_down(64u64);
     frame_buffer::init(boot_info.framebuffer.as_mut().unwrap());
+    println!("Init Frame Buffer!");
+
     serial_port::init();
+    serial_println!("Init Serial Port!");
 
-    serial_println!("Init Frame Buffer");
+    // TODO スタックの移動
 
-
-    memory::init(&boot_info.memory_regions, phys_offset_addr);
-    serial_println!("Init Memory");
 
     gdt::init();
     serial_println!("Init GDT");
 
+    // memory::init(&boot_info.memory_regions, phys_offset_addr);
+    // serial_println!("Init Memory");
+    //
 
-    interrupt::init(rsdp);
-    serial_println!("Init Interrupt");
-
-
-    x86_64::instructions::interrupts::enable();
-    serial_println!("Interrupt Enable");
+    //
+    // interrupt::init();
+    // serial_println!("Init Interrupt");
+    //
+    //
+    // x86_64::instructions::interrupts::enable();
+    // serial_println!("Interrupt Enable");
 }
 
 #[cfg(not(test))]
@@ -117,17 +99,9 @@ fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info);
 
     #[allow(unreachable_code)]
-    assembly::hlt_loop()
+    assembly::hlt::hlt_loop()
 }
 
-async fn example_task() {
-    let number = async_number().await;
-    println!("async number: {}", number);
-}
-
-async fn async_number() -> u32 {
-    42
-}
 
 pub fn test_runner_handler(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());

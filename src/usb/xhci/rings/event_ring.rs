@@ -20,6 +20,8 @@ pub trait EventRingAddress {
 #[allow(unused)]
 pub struct EventRing {
     cycle_bit: bool,
+
+    // FIXME 生ポインタを使わずに実装する
     event_ring_segment: *mut [u128],
     event_ring_segment_tbl: *mut [EventRingSegmentTableEntry],
 }
@@ -66,7 +68,6 @@ impl EventRing {
     pub fn has_front(&self, interrupter: xhci::registers::InterruptRegisterSet, offset: u64) -> bool {
         let trb = self.front_trb(interrupter, offset, 0);
         serial_println!("trb {:?}",trb);
-        if trb.trb_type() != 0 {}
 
 
         trb.cycle_bit() == self.cycle_bit
@@ -74,7 +75,7 @@ impl EventRing {
 
     #[allow(unused)]
     pub fn front_trb(&self, interrupter: xhci::registers::InterruptRegisterSet, offset: u64, o: isize) -> TrbBase {
-        let dequeue_ptr = interrupter.erdp.event_ring_dequeue_pointer() + offset;
+        let dequeue_ptr = interrupter.erdp.event_ring_dequeue_pointer();
 
         unsafe { ptr::read_volatile(self.event_ring_segment as *mut TrbBase) }
     }

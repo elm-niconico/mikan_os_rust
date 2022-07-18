@@ -2,9 +2,7 @@ use core::alloc::Layout;
 use core::ptr::drop_in_place;
 
 use x86_64::VirtAddr;
-use xhci::ring::trb::command::EnableSlot;
 use xhci::ring::trb::transfer::Noop;
-use xhci::ring::trb::Type::NoopCommand;
 
 use crate::memory::heap::HEAP;
 

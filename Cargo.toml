@@ -39,5 +39,5 @@ default-features = false
 features = ["alloc"]
 
 
-[package.metadata.bootloader]
-map-physical-memory = true
+#[package.metadata.bootloader]
+#map-physical-memory = true

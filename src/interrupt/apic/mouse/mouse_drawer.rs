@@ -1,8 +1,7 @@
 use spin::mutex::SpinMutex;
 
-use crate::error::{KernelError, KernelResult};
+use crate::error::kernel_error::{KernelError, KernelResult};
 use crate::frame_buffer::{frame_buff_size, WRITER};
-use crate::serial_println;
 use crate::spin::sync_once_cell::StaticOnceCell;
 
 pub static MOUSE_CURSOR: StaticOnceCell<SpinMutex<MouseCursor>> = StaticOnceCell::uninit();
@@ -25,7 +24,7 @@ impl MouseCursor {
     }
 
     pub fn move_mouse(&mut self, x: isize, y: isize) -> KernelResult<()> {
-        self.erase();
+        let _ = self.erase();
 
         let pos_x_isize = isize::try_from(self.pos_x).map_err(|e| KernelError::FrameBuffOverFlow)?;
         let pos_y_isize = isize::try_from(self.pos_y).map_err(|e| KernelError::FrameBuffOverFlow)?;
@@ -98,7 +97,7 @@ pub fn draw_mouse_cursor(x: usize, y: usize) -> KernelResult<()> {
             let next_y = dy + y as usize;
             let pixel = char::from(MOUSE_CURSOR_SHAPE[dy][dx]);
 
-            serial_println!("mouse");
+
             if pixel == '@' {
                 WRITER
                     .get()

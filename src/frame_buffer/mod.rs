@@ -13,9 +13,12 @@ mod blog_os;
 
 pub static WRITER: StaticOnceCell<StaticSpinMutex<BlogOsWriter>> = StaticOnceCell::uninit();
 
+
+
+#[allow(unused)]
 pub fn frame_buff_size() -> (usize, usize) {
     let frame_buff = WRITER.get().lock();
-    return (frame_buff.width(), frame_buff.height());
+    (frame_buff.width(), frame_buff.height())
 }
 
 pub fn init(frame_buffer: &'static mut FrameBuffer) {

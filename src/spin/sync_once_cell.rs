@@ -8,7 +8,7 @@ impl<T> StaticOnceCell<T> {
     }
 
     pub fn init_once(&self, init: impl FnOnce() -> T) {
-        unsafe { self.0.init_once(init) };
+        self.0.init_once(init);
     }
     pub fn get(&self) -> &T {
         unsafe { self.0.get_unchecked() }

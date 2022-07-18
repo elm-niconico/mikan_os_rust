@@ -2,7 +2,8 @@ use core::alloc::Layout;
 
 use x86_64::PhysAddr;
 
-use crate::error::{DeviceContextErrInfo, KernelError, KernelResult};
+use crate::error::expect_info::DeviceContextErrInfo;
+use crate::error::kernel_error::{KernelError, KernelResult};
 use crate::memory::heap::HEAP;
 use crate::usb::xhci::controller::initialize::XhcInitializer;
 use crate::usb::xhci::controller::lib_base_controller::LibBaseController;

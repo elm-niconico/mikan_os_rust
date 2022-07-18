@@ -30,10 +30,13 @@ global_asm!(
 extern "C" {
     // コンフィグアドレスレジスタにコンフィギュレーション空間の読み込み先のアドレスを書き込みます
     // addrはRDIレジスタに,dataはRSIレジスタに設定される
+    #[allow(unused)]
     pub fn io_out_32(addr: u16, data: u32) -> u32;
 
 
     // コンフィギュレーション空間の値を読み込みます
     // 読み込む前にio_out_32で読み込みたいデータの先頭アドレスを指定する必要があります
+
+    #[allow(unused)]
     pub fn io_in_32(addr: u16) -> u32;
 }

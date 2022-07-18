@@ -2,8 +2,8 @@ use core::alloc::Layout;
 use core::ptr;
 
 use x86_64::VirtAddr;
+use crate::error::kernel_error::KernelResult;
 
-use crate::error::KernelResult;
 use crate::memory::heap::HEAP;
 use crate::usb::xhci::device::device_context::DeviceContext;
 use crate::usb::xhci::device::usb_device::UsbDevice;
@@ -50,8 +50,8 @@ impl DeviceManager {
         })
     }
 
-    pub fn set(&mut self, deivceContext: *mut DeviceContext) {
-        unsafe { self.device_contexts.write_volatile(deivceContext) }
+    pub fn set(&mut self, device_context: *mut DeviceContext) {
+        unsafe { self.device_contexts.write_volatile(device_context) }
     }
 }
 

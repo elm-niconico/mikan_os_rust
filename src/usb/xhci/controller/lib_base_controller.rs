@@ -1,8 +1,9 @@
 use x86_64::{PhysAddr, VirtAddr};
-use xhci::Registers;
+use xhci::{ExtendedCapability, Registers};
+use xhci::extended_capabilities::List;
 
 use crate::{println, serial_println};
-use crate::error::KernelResult;
+use crate::error::kernel_error::KernelResult;
 use crate::usb::xhci::device_manager::device_manager::{DeviceContextAddr, DeviceManager};
 use crate::usb::xhci::mapper::XhcMapper;
 use crate::usb::xhci::rings::command_ring::{CommandRing, CommandRingAddress};
@@ -13,6 +14,7 @@ pub struct LibBaseController {
     pub command_ring: CommandRing,
     pub event_ring: EventRing,
     pub device_manager: DeviceManager,
+    pub phs_offset: u64,
 }
 
 unsafe impl Send for LibBaseController {}
@@ -20,11 +22,27 @@ unsafe impl Send for LibBaseController {}
 unsafe impl Sync for LibBaseController {}
 
 impl LibBaseController {
-    pub fn try_new(xhc_mmio_base: PhysAddr, device_max_slots: u8) -> KernelResult<Self> {
+    pub fn try_new(xhc_mmio_base: PhysAddr, device_max_slots: u8, phs_offset: u64) -> KernelResult<Self> {
         let mapper = XhcMapper::new();
-
+        let map_clone = mapper.clone();
         let registers = unsafe { Registers::new(xhc_mmio_base.as_u64() as usize, mapper) };
 
+        let hcc_params1 = registers.capability.hccparams1.read_volatile();
+
+        unsafe {
+            let mut a = List::new(xhc_mmio_base.as_u64() as usize, hcc_params1, map_clone).unwrap();
+            for cap in a.into_iter() {
+                let cap = cap.unwrap();
+                if let ExtendedCapability::UsbLegacySupport(mut u) = cap {
+                    u.usblegsup.update_volatile(|r| {
+                        r.set_hc_os_owned_semaphore();
+                    });
+
+                    while u.usblegsup.read_volatile().hc_os_owned_semaphore() || !u.usblegsup.read_volatile().hc_bios_owned_semaphore() {}
+                    break;
+                }
+            }
+        }
         let command_ring = CommandRing::new();
         let event_ring = unsafe { EventRing::new() };
         let device_manager = DeviceManager::try_new(device_max_slots)?;
@@ -34,6 +52,7 @@ impl LibBaseController {
             command_ring,
             event_ring,
             device_manager,
+            phs_offset,
         })
     }
 
@@ -54,26 +73,34 @@ impl LibBaseController {
             r.set_doorbell_stream_id(0);
         });
     }
-    pub fn process_event(&mut self, offset: u64) {
+
+    pub fn has_event(&self) -> bool {
         let primary = self
             .registers
             .interrupt_register_set
             .read_volatile_at(0);
-        if !self.event_ring.has_front(primary, offset) {
-            return;
-        }
 
+        self.event_ring.has_front(primary, self.phs_offset)
+    }
+
+    pub fn process_event(&mut self) {
         serial_println!("Event");
 
         self.log_usb_sts();
         self.log_usb_cmd();
     }
 
-    pub fn ports(&self) {
+    pub fn configure_connected_ports(&mut self) {
         for i in 0..self.registers.capability.hcsparams1.read_volatile().number_of_ports() {
-            let port = self.registers.port_register_set.read_volatile_at(i as usize);
+            let mut port = self.registers.port_register_set.read_volatile_at(i as usize);
             let is_connect = port.portsc.current_connect_status();
-            serial_println!("Port {} \n {:#?}", i, port);
+
+            if is_connect {
+                port.portsc.set_port_reset();
+                port.portsc.clear_connect_status_change();
+                self.registers.port_register_set.write_volatile_at(i as usize, port);
+                while self.registers.port_register_set.read_volatile_at(i as usize).portsc.port_reset() {}
+            }
         }
     }
 

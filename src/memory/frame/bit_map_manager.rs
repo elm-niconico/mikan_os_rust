@@ -4,9 +4,7 @@ use bootloader::boot_info::{MemoryRegion, MemoryRegionKind, MemoryRegions};
 use x86_64::PhysAddr;
 use x86_64::structures::paging::{FrameAllocator, PhysFrame, Size4KiB};
 use x86_64::structures::paging::frame::PhysFrameRange;
-
-use crate::error::{KernelError, KernelResult};
-use crate::memory::frame::frame_init::InitAllocator;
+use crate::error::kernel_error::{KernelError, KernelResult};
 
 const fn kib(data: u64) -> u64 {
     data * 1024
@@ -144,11 +142,11 @@ impl BitMapFrameAllocator {
         }
     }
 
-    // pub(crate) fn free(&mut self, range: PhysFrameRange) {
-    //     for frame in range {
-    //         self.set_bit(frame, false)
-    //     }
-    // }
+    pub(crate) fn free(&mut self, range: PhysFrameRange) {
+        for frame in range {
+            self.set_bit(frame, false)
+        }
+    }
 
     fn get_bit(&self, frame: PhysFrame) -> bool {
         let frame_index = frame.start_address().as_u64() / BYTES_PER_FRAME;
@@ -176,67 +174,6 @@ unsafe impl FrameAllocator<Size4KiB> for BitMapFrameAllocator {
         self.allocate(1).map(|range| range.start).ok()
     }
 }
-
-
-//
-// impl BitMapFrameAllocator {
-//     pub fn allocate(&mut self, num_frames: usize) -> KernelResult<PhysFrame> {
-//         loop {
-//             for i in 0..num_frames {
-//                 if self.frames.start == self.frames.end {
-//                     return Err(KernelError::None);
-//                 }
-//
-//                 if self.read_bit(self.frames.start) {
-//                     self.frames.start += 1;
-//                     break;
-//                 }
-//
-//                 if i == num_frames - 1 {
-//                     return Ok(self.mark_allocated(num_frames));
-//                 }
-//             }
-//         }
-//     }
-//
-//
-//     // TODO
-//     fn mark_allocated(&mut self, num_frames: usize) -> PhysFrame {
-//         for f in 0..num_frames {
-//             self.write_bit(self.frames.start, true);
-//             self.frames.start += 1;
-//         }
-//
-//         self.frames.start
-//     }
-//
-//
-//     fn calc_index(&self, frame: PhysFrame) -> (usize, usize) {
-//         let frame_id = frame.start_address().as_u64() / BITS_PER_MAP_LINE as u64;
-//         let line_index = (frame_id / BITS_PER_MAP_LINE) as usize;
-//         let bit_index = (frame_id & BITS_PER_MAP_LINE) as usize;
-//         (line_index, bit_index)
-//     }
-// }
-//
-//
-// impl BitWritable for BitMapFrameAllocator {
-//     fn write_bit(&mut self, frame: PhysFrame, is_allocated: bool) {
-//         let (line_index, bit_index) = self.calc_index(frame);
-//         if is_allocated {
-//             self.alloc_map[line_index] |= (1) << bit_index;
-//         } else {
-//             self.alloc_map[line_index] &= !(1 << bit_index);
-//         }
-//     }
-// }
-//
-// impl BitReadable for BitMapFrameAllocator {
-//     fn read_bit(&self, frame: PhysFrame) -> bool {
-//         let (line_index, bit_index) = self.calc_index(frame);
-//         (self.alloc_map[line_index] & (1 << bit_index)) != 0
-//     }
-// }
 
 
 #[derive(Debug)]

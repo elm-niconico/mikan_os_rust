@@ -3,7 +3,7 @@ use x86_64::structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Page, 
 use x86_64::structures::paging::mapper::TranslateResult;
 
 use crate::{PAGE_TABLE, serial_println};
-use crate::error::KernelResult;
+use crate::error::kernel_error::KernelResult;
 
 #[allow(unused)]
 pub fn virt_to_phys(virt: VirtAddr) -> Option<PhysAddr> {
@@ -15,34 +15,31 @@ pub fn virt_to_phys(virt: VirtAddr) -> Option<PhysAddr> {
     a
 }
 
-// #[allow(unused)]
-// pub fn phys_to_virt(phys: PhysAddr) -> VirtAddr{
-//     let tbl = unsafe { PAGE_TABLE.get_unchecked().lock() };
-//     tbl.
-// }
+#[allow(unused)]
+pub fn map(rsdp: u64) {
+    let mapper = &mut *(unsafe { PAGE_TABLE.get_unchecked() }.lock());
+    let frame_allocator = &mut *FRAME_ALLOCATOR.lock();
+    let base_addr = VirtAddr::new(rsdp).align_down(4096u64).as_u64();
+    make_identity_mapping(mapper, frame_allocator, base_addr, 1).expect("Failed Rsdp Mapping");
+}
+
+
+#[allow(unused)]
 /// 恒等変換(Identity Mapping)を行うための機構を提供します。
 /// 仮想アドレスと物理アドレスが一致するようにします。
-#[allow(unused)]
-pub fn make_identity_mapping(
-    mapper: &mut OffsetPageTable,
-    allocator: &mut impl FrameAllocator<Size4KiB>,
+pub fn identity_mapping(
+    mapper: &mut x86_64::structures::paging::OffsetPageTable,
     base_addr: u64,
     num_pages: usize,
 ) -> KernelResult<()> {
     use x86_64::structures::paging::PageTableFlags as Flags;
     let base_page = Page::<Size4KiB>::from_start_address(VirtAddr::new(base_addr))?;
-    let base_frame = PhysFrame::from_start_address(PhysAddr::new(base_addr))?;
+    let base_frame = PhysFrame::<Size4KiB>::from_start_address(PhysAddr::new(base_addr))?;
     let flags = Flags::PRESENT | Flags::WRITABLE;
     for i in 0..num_pages {
         let page = base_page + i as u64;
         let frame = base_frame + i as u64;
-
-        if let TranslateResult::Mapped { .. } = mapper.translate(page.start_address()) {
-            mapper.unmap(page).unwrap().1.flush();
-        };
-
-        unsafe { mapper.map_to(page, frame, flags, &mut *allocator) }?.flush();
+        unsafe { mapper.map_to(page, frame, flags, &mut *FRAME_ALLOCATOR.lock()) }?.flush();
     }
-
     Ok(())
 }
