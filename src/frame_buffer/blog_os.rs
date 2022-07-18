@@ -1,8 +1,12 @@
 use core::fmt;
 
-use bootloader::boot_info::{FrameBuffer, PixelFormat};
+use bootloader::boot_info::FrameBuffer;
 use font8x8::UnicodeFonts;
 use volatile::Volatile;
+
+use crate::frame_buffer::pixel::pixel_color::PixelColor;
+use crate::frame_buffer::pixel::pixel_color::PixelColor::Rgb;
+use crate::frame_buffer::PixelWriter;
 
 pub struct BlogOsWriter {
     buffer: Volatile<&'static mut [u8]>,
@@ -10,6 +14,7 @@ pub struct BlogOsWriter {
     x_pos: usize,
     y_pos: usize,
 }
+
 
 impl BlogOsWriter {
     pub fn new(frame_buffer: &'static mut FrameBuffer) -> Self {
@@ -74,24 +79,20 @@ impl BlogOsWriter {
     fn write_rendered_char(&mut self, rendered_char: [u8; 8]) {
         for (y, byte) in rendered_char.iter().enumerate() {
             for (x, bit) in (0..8).enumerate() {
-                let on = *byte & (1 << bit) != 0;
-                self.write_pixel(self.x_pos + x, self.y_pos + y, on);
+                let is_write = *byte & (1 << bit) != 0;
+                if is_write {
+                    self.write_pixel(self.x_pos + x, self.y_pos + y, Rgb([0x33, 0xff, 0x66, 0]))
+                } else {
+                    self.clear_pixel(self.x_pos + x, self.y_pos + y)
+                };
             }
         }
         self.x_pos += 8;
     }
 
-    pub fn write_pixel(&mut self, x: usize, y: usize, on: bool) {
+    fn do_write_pixel(&mut self, x: usize, y: usize, color: PixelColor) {
         let pixel_offset = y * self.info.stride + x;
-        let color = if on {
-            match self.info.pixel_format {
-                PixelFormat::RGB => [0x33, 0xff, 0x66, 0],
-                PixelFormat::BGR => [0x66, 0xff, 0x33, 0],
-                _other => [0xff, 0xff, 0xff, 0],
-            }
-        } else {
-            [0, 0, 0, 0]
-        };
+        let color = color.switch_color(self.info.pixel_format).as_buff();
         let bytes_per_pixel = self.info.bytes_per_pixel;
         let byte_offset = pixel_offset * bytes_per_pixel;
         self.buffer
@@ -110,6 +111,17 @@ impl BlogOsWriter {
         }
     }
 }
+
+impl PixelWriter for BlogOsWriter {
+    fn write_pixel(&mut self, x: usize, y: usize, color: PixelColor) {
+        self.do_write_pixel(x, y, color);
+    }
+
+    fn clear_pixel(&mut self, x: usize, y: usize) {
+        self.do_write_pixel(x, y, Rgb([0, 0, 0, 0]));
+    }
+}
+
 
 impl fmt::Write for BlogOsWriter {
     fn write_str(&mut self, s: &str) -> fmt::Result {
