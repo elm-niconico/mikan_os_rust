@@ -6,9 +6,9 @@ use volatile::Volatile;
 
 use crate::frame_buffer::pixel::pixel_color::PixelColor;
 use crate::frame_buffer::pixel::pixel_color::PixelColor::Rgb;
-use crate::frame_buffer::PixelWriter;
+use crate::frame_buffer::pixel::pixel_writer::PixelWriter;
 
-pub struct BlogOsWriter {
+pub struct BlogOsFrameWriter {
     buffer: Volatile<&'static mut [u8]>,
     info: bootloader::boot_info::FrameBufferInfo,
     x_pos: usize,
@@ -16,7 +16,7 @@ pub struct BlogOsWriter {
 }
 
 
-impl BlogOsWriter {
+impl BlogOsFrameWriter {
     pub fn new(frame_buffer: &'static mut FrameBuffer) -> Self {
         Self {
             info: frame_buffer.info(),
@@ -112,7 +112,7 @@ impl BlogOsWriter {
     }
 }
 
-impl PixelWriter for BlogOsWriter {
+impl PixelWriter for BlogOsFrameWriter {
     fn write_pixel(&mut self, x: usize, y: usize, color: PixelColor) {
         self.do_write_pixel(x, y, color);
     }
@@ -123,7 +123,7 @@ impl PixelWriter for BlogOsWriter {
 }
 
 
-impl fmt::Write for BlogOsWriter {
+impl fmt::Write for BlogOsFrameWriter {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.write_string(s);
         Ok(())

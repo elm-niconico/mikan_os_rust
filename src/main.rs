@@ -20,8 +20,9 @@ use core::panic::PanicInfo;
 
 use bootloader::{BootInfo, entry_point};
 
-use crate::frame_buffer::{draw_rect, fill_rect, PixelWriter, Rect, WRITER};
 use crate::frame_buffer::pixel::pixel_color::PixelColor;
+use crate::frame_buffer::pixel::pixel_writer::{PixelWriter, Rect};
+use crate::frame_buffer::WRITER;
 use crate::PixelColor::Rgb;
 use crate::qemu::{exit_qemu, ExitCode};
 use crate::segmentation::gdt;
@@ -95,28 +96,25 @@ fn draw_window() {
     let frame_height = frame_writer.height();
 
     // Window Background
-    fill_rect(frame_writer,
-              Rect::new(0, 0, frame_writer.width(), frame_writer.height()),
-              PixelColor::Rgb([45, 118, 237, 0]),
+    frame_writer.fill_rect(
+        Rect::new(0, 0, frame_writer.width(), frame_writer.height()),
+        PixelColor::Rgb([45, 118, 237, 0]),
     );
 
     // Window Bottom
-    fill_rect(
-        frame_writer,
+    frame_writer.fill_rect(
         Rect::new(0, frame_height - 50, frame_width, 50),
         Rgb([1, 8, 17, 0]),
     );
 
     // Window Left Bottom Region
-    fill_rect(
-        frame_writer,
+    frame_writer.fill_rect(
         Rect::new(0, frame_height - 50, frame_width / 5, 50),
         Rgb([80, 80, 80, 0]),
     );
 
     // Window Left Bottom Icon
-    draw_rect(
-        frame_writer,
+    frame_writer.draw_rect(
         Rect::new(10, frame_height - 40, 30, 30),
         Rgb([160, 160, 160, 0]),
     )
